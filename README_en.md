@@ -9,7 +9,7 @@
     👋 Join our <a href="resources/WECHAT.md" target="_blank">WeChat</a> or <a href="https://discord.gg/QR7SARHRxK" target="_blank">Discord</a> communities
 </p>
 <p align="center">
-    👋 <a href="https://discord.gg/PQWFxJRs" target="_blank">Discord channel</a> for AutoGLM Autotyper
+    👋 Follow AutoGLM Autotyper <a href="https://x.com/Autotyper_Agent?s=20" target="_blank">X</a> account
 </p>
 
 ## Quick Start
