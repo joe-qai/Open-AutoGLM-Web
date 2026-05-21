@@ -51,10 +51,18 @@ class LogService:
 
     @staticmethod
     def _map_to_entry(log_dict: dict) -> LogEntry:
-        """Map SQLite row dict (timestamp) to LogEntry schema (created_at)."""
+        """Map SQLite row dict (timestamp) to LogEntry schema (created_at).
+        Also parses JSON string fields back to dicts."""
+        import json
         mapped = {**log_dict}
         if "timestamp" in mapped and "created_at" not in mapped:
             mapped["created_at"] = mapped.pop("timestamp")
+        # Parse JSON string fields that SQLite stored as text
+        if "detail" in mapped and isinstance(mapped["detail"], str):
+            try:
+                mapped["detail"] = json.loads(mapped["detail"])
+            except (json.JSONDecodeError, TypeError):
+                mapped["detail"] = None
         return LogEntry(**mapped)
 
     def get_log(self, log_id: str) -> Optional[LogEntry]:
