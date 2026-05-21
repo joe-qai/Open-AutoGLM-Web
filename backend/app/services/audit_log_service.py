@@ -3,6 +3,7 @@
 import sqlite3
 import json
 import time
+import uuid
 import threading
 from typing import List, Optional, Any
 from pathlib import Path
@@ -89,7 +90,7 @@ class AuditLogService:
         error: Optional[str] = None,
     ) -> str:
         """Write a log entry to SQLite. Returns the log_id."""
-        log_id = f"log_{int(time.time())}_{category}_{action}"
+        log_id = f"log_{int(time.time())}_{uuid.uuid4().hex[:8]}"
         timestamp = time.strftime("%Y-%m-%dT%H:%M:%S")
         detail_json = json.dumps(detail) if detail else None
 
