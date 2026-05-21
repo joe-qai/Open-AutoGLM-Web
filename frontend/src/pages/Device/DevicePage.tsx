@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Smartphone, RefreshCw, Power, Monitor, Wifi, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { Smartphone, Search, Power, Monitor, Wifi, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { useDeviceStore } from '../../stores/deviceStore';
 
 export function DevicePage() {
@@ -15,6 +15,14 @@ export function DevicePage() {
       return () => clearTimeout(timer);
     }
   }, [error, success, clearMessages]);
+
+  // Auto-scan every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchDevices();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [fetchDevices]);
 
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
@@ -77,15 +85,21 @@ export function DevicePage() {
             <Smartphone className="w-6 h-6 text-indigo-400" />
             设备管理
           </h1>
-          <p className="text-[#94a3b8] mt-1">管理您的测试设备</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-[#94a3b8]">管理您的测试设备</p>
+            <span className="flex items-center gap-1 text-xs text-green-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+              自动扫描已开启
+            </span>
+          </div>
         </div>
         <div className="flex gap-3">
           <button
             onClick={fetchDevices}
             className="px-4 py-2 bg-[#334155] hover:bg-[#475569] text-white rounded-lg flex items-center gap-2 transition-colors"
           >
-            <RefreshCw className="w-4 h-4" />
-            刷新
+            <Search className="w-4 h-4" />
+            扫描设备
           </button>
         </div>
       </div>
