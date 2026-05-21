@@ -70,6 +70,7 @@ export const taskApi = {
   }) => api.post('/api/v1/tasks', data),
   executeTask: (taskId: string) => api.post(`/api/v1/tasks/${taskId}/execute`),
   stopTask: (taskId: string) => api.post(`/api/v1/tasks/${taskId}/stop`),
+  deleteTask: (taskId: string) => api.delete(`/api/v1/tasks/${taskId}`),
   getTaskLogs: (taskId: string) => api.get(`/api/v1/tasks/${taskId}/logs`),
 };
 
