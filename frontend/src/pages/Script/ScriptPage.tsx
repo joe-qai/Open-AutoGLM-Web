@@ -356,7 +356,7 @@ export function ScriptPage() {
       {/* Edit Modal */}
       {isEditModalOpen && editingScript && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#1e293b] border border-[#334155] rounded-2xl p-6 w-full max-w-3xl mx-4 max-h-[90vh] flex flex-col">
+          <div className="bg-[#1e293b] border border-[#334155] rounded-2xl p-6 w-full max-w-5xl mx-4 max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">编辑脚本</h2>
               <button
@@ -375,7 +375,7 @@ export function ScriptPage() {
               <textarea
                 value={editingContent}
                 onChange={(e) => setEditingContent(e.target.value)}
-                className="w-full h-full p-4 bg-[#0f172a] text-[#e2e8f0] font-mono text-sm resize-none focus:outline-none rounded-lg"
+                className="w-full h-full min-h-[60vh] p-4 bg-[#0f172a] text-[#e2e8f0] font-mono text-sm resize-none focus:outline-none rounded-lg leading-relaxed"
                 placeholder="输入脚本内容..."
                 spellCheck={false}
               />
