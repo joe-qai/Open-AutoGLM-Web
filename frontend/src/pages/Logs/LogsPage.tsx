@@ -49,7 +49,7 @@ export function LogsPage() {
     setLoading(true);
     try {
       const response = await logApi.getLogs({ category: selectedCategory, level: selectedLevel !== 'all' ? selectedLevel : undefined });
-      setLogs(response as LogEntry[]);
+      setLogs(response as unknown as LogEntry[]);
     } catch (error) {
       console.error('Failed to fetch logs:', error);
     } finally {
@@ -60,7 +60,7 @@ export function LogsPage() {
   const fetchSummary = async () => {
     try {
       const response = await logApi.getSummary();
-      setSummary(response as LogSummary);
+      setSummary(response as unknown as LogSummary);
     } catch (error) {
       console.error('Failed to fetch log summary:', error);
     }

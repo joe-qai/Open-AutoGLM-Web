@@ -9,6 +9,8 @@ export interface Task {
   task_type: string;
   device_id: string;
   device_name?: string;
+  script_id?: string;
+  devices?: string[];
   progress: number;
   result?: string;
   error_message?: string;
