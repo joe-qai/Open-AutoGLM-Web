@@ -111,6 +111,8 @@ export const reportApi = {
   downloadReport: (reportId: string, format: string = 'html') =>
     api.get(`/api/v1/reports/${reportId}/download`, { params: { format }, responseType: 'blob' }),
   deleteReport: (reportId: string) => api.delete(`/api/v1/reports/${reportId}`),
+  batchDeleteReports: (reportIds: string[]) =>
+    api.delete('/api/v1/reports/batch', { data: { report_ids: reportIds } }),
 };
 
 // APK相关API

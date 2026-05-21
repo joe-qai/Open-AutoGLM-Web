@@ -68,4 +68,13 @@ export const useReportStore = create<ReportState>((set, get) => ({
       set({ error: 'Failed to delete report' });
     }
   },
+
+  batchDeleteReports: async (reportIds: string[]) => {
+    try {
+      await reportApi.batchDeleteReports(reportIds);
+      await get().fetchReports();
+    } catch (error) {
+      set({ error: 'Failed to batch delete reports' });
+    }
+  },
 }));

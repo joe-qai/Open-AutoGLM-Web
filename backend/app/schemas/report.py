@@ -67,3 +67,14 @@ class ReportInfo(BaseModel):
     generated_at: Optional[str] = None
     
     model_config = {"from_attributes": True}
+
+
+class BatchDeleteRequest(BaseModel):
+    """Request model for batch deleting reports."""
+    report_ids: List[str]
+
+
+class BatchDeleteResponse(BaseModel):
+    """Response model for batch deleting reports."""
+    deleted_count: int
+    failed_ids: List[str] = []
