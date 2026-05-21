@@ -157,32 +157,18 @@ export const settingsApi = {
 export const logApi = {
   getLogs: (params?: {
     level?: string;
-    type?: string;
-    endpoint?: string;
+    category?: string;
+    device_id?: string;
     script_id?: string;
     task_id?: string;
-    device_id?: string;
+    search?: string;
     start_time?: string;
     end_time?: string;
     skip?: number;
     limit?: number;
   }) => api.get('/api/v1/logs', { params }),
-  getLog: (logId: string) => api.get(`/api/v1/logs/${logId}`),
   getSummary: () => api.get('/api/v1/logs/summary'),
   clearLogs: () => api.delete('/api/v1/logs'),
-  createLog: (data: {
-    level: string;
-    type: string;
-    message: string;
-    endpoint?: string;
-    method?: string;
-    status_code?: number;
-    duration_ms?: number;
-    script_id?: string;
-    task_id?: string;
-    device_id?: string;
-    error?: string;
-  }) => api.post('/api/v1/logs', data),
 };
 
 export default api;
