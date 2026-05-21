@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { deviceApi } from '../services/api';
+import api, { deviceApi } from '../services/api';
 
 export interface Device {
   device_id: string;
@@ -25,6 +25,11 @@ interface DeviceState {
   enablingWireless: boolean;
   error: string | null;
   success: string | null;
+  screenshotData: string | null;
+  deviceApps: { package_name: string; name: string }[];
+  loadingScreenshot: boolean;
+  loadingApps: boolean;
+  drawerOpen: boolean;
 
   // Actions
   fetchDevices: () => Promise<void>;
@@ -35,6 +40,8 @@ interface DeviceState {
   enableWireless: (deviceId: string, port?: number) => Promise<void>;
   getDeviceIp: (deviceId: string) => Promise<string | null>;
   clearMessages: () => void;
+  openDrawer: (device: Device) => Promise<void>;
+  closeDrawer: () => void;
 }
 
 export const useDeviceStore = create<DeviceState>((set, get) => ({
@@ -45,6 +52,11 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
   enablingWireless: false,
   error: null,
   success: null,
+  screenshotData: null,
+  deviceApps: [],
+  loadingScreenshot: false,
+  loadingApps: false,
+  drawerOpen: false,
 
   fetchDevices: async () => {
     set({ loading: true, error: null });
@@ -126,5 +138,25 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
 
   clearMessages: () => {
     set({ error: null, success: null });
+  },
+
+  openDrawer: async (device: Device) => {
+    set({ selectedDevice: device, drawerOpen: true, screenshotData: null, deviceApps: [], loadingScreenshot: true, loadingApps: true });
+    try {
+      const response = await deviceApi.getScreenshot(device.device_id) as unknown as { screenshot_base64: string };
+      set({ screenshotData: response.screenshot_base64, loadingScreenshot: false });
+    } catch {
+      set({ screenshotData: null, loadingScreenshot: false });
+    }
+    try {
+      const appsResponse = await api.get(`/api/v1/devices/${device.device_id}/apps`) as unknown as { apps: { package_name: string; name: string }[] };
+      set({ deviceApps: appsResponse.apps || [], loadingApps: false });
+    } catch {
+      set({ deviceApps: [], loadingApps: false });
+    }
+  },
+
+  closeDrawer: () => {
+    set({ drawerOpen: false, screenshotData: null, deviceApps: [] });
   },
 }));

@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { Smartphone, Search, Power, Monitor, Wifi, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { useDeviceStore } from '../../stores/deviceStore';
+import { DeviceDetailDrawer } from '../../components/DeviceDetailDrawer';
 
 export function DevicePage() {
-  const { devices, fetchDevices, connectDevice, disconnectDevice, enableWireless, enablingWireless, error, success, clearMessages } = useDeviceStore();
+  const { devices, fetchDevices, connectDevice, disconnectDevice, enableWireless, enablingWireless, openDrawer, error, success, clearMessages } = useDeviceStore();
 
   useEffect(() => {
     fetchDevices();
@@ -203,7 +204,10 @@ export function DevicePage() {
                   </button>
                 </>
               )}
-              <button className="flex-1 py-2 bg-[#334155] hover:bg-[#475569] text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+              <button
+                onClick={() => openDrawer(device)}
+                className="flex-1 py-2 bg-[#334155] hover:bg-[#475569] text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+              >
                 <Monitor className="w-4 h-4" />
                 详情
               </button>
@@ -219,6 +223,7 @@ export function DevicePage() {
           <p className="text-[#64748b] mb-4">连接USB设备即可开始使用</p>
         </div>
       )}
+      <DeviceDetailDrawer />
     </div>
   );
 }
