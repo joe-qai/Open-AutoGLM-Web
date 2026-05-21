@@ -8,6 +8,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from app.schemas.apk import ApkInfo, ApkStatus, ApkUploadResponse, ApkActionResponse
+from app.services.apk_metadata_service import ApkMetadataService
 from app.config import settings
 
 
@@ -18,6 +19,7 @@ class ApkService:
         self.apks = {}
         self.upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads", "apks")
         os.makedirs(self.upload_dir, exist_ok=True)
+        self.metadata = ApkMetadataService()
     
     def _parse_apk_info(self, file_path: str) -> dict:
         """Parse APK info using aapt2 (preferred) with aapt fallback."""
@@ -73,22 +75,27 @@ class ApkService:
     def list_apks(self) -> List[ApkInfo]:
         """List all uploaded APKs."""
         apk_list = []
-        
+
         # Check upload directory for APK files
         for filename in os.listdir(self.upload_dir):
             if filename.endswith(".apk"):
                 file_path = os.path.join(self.upload_dir, filename)
                 file_stat = os.stat(file_path)
-                
+
                 # Generate ID from filename (without extension)
                 apk_id = os.path.splitext(filename)[0]
-                
+
                 # Try to parse APK info
                 apk_info = self._parse_apk_info(file_path)
-                
+
+                # Query metadata for original_filename
+                meta = self.metadata.get(apk_id)
+                original_filename = meta.get("original_filename") if meta else filename
+
                 apk_list.append(ApkInfo(
                     id=apk_id,
                     name=filename,
+                    original_filename=original_filename,
                     version=apk_info.get("version"),
                     package_name=apk_info.get("package_name"),
                     file_size=file_stat.st_size,
@@ -96,7 +103,7 @@ class ApkService:
                     status=ApkStatus.UPLOADED,
                     file_path=file_path
                 ))
-        
+
         return apk_list
     
     def get_apk(self, apk_id: str) -> Optional[ApkInfo]:
@@ -122,11 +129,23 @@ class ApkService:
             
             # Parse APK info
             apk_info_data = self._parse_apk_info(file_path)
-            
+
+            # Save metadata to SQLite
+            self.metadata.save(
+                apk_id=apk_id,
+                original_filename=filename,
+                package_name=apk_info_data.get("package_name"),
+                version=apk_info_data.get("version"),
+                file_size=len(content),
+                upload_time=datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+                status="uploaded"
+            )
+
             # Create APK info object
             apk_info = ApkInfo(
                 id=apk_id,
                 name=filename,
+                original_filename=filename,
                 version=apk_info_data.get("version"),
                 package_name=apk_info_data.get("package_name"),
                 file_size=len(content),
@@ -161,6 +180,9 @@ class ApkService:
             # Delete file
             if apk.file_path and os.path.exists(apk.file_path):
                 os.remove(apk.file_path)
+
+            # Delete metadata
+            self.metadata.delete(apk_id)
             
             return ApkActionResponse(
                 success=True,
