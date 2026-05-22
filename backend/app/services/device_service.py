@@ -21,7 +21,7 @@ class DeviceService:
             cmd += f" -s {device_serial}"
         cmd += f" {command}"
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, shell=True, timeout=30)
+            result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", shell=True, timeout=30)
             return result.stdout.strip()
         except subprocess.TimeoutExpired:
             return ""
@@ -142,10 +142,18 @@ class DeviceService:
         return None
     
     def enable_tcpip_mode(self, device_id: str, port: int = 5555) -> bool:
-        """Enable TCP/IP mode on device."""
-        result = self._run_adb_command(f"tcpip {port}", device_id)
-        time.sleep(2)
-        return result is not None
+        """Enable TCP/IP mode on a specific USB device."""
+        result = subprocess.run(
+            f"adb -s {device_id} tcpip {port}",
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            shell=True,
+            timeout=30
+        )
+        time.sleep(3)  # Wait for ADB service restart on device
+        return result.returncode == 0
     
     def enable_wireless_connection(self, device_id: str, port: int = 5555) -> Dict[str, any]:
         """Enable wireless connection for a USB device."""
@@ -187,6 +195,8 @@ class DeviceService:
                 "hdc list targets", 
                 capture_output=True, 
                 text=True, 
+                encoding="utf-8",
+                errors="replace",
                 shell=True, 
                 timeout=30
             )
@@ -234,12 +244,23 @@ class DeviceService:
             if platform and device["platform"] != platform.value:
                 continue
             
+            # 根据连接类型确定可用操作
+            # USB设备：去掉断开，保留开启无线和详情
+            # TCPIP设备：去掉开启无线，保留断开和详情
+            conn_type = device["connection_type"]
+            if conn_type == "usb":
+                available_actions = ["wireless", "screenshot", "apps", "launch", "detail"]
+            elif conn_type == "tcpip":
+                available_actions = ["disconnect", "screenshot", "apps", "launch", "detail"]
+            else:
+                available_actions = ["detail"]
+            
             device_list.append(DeviceInfo(
                 device_id=device["device_id"],
                 name=device["name"],
                 platform=PlatformType(device["platform"]),
                 status=DeviceStatus(device["status"]),
-                connection_type=ConnectionType(device["connection_type"]),
+                connection_type=ConnectionType(conn_type),
                 ip=device["ip"],
                 model=device["model"],
                 manufacturer=device["manufacturer"],
@@ -248,7 +269,8 @@ class DeviceService:
                 screen_height=device["screen_height"],
                 battery_level=device.get("battery_level"),
                 device_type=device.get("device_type"),
-                android_sdk_version=device.get("android_sdk_version")
+                android_sdk_version=device.get("android_sdk_version"),
+                available_actions=available_actions
             ))
         
         return device_list
@@ -271,10 +293,11 @@ class DeviceService:
         return False
     
     def disconnect_device(self, device_id: str):
-        """Disconnect from a device."""
+        """Disconnect from a device. Only disconnects TCP/IP devices; USB is physical."""
         device = self.get_device(device_id)
         if device and device.platform == PlatformType.ANDROID:
-            self._run_adb_command(f"disconnect {device_id}")
+            if device.connection_type == ConnectionType.TCPIP:
+                self._run_adb_command(f"disconnect {device_id}")
         if device_id in self.devices:
             del self.devices[device_id]
     
