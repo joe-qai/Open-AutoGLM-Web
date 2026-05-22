@@ -43,7 +43,7 @@ export function Dashboard() {
   const stats = [
     {
       title: '运行中任务',
-      value: tasks.filter(t => t.status === 'running').length.toString(),
+      value: tasks.filter(t => t.status === 'executing').length.toString(),
       icon: <Play className="w-5 h-5 text-blue-400" />,
       trend: '',
       trendUp: true,
@@ -78,7 +78,7 @@ export function Dashboard() {
     switch (status) {
       case 'completed':
         return <CheckCircle2 className="w-4 h-4 text-green-400" />;
-      case 'running':
+      case 'executing':
         return <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />;
       case 'failed':
         return <XCircle className="w-4 h-4 text-red-400" />;
@@ -91,7 +91,7 @@ export function Dashboard() {
     switch (status) {
       case 'completed':
         return '通过';
-      case 'running':
+      case 'executing':
         return '运行中';
       case 'failed':
         return '失败';
@@ -122,7 +122,7 @@ export function Dashboard() {
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[#94a3b8] text-sm">{stat.title}</p>
+                <p className="text-slate-300 text-sm">{stat.title}</p>
                 <p className="text-2xl font-bold text-white mt-2">{stat.value}</p>
               </div>
               <div className="p-2 bg-[#0f172a] rounded-lg">{stat.icon}</div>
@@ -131,10 +131,10 @@ export function Dashboard() {
               <span className={`text-sm ${stat.trendUp ? 'text-green-400' : 'text-red-400'}`}>
                 {stat.trend}
               </span>
-              <span className="text-[#64748b] text-sm">较上周</span>
+              <span className="text-slate-400 text-sm">较上周</span>
             </div>
               {stat.detail && (
-                <p className="text-[#94a3b8] text-xs mt-1">{stat.detail}</p>
+                <p className="text-slate-400 text-xs mt-1">{stat.detail}</p>
               )}
           </div>
         ))}
@@ -214,7 +214,7 @@ export function Dashboard() {
                     <div key={name} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div
-                          className="w-3 h-3 rounded-full"
+                          className="w-4 h-4 rounded-full"
                           style={{ backgroundColor: deviceEntries[0].platform === 'android' ? '#3ddc84' : deviceEntries[0].platform === 'ios' ? '#ffffff' : '#007dff' }}
                         />
                         <span className="text-[#94a3b8]">{name}</span>
@@ -267,7 +267,7 @@ export function Dashboard() {
                         {getStatusIcon(task.status)}
                         <span className={`text-sm ${
                           task.status === 'completed' ? 'text-green-400' :
-                          task.status === 'running' ? 'text-blue-400' :
+                          task.status === 'executing' ? 'text-blue-400' :
                           task.status === 'failed' ? 'text-red-400' : 'text-[#94a3b8]'
                         }`}>
                           {getStatusText(task.status)}

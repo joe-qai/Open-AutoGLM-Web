@@ -5,7 +5,7 @@ export interface Task {
   task_id: string;
   name: string;
   description: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'stopped';
+  status: 'pending' | 'executing' | 'completed' | 'failed' | 'stopped';
   task_type: string;
   device_id: string;
   device_name?: string;

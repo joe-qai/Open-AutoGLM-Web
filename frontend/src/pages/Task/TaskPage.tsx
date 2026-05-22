@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ListTodo, Play, Square, Trash2, Clock, CheckCircle2, XCircle, Loader2, Plus, X, Bot, Upload, ChevronDown, ChevronUp } from 'lucide-react';
+import { ListTodo, Play, Square, Trash2, Clock, CheckCircle2, XCircle, Loader2, Plus, X, Bot, Upload, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { useTaskStore } from '../../stores/taskStore';
 import { useAgentStore } from '../../stores/agentStore';
 import { useDeviceStore } from '../../stores/deviceStore';
@@ -41,13 +41,17 @@ export function TaskPage() {
   const handleCreateTask = async () => {
     if (!taskName || !selectedScriptId || selectedDeviceIds.length === 0) return;
     
-    await createTask({
+    const taskId = await createTask({
       name: taskName,
       description: taskDescription,
       script_id: selectedScriptId,
       device_id: selectedDeviceIds[0],
       apk_id: selectedApkId || undefined,
     });
+    
+    if (taskId) {
+      await executeTask(taskId);
+    }
     
     setIsModalOpen(false);
     setTaskName('');
@@ -57,11 +61,15 @@ export function TaskPage() {
     setSelectedApkId('');
   };
 
+  const handlePreviewReport = (taskId: string) => {
+    window.open(`/api/v1/reports/${taskId}/preview`, '_blank');
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
         return <CheckCircle2 className="w-4 h-4 text-green-400" />;
-      case 'running':
+      case 'executing':
         return <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />;
       case 'failed':
         return <XCircle className="w-4 h-4 text-red-400" />;
@@ -77,7 +85,7 @@ export function TaskPage() {
   const getStatusText = (status: string) => {
     const statusMap: Record<string, string> = {
       pending: '准备中',
-      running: '执行中',
+      executing: '执行中',
       completed: '成功',
       failed: '失败',
       stopped: '已停止',
@@ -89,7 +97,7 @@ export function TaskPage() {
     switch (status) {
       case 'completed':
         return 'text-green-400';
-      case 'running':
+      case 'executing':
         return 'text-blue-400';
       case 'failed':
         return 'text-red-400';
@@ -210,7 +218,7 @@ export function TaskPage() {
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-2">
-                          {task.status === 'running' ? (
+                          {task.status === 'executing' ? (
                             <button
                               onClick={() => stopTask(task.task_id)}
                               className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
@@ -225,6 +233,15 @@ export function TaskPage() {
                               title="执行"
                             >
                               <Play className="w-4 h-4" />
+                            </button>
+                          )}
+                          {task.status === 'completed' && (
+                            <button
+                              onClick={() => handlePreviewReport(task.task_id)}
+                              className="p-2 text-indigo-400 hover:bg-indigo-500/20 rounded-lg transition-colors"
+                              title="查看报告"
+                            >
+                              <FileText className="w-4 h-4" />
                             </button>
                           )}
                           <button

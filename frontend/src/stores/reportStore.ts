@@ -7,7 +7,7 @@ export interface Report {
   task_id: string;
   task_name: string;
   platform: 'android' | 'ios' | 'harmonyos';
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: 'pending' | 'executing' | 'completed' | 'failed';
   duration?: number;
   created_at: string;
   updated_at?: string;
@@ -22,6 +22,7 @@ interface ReportState {
   fetchReports: () => Promise<void>;
   downloadReport: (reportId: string) => Promise<void>;
   deleteReport: (reportId: string) => Promise<void>;
+  batchDeleteReports: (reportIds: string[]) => Promise<void>;
 }
 
 export const useReportStore = create<ReportState>((set, get) => ({

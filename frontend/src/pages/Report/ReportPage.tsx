@@ -63,7 +63,7 @@ export function ReportPage() {
         return <CheckCircle2 className="w-4 h-4 text-green-400" />;
       case 'failed':
         return <XCircle className="w-4 h-4 text-red-400" />;
-      case 'running':
+      case 'executing':
         return <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />;
       default:
         return <Clock className="w-4 h-4 text-gray-400" />;
@@ -73,7 +73,7 @@ export function ReportPage() {
   const getStatusText = (status: string) => {
     const statusMap: Record<string, string> = {
       pending: '等待生成',
-      running: '生成中',
+      executing: '生成中',
       completed: '已完成',
       failed: '生成失败',
     };
@@ -84,7 +84,7 @@ export function ReportPage() {
     switch (status) {
       case 'completed':
         return 'text-green-400';
-      case 'running':
+      case 'executing':
         return 'text-blue-400';
       case 'failed':
         return 'text-red-400';
