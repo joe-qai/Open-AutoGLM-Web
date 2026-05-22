@@ -2,11 +2,15 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileCode, Play, Edit, Trash2, Download, Bot, Upload, X, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAgentStore, type Script } from '../../stores/agentStore';
+import { useTaskStore } from '../../stores/taskStore';
+import { useDeviceStore } from '../../stores/deviceStore';
 import { scriptApi } from '../../services/api';
 
 export function ScriptPage() {
   const navigate = useNavigate();
-  const { scripts, fetchScripts, uploadScript, setCurrentScript } = useAgentStore();
+  const { scripts, fetchScripts, uploadScript } = useAgentStore();
+  const { createTask, executeTask } = useTaskStore();
+  const { devices, fetchDevices } = useDeviceStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [scriptName, setScriptName] = useState('');
@@ -16,11 +20,18 @@ export function ScriptPage() {
   const [editingContent, setEditingContent] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [selectedScriptForExec, setSelectedScriptForExec] = useState<Script | null>(null);
+  const [isDeviceSelectOpen, setIsDeviceSelectOpen] = useState(false);
+  const [selectedDeviceId, setSelectedDeviceId] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchScripts();
-  }, []);
+    fetchDevices();
+  }, [fetchScripts, fetchDevices]);
+
+  // Note: Removed old searchParams useEffect that navigated to /agent page.
+  // Script execution now goes through task creation flow.
 
   useEffect(() => {
     if (message) {
@@ -62,8 +73,29 @@ export function ScriptPage() {
   };
 
   const handleExecute = (script: Script) => {
-    setCurrentScript(script);
-    navigate('/agent');
+    setSelectedScriptForExec(script);
+    setSelectedDeviceId('');
+    setIsDeviceSelectOpen(true);
+  };
+
+  const handleExecuteWithDevice = async () => {
+    if (!selectedScriptForExec || !selectedDeviceId) return;
+
+    const taskId = await createTask({
+      name: `Execute: ${selectedScriptForExec.name}`,
+      description: selectedScriptForExec.description || '',
+      script_id: selectedScriptForExec.script_id,
+      device_id: selectedDeviceId,
+    });
+
+    if (taskId) {
+      await executeTask(taskId);
+      navigate('/tasks');
+    }
+
+    setIsDeviceSelectOpen(false);
+    setSelectedScriptForExec(null);
+    setSelectedDeviceId('');
   };
 
   const handleEdit = (script: Script) => {
@@ -398,6 +430,67 @@ export function ScriptPage() {
               >
                 保存
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Device Select Modal for Script Execution */}
+      {isDeviceSelectOpen && selectedScriptForExec && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#1e293b] border border-[#334155] rounded-2xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white">执行脚本: {selectedScriptForExec.name}</h2>
+              <button
+                onClick={() => { setIsDeviceSelectOpen(false); setSelectedScriptForExec(null); }}
+                className="p-2 hover:bg-[#334155] rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-[#94a3b8]" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[#94a3b8] text-sm mb-2">选择设备 *</label>
+                <div className="space-y-2">
+                  {devices.filter(d => d.status === 'connected').map((device) => (
+                    <label key={device.device_id} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="device-select"
+                        checked={selectedDeviceId === device.device_id}
+                        onChange={() => setSelectedDeviceId(device.device_id)}
+                        className="w-4 h-4 border-[#334155] bg-[#0f172a] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-[#94a3b8]">{device.name || device.device_id} ({device.platform})</span>
+                      {device.connection_type === 'tcpip' ? (
+                        <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full">WiFi</span>
+                      ) : (
+                        <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded-full">USB</span>
+                      )}
+                    </label>
+                  ))}
+                  {devices.filter(d => d.status === 'connected').length === 0 && (
+                    <p className="text-[#64748b] text-sm">暂无在线设备，请先在设备管理页连接设备</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => { setIsDeviceSelectOpen(false); setSelectedScriptForExec(null); }}
+                  className="flex-1 px-4 py-2.5 bg-[#334155] hover:bg-[#475569] text-white rounded-lg transition-colors"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleExecuteWithDevice}
+                  disabled={!selectedDeviceId}
+                  className="flex-1 px-4 py-2.5 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                >
+                  创建任务并执行
+                </button>
+              </div>
             </div>
           </div>
         </div>
