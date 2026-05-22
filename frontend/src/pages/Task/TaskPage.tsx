@@ -337,7 +337,7 @@ export function TaskPage() {
               <div>
                 <label className="block text-[#94a3b8] text-sm mb-2">选择设备 *</label>
                 <div className="space-y-2">
-                  {devices.map((device) => (
+                  {devices.filter(d => d.status === 'connected').map((device) => (
                     <label key={device.device_id} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -352,13 +352,16 @@ export function TaskPage() {
                         className="w-4 h-4 rounded border-[#334155] bg-[#0f172a] text-indigo-600 focus:ring-indigo-500"
                       />
                       <span className="text-[#94a3b8]">{device.name || device.device_id} ({device.platform})</span>
-                      {device.status === 'connected' ? (
-                        <span className="text-green-400 text-xs">在线</span>
+                      {device.connection_type === 'tcpip' ? (
+                        <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full">WiFi在线</span>
                       ) : (
-                        <span className="text-gray-400 text-xs">离线</span>
+                        <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded-full">USB在线</span>
                       )}
                     </label>
                   ))}
+                  {devices.filter(d => d.status === 'connected').length === 0 && (
+                    <p className="text-[#64748b] text-sm">暂无在线设备</p>
+                  )}
                 </div>
               </div>
 
