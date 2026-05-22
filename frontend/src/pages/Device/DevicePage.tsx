@@ -4,7 +4,7 @@ import { useDeviceStore } from '../../stores/deviceStore';
 import { DeviceDetailDrawer } from '../../components/DeviceDetailDrawer';
 
 export function DevicePage() {
-  const { devices, fetchDevices, connectDevice, disconnectDevice, enableWireless, enablingWireless, openDrawer, error, success, clearMessages } = useDeviceStore();
+  const { devices, fetchDevices, connectDevice, disconnectDevice, enableWireless, enablingWirelessDeviceId, openDrawer, error, success, clearMessages } = useDeviceStore();
 
   useEffect(() => {
     fetchDevices();
@@ -106,10 +106,10 @@ export function DevicePage() {
       </div>
 
       {/* Messages */}
-      {enablingWireless && (
+      {enablingWirelessDeviceId && (
         <div className="mb-4 p-3 bg-blue-900/30 border border-blue-500/30 rounded-lg flex items-center gap-2 text-blue-300">
           <Loader2 className="w-4 h-4 animate-spin" />
-          正在开启无线连接...
+          正在为设备 {devices.find(d => d.device_id === enablingWirelessDeviceId)?.name || enablingWirelessDeviceId} 开启无线连接...
         </div>
       )}
       {error && (
@@ -185,16 +185,14 @@ export function DevicePage() {
                 </button>
               ) : (
                 <>
-                  {device.connection_type === 'usb' && (
-                    <button
-                      onClick={() => enableWireless(device.device_id)}
-                      disabled={enablingWireless}
-                      className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
-                    >
-                      <Wifi className="w-4 h-4" />
-                      {enablingWireless ? '开启中...' : '开启无线'}
-                    </button>
-                  )}
+                  <button
+                    onClick={() => enableWireless(device.device_id)}
+                    disabled={enablingWirelessDeviceId === device.device_id}
+                    className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                  >
+                    <Wifi className="w-4 h-4" />
+                    {enablingWirelessDeviceId === device.device_id ? '开启中...' : '开启无线'}
+                  </button>
                   <button
                     onClick={() => disconnectDevice(device.device_id)}
                     className="flex-1 py-2 bg-red-600 hover:bg-red-500 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
