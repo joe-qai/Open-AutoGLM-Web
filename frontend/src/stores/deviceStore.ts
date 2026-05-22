@@ -14,6 +14,8 @@ export interface Device {
   screen_width?: number;
   screen_height?: number;
   battery_level?: number;
+  device_type?: string;
+  android_sdk_version?: string;
   last_seen?: string;
 }
 
@@ -22,13 +24,11 @@ interface DeviceState {
   selectedDevice: Device | null;
   loading: boolean;
   connectingTcpIp: boolean;
-  enablingWireless: boolean;
+  enablingWirelessDeviceId: string | null;
   error: string | null;
   success: string | null;
   screenshotData: string | null;
-  deviceApps: { package_name: string; name: string }[];
   loadingScreenshot: boolean;
-  loadingApps: boolean;
   drawerOpen: boolean;
 
   // Actions
@@ -49,13 +49,11 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
   selectedDevice: null,
   loading: false,
   connectingTcpIp: false,
-  enablingWireless: false,
+  enablingWirelessDeviceId: null,
   error: null,
   success: null,
   screenshotData: null,
-  deviceApps: [],
   loadingScreenshot: false,
-  loadingApps: false,
   drawerOpen: false,
 
   fetchDevices: async () => {
@@ -104,24 +102,30 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
   },
 
   enableWireless: async (deviceId: string, port: number = 5555) => {
-    set({ enablingWireless: true, error: null, success: null });
+    // Guard: skip if device is already on tcpip
+    const device = get().devices.find(d => d.device_id === deviceId);
+    if (device?.connection_type === 'tcpip') {
+      set({ success: '该设备已通过WiFi连接' });
+      return;
+    }
+    set({ enablingWirelessDeviceId: deviceId, error: null, success: null });
     try {
       const response = await deviceApi.enableWireless(deviceId, port) as unknown as {
         success: boolean;
         message: string;
         device_id?: string;
       };
-      
+
       if (response.success) {
         await get().fetchDevices();
-        set({ enablingWireless: false, success: response.message });
+        set({ enablingWirelessDeviceId: null, success: response.message });
       } else {
-        set({ enablingWireless: false, error: response.message });
+        set({ enablingWirelessDeviceId: null, error: response.message });
       }
     } catch (error: any) {
-      set({ 
-        enablingWireless: false, 
-        error: error.response?.data?.detail || 'Failed to enable wireless connection' 
+      set({
+        enablingWirelessDeviceId: null,
+        error: error.response?.data?.detail || 'Failed to enable wireless connection'
       });
     }
   },
@@ -141,22 +145,16 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
   },
 
   openDrawer: async (device: Device) => {
-    set({ selectedDevice: device, drawerOpen: true, screenshotData: null, deviceApps: [], loadingScreenshot: true, loadingApps: true });
+    set({ selectedDevice: device, drawerOpen: true, screenshotData: null, loadingScreenshot: true });
     try {
       const response = await deviceApi.getScreenshot(device.device_id) as unknown as { screenshot_base64: string };
       set({ screenshotData: response.screenshot_base64, loadingScreenshot: false });
     } catch {
       set({ screenshotData: null, loadingScreenshot: false });
     }
-    try {
-      const appsResponse = await api.get(`/api/v1/devices/${device.device_id}/apps`) as unknown as { apps: { package_name: string; name: string }[] };
-      set({ deviceApps: appsResponse.apps || [], loadingApps: false });
-    } catch {
-      set({ deviceApps: [], loadingApps: false });
-    }
   },
 
   closeDrawer: () => {
-    set({ drawerOpen: false, screenshotData: null, deviceApps: [] });
+    set({ drawerOpen: false, screenshotData: null });
   },
 }));
