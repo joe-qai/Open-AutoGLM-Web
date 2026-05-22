@@ -244,13 +244,22 @@ class TaskService:
         if not task:
             return
 
-        has_error = task.status in (TaskStatus.FAILED, TaskStatus.STOPPED)
         if task.status == TaskStatus.COMPLETED:
             status_text = "passed"
         elif task.status == TaskStatus.STOPPED:
             status_text = "stopped"
         else:
             status_text = "failed"
+
+        # Capture screenshot on error only (not on success)
+        screenshot_base64 = None
+        if task.status in (TaskStatus.FAILED, TaskStatus.STOPPED) and task.device_id:
+            from app.services.device_service import DeviceService
+            device_service = DeviceService()
+            try:
+                screenshot_base64 = device_service.get_screenshot(task.device_id)
+            except Exception:
+                screenshot_base64 = None
 
         started = task.started_at or task.created_at
         completed = task.completed_at or time.strftime("%Y-%m-%dT%H:%M:%S")
@@ -266,12 +275,24 @@ class TaskService:
         for i, log in enumerate(logs[:50]):
             step_rows += f"<tr><td>{i+1}</td><td>{log['timestamp']}</td><td>{log['level']}</td><td>{log['message']}</td></tr>\n"
 
+        # Build screenshot section if available
+        screenshot_section = ""
+        if screenshot_base64:
+            screenshot_section = f"""
+        <h2>Error Screenshot</h2>
+        <div style="background:#1e293b;padding:12px;border-radius:8px;border:1px solid #334155;margin:16px 0;">
+          <img src="data:image/png;base64,{screenshot_base64}"
+               style="max-width:100%;border-radius:4px;" alt="Error Screenshot" />
+        </div>
+        """
+
         html_content = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><title>Test Report - {task.name}</title>
 <style>
 body {{ font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 20px; }}
 h1 {{ color: #fff; border-bottom: 1px solid #334155; padding-bottom: 10px; }}
+h2 {{ color: #e2e8f0; margin-top: 24px; }}
 table {{ width: 100%; border-collapse: collapse; margin: 16px 0; }}
 th, td {{ text-align: left; padding: 8px 12px; border-bottom: 1px solid #334155; }}
 th {{ background: #1e293b; color: #94a3b8; }}
@@ -289,6 +310,7 @@ th {{ background: #1e293b; color: #94a3b8; }}
   <div class="summary-item"><strong>Started:</strong> {started}</div>
   <div class="summary-item"><strong>Completed:</strong> {completed}</div>
 </div>
+{screenshot_section}
 <h2>Execution Log</h2>
 <table><thead><tr><th>#</th><th>Time</th><th>Level</th><th>Message</th></tr></thead><tbody>
 {step_rows}
