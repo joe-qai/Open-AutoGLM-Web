@@ -65,7 +65,7 @@ export function DevicePage() {
         return (
           <div className="flex items-center gap-1">
             <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
-              无线
+              TCP/IP
             </span>
             {ip && (
               <span className="text-[#64748b] text-xs">{ip}</span>
@@ -185,21 +185,25 @@ export function DevicePage() {
                 </button>
               ) : (
                 <>
-                  <button
-                    onClick={() => enableWireless(device.device_id)}
-                    disabled={enablingWirelessDeviceId === device.device_id}
-                    className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
-                  >
-                    <Wifi className="w-4 h-4" />
-                    {enablingWirelessDeviceId === device.device_id ? '开启中...' : '开启无线'}
-                  </button>
-                  <button
-                    onClick={() => disconnectDevice(device.device_id)}
-                    className="flex-1 py-2 bg-red-600 hover:bg-red-500 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
-                  >
-                    <Power className="w-4 h-4" />
-                    断开
-                  </button>
+                  {device.connection_type !== 'tcpip' && (
+                    <button
+                      onClick={() => enableWireless(device.device_id)}
+                      disabled={enablingWirelessDeviceId === device.device_id}
+                      className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                    >
+                      <Wifi className="w-4 h-4" />
+                      {enablingWirelessDeviceId === device.device_id ? '开启中...' : '开启无线'}
+                    </button>
+                  )}
+                  {device.connection_type === 'tcpip' && (
+                    <button
+                      onClick={() => disconnectDevice(device.device_id)}
+                      className="flex-1 py-2 bg-red-600 hover:bg-red-500 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                    >
+                      <Power className="w-4 h-4" />
+                      断开
+                    </button>
+                  )}
                 </>
               )}
               <button
