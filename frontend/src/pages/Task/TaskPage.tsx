@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ListTodo, Play, Square, Trash2, Clock, CheckCircle2, XCircle, Loader2, Plus, X, Bot, Upload, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { ListTodo, Play, Square, CheckSquare, Trash2, Clock, CheckCircle2, XCircle, Loader2, Plus, X, Bot, Upload, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { useTaskStore } from '../../stores/taskStore';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useAgentStore } from '../../stores/agentStore';
 import { useDeviceStore } from '../../stores/deviceStore';
 import { useApkStore } from '../../stores/apkStore';
@@ -19,6 +20,9 @@ export function TaskPage() {
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
   const [selectedApkId, setSelectedApkId] = useState('');
   const [expandedDevices, setExpandedDevices] = useState<Record<string, boolean>>({});
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
+  const [batchMode, setBatchMode] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     fetchTasks();
@@ -119,6 +123,34 @@ export function TaskPage() {
     return devices.find(d => d.device_id === deviceId);
   };
 
+  const toggleTaskSelect = (id: string) => {
+    setSelectedTaskIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAllTasks = () => {
+    if (selectedTaskIds.size === tasks.length) {
+      setSelectedTaskIds(new Set());
+    } else {
+      setSelectedTaskIds(new Set(tasks.map(t => t.task_id)));
+    }
+  };
+
+  const handleBatchDeleteClick = () => {
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmBatchDelete = async () => {
+    setConfirmOpen(false);
+    await useTaskStore.getState().batchDeleteTasks(Array.from(selectedTaskIds));
+    setSelectedTaskIds(new Set());
+    setBatchMode(false);
+  };
+
   return (
     <div className="animate-fade-in">
       {/* Header */}
@@ -130,13 +162,43 @@ export function TaskPage() {
           </h1>
           <p className="text-[#94a3b8] mt-1">查看和管理您的测试任务</p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg flex items-center gap-2 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          新增任务
-        </button>
+        {batchMode ? (
+          <>
+            <span className="text-[#94a3b8] text-sm">{selectedTaskIds.size} 已选择</span>
+            <button
+              onClick={handleBatchDeleteClick}
+              disabled={selectedTaskIds.size === 0}
+              className="px-4 py-2 bg-red-600 hover:bg-red-500 disabled:bg-red-800 text-white rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              批量删除
+            </button>
+            <button
+              onClick={() => { setBatchMode(false); setSelectedTaskIds(new Set()); }}
+              className="px-4 py-2 bg-[#334155] hover:bg-[#475569] text-white rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <X className="w-4 h-4" />
+              取消
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => { setBatchMode(true); setSelectedTaskIds(new Set()); }}
+              className="px-4 py-2 bg-[#334155] hover:bg-[#475569] text-white rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              批量删除
+            </button>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              新增任务
+            </button>
+          </>
+        )}
       </div>
 
       {/* Task Table */}
@@ -145,6 +207,17 @@ export function TaskPage() {
           <table className="w-full">
             <thead>
               <tr className="text-[#64748b] text-sm border-b border-[#334155]">
+                {batchMode && (
+                  <th className="text-left py-4 px-4 font-medium w-10">
+                    <button onClick={toggleSelectAllTasks} className="text-[#94a3b8] hover:text-white transition-colors">
+                      {selectedTaskIds.size === tasks.length && tasks.length > 0 ? (
+                        <CheckSquare className="w-4 h-4" />
+                      ) : (
+                        <Square className="w-4 h-4" />
+                      )}
+                    </button>
+                  </th>
+                )}
                 <th className="text-left py-4 px-6 font-medium">任务名称</th>
                 <th className="text-left py-4 px-6 font-medium">类型</th>
                 <th className="text-left py-4 px-6 font-medium">执行设备</th>
@@ -163,6 +236,17 @@ export function TaskPage() {
                 return (
                   <>
                     <tr key={task.task_id} className="border-b border-[#334155] last:border-0 hover:bg-[#334155]/30">
+                      {batchMode && (
+                        <td className="py-4 px-4">
+                          <button onClick={() => toggleTaskSelect(task.task_id)} className="text-[#94a3b8] hover:text-white transition-colors">
+                            {selectedTaskIds.has(task.task_id) ? (
+                              <CheckSquare className="w-4 h-4 text-indigo-400" />
+                            ) : (
+                              <Square className="w-4 h-4" />
+                            )}
+                          </button>
+                        </td>
+                      )}
                       <td className="py-4 px-6">
                         <div>
                           <p className="text-white font-medium">{task.name}</p>
@@ -260,7 +344,7 @@ export function TaskPage() {
                     </tr>
                     {isExpanded && (
                       <tr className="border-b border-[#334155] bg-[#0f172a]/30">
-                        <td colSpan={7} className="py-3 px-6">
+                        <td colSpan={batchMode ? 8 : 7} className="py-3 px-6">
                           <div className="flex flex-wrap gap-2">
                             {primaryDevice && (
                               <span className="px-3 py-1.5 bg-[#334155] text-[#94a3b8] text-xs rounded-full">
@@ -417,6 +501,16 @@ export function TaskPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="批量删除任务"
+        message={`确定要删除 ${selectedTaskIds.size} 个任务吗？关联的报告也将被删除，此操作不可撤销。`}
+        confirmLabel="删除"
+        variant="danger"
+        onConfirm={handleConfirmBatchDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }

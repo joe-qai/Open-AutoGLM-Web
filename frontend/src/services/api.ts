@@ -72,6 +72,8 @@ export const taskApi = {
   stopTask: (taskId: string) => api.post(`/api/v1/tasks/${taskId}/stop`),
   deleteTask: (taskId: string) => api.delete(`/api/v1/tasks/${taskId}`),
   getTaskLogs: (taskId: string) => api.get(`/api/v1/tasks/${taskId}/logs`),
+  batchDeleteTasks: (taskIds: string[]) =>
+    api.delete('/api/v1/tasks/batch', { data: { task_ids: taskIds } }),
 };
 
 // 脚本相关API
@@ -104,12 +106,13 @@ export const scriptApi = {
 
 // 报告相关API
 export const reportApi = {
-  getReports: (params?: { skip?: number; limit?: number; task_id?: string }) =>
+  getReports: (params?: { task_id?: string; status?: string; skip?: number; limit?: number }) =>
     api.get('/api/v1/reports', { params }),
   getReport: (reportId: string) => api.get(`/api/v1/reports/${reportId}`),
   generateReport: (reportId: string) => api.post(`/api/v1/reports/${reportId}/generate`),
   downloadReport: (reportId: string, format: string = 'html') =>
     api.get(`/api/v1/reports/${reportId}/download`, { params: { format }, responseType: 'blob' }),
+  getReportPreview: (reportId: string) => api.get(`/api/v1/reports/${reportId}/preview`),
   deleteReport: (reportId: string) => api.delete(`/api/v1/reports/${reportId}`),
   batchDeleteReports: (reportIds: string[]) =>
     api.delete('/api/v1/reports/batch', { data: { report_ids: reportIds } }),
@@ -127,6 +130,8 @@ export const apkApi = {
     });
   },
   deleteApk: (apkId: string) => api.delete(`/api/v1/apks/${apkId}`),
+  batchDeleteApks: (apkIds: string[]) =>
+    api.delete('/api/v1/apks/batch', { data: { apk_ids: apkIds } }),
   installApk: (deviceId: string, apkId: string) =>
     api.post('/api/v1/apks/install', { device_id: deviceId, apk_id: apkId }),
 };

@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { FileText, Download, Trash2, Clock, CheckCircle2, XCircle, Loader2, Calendar, CheckSquare, Square, X } from 'lucide-react';
 import { useReportStore } from '../../stores/reportStore';
 import type { Report } from '../../stores/reportStore';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 
 export function ReportPage() {
   const { reports, fetchReports, deleteReport, downloadReport, batchDeleteReports } = useReportStore();
   const [loadingReportId, setLoadingReportId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
@@ -25,8 +27,12 @@ export function ReportPage() {
     }
   };
 
-  const handleBatchDelete = async () => {
-    if (!confirm(`确定要删除 ${selectedIds.size} 个报告吗？`)) return;
+  const handleBatchDelete = () => {
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setConfirmOpen(false);
     await batchDeleteReports(Array.from(selectedIds));
     setSelectedIds(new Set());
   };
@@ -252,6 +258,16 @@ export function ReportPage() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="批量删除报告"
+        message={`确定要删除 ${selectedIds.size} 个报告吗？此操作不可撤销。`}
+        confirmLabel="删除"
+        variant="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }

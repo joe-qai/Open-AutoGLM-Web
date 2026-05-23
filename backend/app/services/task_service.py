@@ -373,6 +373,26 @@ th {{ background: #1e293b; color: #94a3b8; }}
         await conn.execute("DELETE FROM tasks WHERE task_id = ?", (task_id,))
         await conn.commit()
 
+    async def batch_delete(self, task_ids: list[str]) -> tuple[int, list[str]]:
+        conn = await db.get_connection()
+        deleted = 0
+        failed = []
+        for task_id in task_ids:
+            process = self.task_processes.get(task_id)
+            if process:
+                process.kill()
+                del self.task_processes[task_id]
+            await conn.execute("DELETE FROM task_logs WHERE task_id = ?", (task_id,))
+            await conn.execute("DELETE FROM task_devices WHERE task_id = ?", (task_id,))
+            await conn.execute("DELETE FROM reports WHERE task_id = ?", (task_id,))
+            cursor = await conn.execute("DELETE FROM tasks WHERE task_id = ?", (task_id,))
+            if cursor.rowcount > 0:
+                deleted += 1
+            else:
+                failed.append(task_id)
+        await conn.commit()
+        return deleted, failed
+
     async def _log(self, task_id: str, level: str, message: str):
         conn = await db.get_connection()
         await conn.execute(
