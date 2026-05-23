@@ -38,7 +38,7 @@ interface TaskState {
   executeTask: (taskId: string) => Promise<void>;
   stopTask: (taskId: string) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
-  batchDeleteTasks: (taskIds: string[]) => Promise<void>;
+  batchDeleteTasks: (taskIds: string[]) => Promise<any>;
   getTaskLogs: (taskId: string) => Promise<string[]>;
 }
 
@@ -105,10 +105,12 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   batchDeleteTasks: async (taskIds: string[]) => {
     try {
-      await taskApi.batchDeleteTasks(taskIds);
+      const result = await taskApi.batchDeleteTasks(taskIds);
       await get().fetchTasks();
+      return result;
     } catch (error) {
       set({ error: 'Failed to batch delete tasks' });
+      return null;
     }
   },
 

@@ -23,6 +23,7 @@ export function TaskPage() {
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
   const [batchMode, setBatchMode] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [batchDeleting, setBatchDeleting] = useState(false);
 
   useEffect(() => {
     fetchTasks();
@@ -146,9 +147,16 @@ export function TaskPage() {
 
   const handleConfirmBatchDelete = async () => {
     setConfirmOpen(false);
-    await useTaskStore.getState().batchDeleteTasks(Array.from(selectedTaskIds));
-    setSelectedTaskIds(new Set());
-    setBatchMode(false);
+    setBatchDeleting(true);
+    try {
+      await useTaskStore.getState().batchDeleteTasks(Array.from(selectedTaskIds));
+      setSelectedTaskIds(new Set());
+      setBatchMode(false);
+    } catch (error) {
+      console.error('Batch delete failed:', error);
+    } finally {
+      setBatchDeleting(false);
+    }
   };
 
   return (
@@ -167,11 +175,11 @@ export function TaskPage() {
             <span className="text-[#94a3b8] text-sm">{selectedTaskIds.size} 已选择</span>
             <button
               onClick={handleBatchDeleteClick}
-              disabled={selectedTaskIds.size === 0}
+              disabled={selectedTaskIds.size === 0 || batchDeleting}
               className="px-4 py-2 bg-red-600 hover:bg-red-500 disabled:bg-red-800 text-white rounded-lg flex items-center gap-2 transition-colors"
             >
-              <Trash2 className="w-4 h-4" />
-              批量删除
+              {batchDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+              {batchDeleting ? '删除中...' : '批量删除'}
             </button>
             <button
               onClick={() => { setBatchMode(false); setSelectedTaskIds(new Set()); }}

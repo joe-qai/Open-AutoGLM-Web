@@ -9,6 +9,7 @@ export function ReportPage() {
   const [loadingReportId, setLoadingReportId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [batchDeleting, setBatchDeleting] = useState(false);
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
@@ -33,8 +34,15 @@ export function ReportPage() {
 
   const handleConfirmDelete = async () => {
     setConfirmOpen(false);
-    await batchDeleteReports(Array.from(selectedIds));
-    setSelectedIds(new Set());
+    setBatchDeleting(true);
+    try {
+      await batchDeleteReports(Array.from(selectedIds));
+      setSelectedIds(new Set());
+    } catch (error) {
+      console.error('Batch delete failed:', error);
+    } finally {
+      setBatchDeleting(false);
+    }
   };
 
   useEffect(() => {
@@ -138,8 +146,8 @@ export function ReportPage() {
               onClick={handleBatchDelete}
               className="px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-sm rounded-lg flex items-center gap-1.5 transition-colors"
             >
-              <Trash2 className="w-4 h-4" />
-              批量删除
+              {batchDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+              {batchDeleting ? '删除中...' : '批量删除'}
             </button>
             <button
               onClick={() => setSelectedIds(new Set())}
