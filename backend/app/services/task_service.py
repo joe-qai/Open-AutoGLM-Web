@@ -370,6 +370,7 @@ th {{ background: #1e293b; color: #94a3b8; }}
         await self._log(task_id, "INFO", "Task stopped by user")
 
     async def delete_task(self, task_id: str):
+        self.task_errors.pop(task_id, None)
         process = self.task_processes.get(task_id)
         if process:
             process.kill()
@@ -388,6 +389,7 @@ th {{ background: #1e293b; color: #94a3b8; }}
         try:
             await conn.execute("BEGIN")
             for task_id in task_ids:
+                self.task_errors.pop(task_id, None)
                 process = self.task_processes.get(task_id)
                 if process:
                     process.kill()

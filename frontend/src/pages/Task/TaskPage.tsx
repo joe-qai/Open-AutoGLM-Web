@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { ListTodo, Play, Square, CheckSquare, Trash2, Clock, CheckCircle2, XCircle, Loader2, Plus, X, Bot, Upload, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { useTaskStore } from '../../stores/taskStore';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -252,8 +252,8 @@ export function TaskPage() {
                 const isExpanded = expandedDevices[task.task_id];
                 
                 return (
-                  <>
-                    <tr key={task.task_id} className="border-b border-[#334155] last:border-0 hover:bg-[#334155]/30">
+                  <Fragment key={task.task_id}>
+                    <tr className="border-b border-[#334155] last:border-0 hover:bg-[#334155]/30">
                       {batchMode && (
                         <td className="py-4 px-4">
                           <button onClick={() => toggleTaskSelect(task.task_id)} className="text-[#94a3b8] hover:text-white transition-colors">
@@ -389,7 +389,7 @@ export function TaskPage() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 );
               })}
             </tbody>
