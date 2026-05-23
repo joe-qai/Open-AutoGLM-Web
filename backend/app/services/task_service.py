@@ -17,6 +17,7 @@ class TaskService:
 
     def __init__(self):
         self.task_processes: Dict[str, subprocess.Popen] = {}
+        self.task_errors: Dict[str, str] = {}
 
     async def create_task(
         self,
@@ -59,7 +60,7 @@ class TaskService:
         dev_cursor = await conn.execute("SELECT device_id FROM task_devices WHERE task_id = ?", (task_id,))
         dev_rows = await dev_cursor.fetchall()
         device_ids = [r["device_id"] for r in dev_rows]
-        return TaskResponse(
+        result = TaskResponse(
             task_id=row["task_id"],
             name=row["name"],
             task_type=TaskType(row["task_type"]) if row["task_type"] in TaskType._value2member_map_ else TaskType.FUNCTIONAL,
@@ -75,6 +76,8 @@ class TaskService:
             started_at=row["started_at"],
             completed_at=row["completed_at"]
         )
+        result.error_message = self.task_errors.get(task_id)
+        return result
 
     async def list_tasks(
         self,
@@ -102,7 +105,7 @@ class TaskService:
         rows = await cursor.fetchall()
         result = []
         for row in rows:
-            result.append(TaskResponse(
+            task_resp = TaskResponse(
                 task_id=row["task_id"],
                 name=row["name"],
                 task_type=TaskType(row["task_type"]) if row["task_type"] in TaskType._value2member_map_ else TaskType.FUNCTIONAL,
@@ -117,7 +120,9 @@ class TaskService:
                 updated_at=row["updated_at"],
                 started_at=row["started_at"],
                 completed_at=row["completed_at"]
-            ))
+            )
+            task_resp.error_message = self.task_errors.get(row["task_id"])
+            result.append(task_resp)
         return result
 
     async def _get_script_content(self, script_id: str) -> Optional[str]:
@@ -215,7 +220,8 @@ class TaskService:
                         await self._log(task_id, "INFO", f"Output: {chunk}")
             else:
                 await self._update_task_status(task_id, TaskStatus.FAILED, progress=100)
-                error_msg = stderr if stderr else "Unknown error"
+                error_msg = stderr[:2000] if stderr else "Unknown error"
+                self.task_errors[task_id] = error_msg
                 # Log full error — split into chunks if very long
                 if len(error_msg) > 2000:
                     for i in range(0, len(error_msg), 2000):
@@ -230,8 +236,10 @@ class TaskService:
                 stderr if stderr else ""
             )
         except Exception as e:
+            error_msg = f"Subprocess error: {str(e)}"
+            self.task_errors[task_id] = error_msg
             await self._update_task_status(task_id, TaskStatus.FAILED)
-            await self._log(task_id, "ERROR", f"Subprocess error: {str(e)}")
+            await self._log(task_id, "ERROR", error_msg)
         finally:
             # 清理临时脚本文件
             if temp_script_path and os.path.exists(temp_script_path):

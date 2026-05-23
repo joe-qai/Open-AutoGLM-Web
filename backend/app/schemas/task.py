@@ -60,6 +60,7 @@ class TaskResponse(BaseModel):
     updated_at: Optional[str] = None
     started_at: Optional[str] = None
     completed_at: Optional[str] = None
+    error_message: Optional[str] = None
     
     model_config = {"from_attributes": True}
 

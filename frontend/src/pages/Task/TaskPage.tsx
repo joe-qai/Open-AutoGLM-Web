@@ -9,9 +9,9 @@ import type { Script } from '../../stores/agentStore';
 
 export function TaskPage() {
   const { tasks, fetchTasks, executeTask, stopTask, createTask, deleteTask } = useTaskStore();
-  const { scripts } = useAgentStore();
-  const { devices } = useDeviceStore();
-  const { apks } = useApkStore();
+  const { scripts, fetchScripts } = useAgentStore();
+  const { devices, fetchDevices } = useDeviceStore();
+  const { apks, fetchApks } = useApkStore();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taskName, setTaskName] = useState('');
@@ -27,7 +27,17 @@ export function TaskPage() {
 
   useEffect(() => {
     fetchTasks();
+    fetchScripts();
+    fetchDevices();
+    fetchApks();
   }, []);
+
+  useEffect(() => {
+    const hasExecuting = tasks.some(t => t.status === 'executing');
+    if (!hasExecuting) return;
+    const interval = setInterval(() => fetchTasks(), 5000);
+    return () => clearInterval(interval);
+  }, [tasks, fetchTasks]);
 
   const getScriptById = (scriptId: string | undefined): Script | undefined => {
     return scripts.find(s => s.script_id === scriptId);
@@ -293,6 +303,11 @@ export function TaskPage() {
                             {getStatusText(task.status)}
                           </span>
                         </div>
+                        {task.status === 'failed' && task.error_message && (
+                          <div className="mt-1 text-xs text-red-400/80 max-w-xs truncate" title={task.error_message}>
+                            {task.error_message}
+                          </div>
+                        )}
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-2">
