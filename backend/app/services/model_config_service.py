@@ -152,7 +152,7 @@ class ModelConfigService:
                 )
         except Exception as e:
             elapsed = round((time.time() - start) * 1000)
-            msg = self._classify_error(e)
+            msg = self._classify_error(e, api_key=config.api_key)
             return ModelConfigTestResponse(
                 success=False,
                 message=msg,
@@ -177,14 +177,21 @@ class ModelConfigService:
                 )
             )
             elapsed = round((time.time() - start) * 1000)
-            return ModelConfigTestResponse(
-                success=True,
-                message="连接成功",
-                response_time_ms=elapsed,
-            )
+            if response.content and response.content[0].text:
+                return ModelConfigTestResponse(
+                    success=True,
+                    message="连接成功",
+                    response_time_ms=elapsed,
+                )
+            else:
+                return ModelConfigTestResponse(
+                    success=False,
+                    message="响应格式异常",
+                    response_time_ms=elapsed,
+                )
         except Exception as e:
             elapsed = round((time.time() - start) * 1000)
-            msg = self._classify_error(e)
+            msg = self._classify_error(e, api_key=config.api_key)
             return ModelConfigTestResponse(
                 success=False,
                 message=msg,
@@ -192,7 +199,7 @@ class ModelConfigService:
             )
 
     @staticmethod
-    def _classify_error(e: Exception) -> str:
+    def _classify_error(e: Exception, api_key: str = "") -> str:
         msg = str(e).lower()
         if any(x in msg for x in ["connect", "connection refused", "connection error", "name resolution"]):
             return "无法连接到服务器，请检查 API Base URL"
@@ -202,4 +209,7 @@ class ModelConfigService:
             return "模型名称不存在"
         if any(x in msg for x in ["timeout", "timed out"]):
             return "连接超时，请检查网络"
-        return f"连接失败: {str(e)}"
+        safe = str(e)
+        if api_key and api_key in safe:
+            safe = safe.replace(api_key, "***")
+        return f"连接失败: {safe}"
