@@ -1,11 +1,14 @@
+import logging
 from dataclasses import dataclass
 from typing import Tuple, Optional, List
 import xml.etree.ElementTree as ET
 import re
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
-class UIElement:
+class RawUIElement:
     resource_id: str = ""
     class_name: str = ""
     text: str = ""
@@ -45,7 +48,10 @@ class UITreeExtractor:
 
     def extract(self) -> str:
         """Get raw UI tree XML from device."""
-        return self.device.dump_ui_tree()
+        dump = getattr(self.device, 'dump_ui_tree', None)
+        if dump and callable(dump):
+            return dump()
+        return ""
 
     def to_text(self, ui_xml: str, max_elements: int = 30) -> str:
         """Convert UI tree XML to structured text description."""
@@ -54,15 +60,8 @@ class UITreeExtractor:
 
         lines = []
         lines.append("=== 屏幕概览 ===")
-        try:
-            display = self.device.get_display_info()
-            lines.append(f"分辨率: {display.width}x{display.height}")
-        except Exception:
-            lines.append("分辨率: unknown")
-        try:
-            lines.append(f"当前应用: {self.device.get_current_app()}")
-        except Exception:
-            lines.append("当前应用: unknown")
+        lines.append(f"分辨率: {self._get_display_resolution()}")
+        lines.append(f"当前应用: {self._get_current_app()}")
         lines.append("")
         lines.append("=== 可交互元素 ===")
 
@@ -94,25 +93,40 @@ class UITreeExtractor:
 
         return "\n".join(lines)
 
-    def _parse_xml(self, ui_xml: str) -> List[UIElement]:
-        """Parse UI tree XML string into list of UIElement."""
+    def _get_display_resolution(self) -> str:
+        try:
+            di = self.device.display_info if hasattr(self.device, 'display_info') else None
+            if di:
+                return f"{di.width}x{di.height}"
+        except Exception:
+            pass
+        return "unknown"
+
+    def _get_current_app(self) -> str:
+        try:
+            return self.device.get_current_app()
+        except Exception:
+            return "unknown"
+
+    def _parse_xml(self, ui_xml: str) -> List["RawUIElement"]:
+        """Parse UI tree XML string into list of RawUIElement."""
         elements = []
         if not ui_xml or not ui_xml.strip():
             return elements
         try:
             root = ET.fromstring(ui_xml)
             self._parse_element(root, elements)
-        except ET.ParseError:
-            pass
-        except Exception:
-            pass
+        except ET.ParseError as e:
+            logger.warning("UI XML parse error: %s", e)
+        except Exception as e:
+            logger.warning("UI XML unexpected error: %s", e)
         return elements
 
-    def _parse_element(self, element: ET.Element, results: List[UIElement]):
+    def _parse_element(self, element: ET.Element, results: List["RawUIElement"]):
         """Recursively parse XML element tree."""
         attrib = element.attrib
         bounds_str = attrib.get("bounds", "[0,0][0,0]")
-        ui_elem = UIElement(
+        ui_elem = RawUIElement(
             resource_id=attrib.get("resource-id", ""),
             class_name=attrib.get("class", ""),
             text=attrib.get("text", ""),
@@ -136,6 +150,6 @@ class UITreeExtractor:
             )
         return (0, 0, 0, 0)
 
-    def _sort_by_priority(self, elements: List[UIElement]) -> List[UIElement]:
-        """Sort elements by locator priority (resource_id > desc > text > class_name)."""
-        return sorted(elements, key=lambda e: e.priority_key)
+    def _sort_by_priority(self, elements: List["RawUIElement"]) -> List["RawUIElement"]:
+        """Sort by locator priority, then top-to-bottom left-to-right."""
+        return sorted(elements, key=lambda e: (e.priority_key, e.bounds[1], e.bounds[0]))
