@@ -137,7 +137,7 @@ async def test_test_openai_connection_error(service):
 
 
 @pytest.mark.asyncio
-async def test_test_unsupported_provider(service):
+async def test_test_anthropic_sdk_not_installed(service):
     config = ModelConfigCreate(
         name="test",
         provider="anthropic",
@@ -149,3 +149,20 @@ async def test_test_unsupported_provider(service):
     result = await service.test_config(config)
 
     assert result.success is False
+
+
+@pytest.mark.asyncio
+async def test_classify_error_redacts_api_key(service):
+    safe = ModelConfigService._classify_error(
+        Exception("some error with key sk-12345 inside"),
+        api_key="sk-12345",
+    )
+    assert "sk-12345" not in safe
+    assert "***" in safe
+
+
+@pytest.mark.asyncio
+async def test_classify_error_unknown_error(service):
+    safe = ModelConfigService._classify_error(Exception("weird error"))
+    assert "连接失败" in safe
+    assert "weird error" in safe
