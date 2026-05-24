@@ -20,6 +20,11 @@ class ModelConfigBase(BaseModel):
 class ModelConfigCreate(ModelConfigBase):
     pass
 
+class ModelConfigTestResponse(BaseModel):
+    success: bool
+    message: str
+    response_time_ms: Optional[float] = None
+
 class ModelConfigUpdate(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
     name: Optional[str] = None
