@@ -21,6 +21,7 @@ class ModelConfigCreate(ModelConfigBase):
     pass
 
 class ModelConfigTestResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     success: bool
     message: str
     response_time_ms: Optional[float] = None
