@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional
-from app.schemas.model_config import ModelConfigResponse, ModelConfigCreate, ModelConfigUpdate
+from app.schemas.model_config import ModelConfigResponse, ModelConfigCreate, ModelConfigUpdate, ModelConfigTestResponse
 from app.services.model_config_service import ModelConfigService
 
 router = APIRouter()
@@ -12,6 +12,10 @@ model_config_service = ModelConfigService()
 async def create_config(config: ModelConfigCreate):
     config_id = await model_config_service.create_config(config)
     return await model_config_service.get_config(config_id)
+
+@router.post("/test", response_model=ModelConfigTestResponse)
+async def test_config(config: ModelConfigCreate):
+    return await model_config_service.test_config(config)
 
 @router.get("/", response_model=List[ModelConfigResponse])
 async def list_configs():
