@@ -228,3 +228,4 @@ def get_screenshot_png(
         return base64.b64decode(screenshot.base64_data)
     except Exception:
         return None
+# -*- coding: utf-8 -*-

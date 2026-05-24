@@ -25,6 +25,7 @@ class DeviceInfo:
     status: str
     connection_type: ConnectionType
     model: str | None = None
+    manufacturer: str | None = None
     android_version: str | None = None
 
 
@@ -77,6 +78,8 @@ class ADBConnection:
                 [self.adb_path, "connect", address],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=timeout,
             )
 
@@ -96,10 +99,13 @@ class ADBConnection:
 
     def disconnect(self, address: str | None = None) -> tuple[bool, str]:
         """
-        Disconnect from a remote device.
+        Disconnect from a device.
+
+        For TCP/IP devices, runs adb disconnect. For USB devices,
+        adb disconnect will return an appropriate message.
 
         Args:
-            address: Device address to disconnect. If None, disconnects all.
+            address: Device address to disconnect. If None, disconnects all TCP/IP devices.
 
         Returns:
             Tuple of (success, message).
@@ -109,7 +115,7 @@ class ADBConnection:
             if address:
                 cmd.append(address)
 
-            result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", timeout=5)
+            result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5)
 
             output = result.stdout + result.stderr
             return True, output.strip() or "Disconnected"
@@ -117,18 +123,53 @@ class ADBConnection:
         except Exception as e:
             return False, f"Disconnect error: {e}"
 
+    def _get_device_details(self, device_id: str) -> dict[str, str]:
+        """
+        Get detailed information about a specific device via shell getprop.
+
+        Args:
+            device_id: Device serial number.
+
+        Returns:
+            Dictionary with model, manufacturer, and android_version.
+        """
+        props = {
+            "ro.product.model": "model",
+            "ro.product.manufacturer": "manufacturer",
+            "ro.build.version.release": "android_version",
+        }
+        info = {}
+        try:
+            for prop, key in props.items():
+                result = subprocess.run(
+                    [self.adb_path, "-s", device_id, "shell", "getprop", prop],
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=5,
+                )
+                value = result.stdout.strip()
+                if value:
+                    info[key] = value
+        except Exception:
+            pass
+        return info
+
     def list_devices(self) -> list[DeviceInfo]:
         """
         List all connected devices.
 
         Returns:
-            List of DeviceInfo objects.
+            List of DeviceInfo objects with model, manufacturer, and android_version populated.
         """
         try:
             result = subprocess.run(
                 [self.adb_path, "devices", "-l"],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=5,
             )
 
@@ -150,19 +191,26 @@ class ADBConnection:
                     else:
                         conn_type = ConnectionType.USB
 
-                    # Parse additional info
-                    model = None
+                    # Parse additional info from adb devices -l
+                    model_from_list = None
                     for part in parts[2:]:
                         if part.startswith("model:"):
-                            model = part.split(":", 1)[1]
+                            model_from_list = part.split(":", 1)[1]
                             break
+
+                    # Query detailed device info via shell getprop
+                    details = {}
+                    if status == "device":
+                        details = self._get_device_details(device_id)
 
                     devices.append(
                         DeviceInfo(
                             device_id=device_id,
                             status=status,
                             connection_type=conn_type,
-                            model=model,
+                            model=details.get("model", model_from_list),
+                            manufacturer=details.get("manufacturer"),
+                            android_version=details.get("android_version"),
                         )
                     )
 
@@ -241,7 +289,7 @@ class ADBConnection:
                 cmd.extend(["-s", device_id])
             cmd.extend(["tcpip", str(port)])
 
-            result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", timeout=10)
+            result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=10)
 
             output = result.stdout + result.stderr
 
@@ -270,7 +318,7 @@ class ADBConnection:
                 cmd.extend(["-s", device_id])
             cmd.extend(["shell", "ip", "route"])
 
-            result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", timeout=5)
+            result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5)
 
             # Parse IP from route output
             for line in result.stdout.split("\n"):
@@ -287,6 +335,7 @@ class ADBConnection:
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
+                errors="replace",
                 timeout=5,
             )
 
@@ -312,14 +361,14 @@ class ADBConnection:
         try:
             # Kill server
             subprocess.run(
-                [self.adb_path, "kill-server"], capture_output=True, timeout=5
+                [self.adb_path, "kill-server"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5
             )
 
             time.sleep(TIMING_CONFIG.connection.server_restart_delay)
 
             # Start server
             subprocess.run(
-                [self.adb_path, "start-server"], capture_output=True, timeout=5
+                [self.adb_path, "start-server"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5
             )
 
             return True, "ADB server restarted"

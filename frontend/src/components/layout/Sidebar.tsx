@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   FolderKanban,
@@ -12,7 +12,6 @@ import {
   ChevronRight,
   ChevronDown,
   FileText,
-  FileText as LogIcon
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -44,7 +43,7 @@ const navEntries: NavEntry[] = [
       { path: '/devices', label: '设备管理', icon: <Smartphone size={20} /> },
     ],
   },
-  { type: 'single', path: '/agent', label: 'Agent脚本', icon: <Bot size={20} /> },
+  { type: 'single', path: '/agent', label: '智能体', icon: <Bot size={20} /> },
   { type: 'single', path: '/scripts', label: '脚本管理', icon: <FileCode size={20} /> },
   {
     type: 'group',
@@ -55,12 +54,11 @@ const navEntries: NavEntry[] = [
       { path: '/reports', label: '报告管理', icon: <FileText size={20} /> },
     ],
   },
-  { type: 'single', path: '/logs', label: '日志中心', icon: <LogIcon size={20} /> },
+  { type: 'single', path: '/logs', label: '日志中心', icon: <FileText size={20} /> },
   { type: 'single', path: '/settings', label: '设置', icon: <Settings size={20} /> },
 ];
 
 export function Sidebar() {
-  useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['资源管理', '执行中心']));
 
@@ -99,6 +97,7 @@ export function Sidebar() {
       {/* Toggle Button */}
       <button
         onClick={() => setCollapsed(!collapsed)}
+        aria-label={collapsed ? '展开侧边栏' : '收起侧边栏'}
         className="absolute -right-3 top-20 w-6 h-6 bg-[#334155] rounded-full flex items-center justify-center text-[#94a3b8] hover:text-white transition-colors border border-[#475569]"
       >
         {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}

@@ -1,14 +1,14 @@
-# Open-AutoGLM Quick Start for Coding Agent
+# Open-AutoPhone Quick Start for Coding Agent
 
 <div align="center">
 <img src=resources/logo.svg width="20%"/>
 </div>
 
-> **本文专为 AI 助手（如 Claude Code）阅读，用于自动化部署 Open-AutoGLM。**
+> **本文档专为 AI 助手（如 Claude Code）阅读，用于自动化部署 Open-AutoPhone。**
 >
-> **This document is designed for AI assistants (such as Claude Code) to automate the deployment of Open-AutoGLM.**
+> **This document is designed for AI assistants (such as Claude Code) to automate the deployment of Open-AutoPhone.**
 >
-> 如果你是人类读者，可以跳过本文，按照 README.md 文档操作即可。
+> 如果你是人类读者，可以跳过本文档，按 README.md 文档操作即可。
 >
 > If you are a human reader, you can skip this document and follow the README.md instructions instead.
 
@@ -61,7 +61,7 @@ Requirements:
 
 **Important permissions to check:**
 
-![Permissions](resources/screenshot-20251210-120416.png)
+![Permissions](resources/screenshot-20251209-181423.png)
 
 ### 4. Install ADB Keyboard
 
@@ -178,7 +178,7 @@ print(result)
 | Variable                  | Description               | Default                      |
 |---------------------------|---------------------------|------------------------------|
 | `PHONE_AGENT_BASE_URL`    | Model API URL             | `http://localhost:8000/v1`   |
-| `PHONE_AGENT_MODEL`       | Model name                | `autoglm-phone-9b`           |
+| `PHONE_AGENT_MODEL`       | Model name                | `AutoPhone-phone-9b`           |
 | `PHONE_AGENT_API_KEY`     | API key                   | `EMPTY`                      |
 | `PHONE_AGENT_MAX_STEPS`   | Max steps per task        | `100`                        |
 | `PHONE_AGENT_DEVICE_ID`   | ADB device ID             | (auto-detect)                |
@@ -269,7 +269,7 @@ export PATH=${PATH}:~/Downloads/platform-tools
 
 在设备上下载并安装 [ADB Keyboard APK](https://github.com/senzhk/ADBKeyBoard/blob/master/ADBKeyboard.apk)。
 
-安装后，在 `设置 > 输入法` 或 `设置 > 键盘列表` 中启用。
+安装后，在 `设置 > 输入法` 或 `设置 > 键盘列表` 中启用它。
 
 ---
 
@@ -300,7 +300,7 @@ adb devices
 # emulator-5554   device
 ```
 
-### 远程调试（WiFi）
+### 远程调试（WiFi 连接）
 
 确保手机和电脑在同一 WiFi 网络中。
 
@@ -380,10 +380,10 @@ print(result)
 | 变量                        | 描述               | 默认值                        |
 |---------------------------|------------------|----------------------------|
 | `PHONE_AGENT_BASE_URL`    | 模型 API 地址        | `http://localhost:8000/v1` |
-| `PHONE_AGENT_MODEL`       | 模型名称             | `autoglm-phone-9b`         |
+| `PHONE_AGENT_MODEL`       | 模型名称             | `AutoPhone-phone-9b`         |
 | `PHONE_AGENT_API_KEY`     | API Key          | `EMPTY`                    |
-| `PHONE_AGENT_MAX_STEPS`   | 每个任务最大步数         | `100`                      |
-| `PHONE_AGENT_DEVICE_ID`   | ADB 设备 ID        | (自动检测)                     |
+| `PHONE_AGENT_MAX_STEPS`   | 每个任务最大步数        | `100`                      |
+| `PHONE_AGENT_DEVICE_ID`   | ADB 设备 ID        | (自动检测)                   |
 | `PHONE_AGENT_LANG`        | 语言 (`cn`/`en`)   | `cn`                       |
 
 ---

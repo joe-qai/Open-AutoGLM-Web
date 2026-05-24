@@ -1,6 +1,6 @@
 """Report schemas."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from enum import Enum
 from typing import Optional, List, Dict
 
@@ -66,7 +66,7 @@ class ReportInfo(BaseModel):
     updated_at: Optional[str] = None
     generated_at: Optional[str] = None
     
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True, protected_namespaces=())
 
 
 class BatchDeleteRequest(BaseModel):

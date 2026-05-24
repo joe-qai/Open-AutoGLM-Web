@@ -10,3 +10,4 @@ from phone_agent.agent_ios import IOSPhoneAgent
 
 __version__ = "0.1.0"
 __all__ = ["PhoneAgent", "IOSPhoneAgent"]
+# -*- coding: utf-8 -*-

@@ -2,7 +2,7 @@
 
 from enum import Enum
 from typing import Optional, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class LogLevel(str, Enum):
@@ -40,7 +40,7 @@ class LogEntry(BaseModel):
     error: Optional[str] = None
     created_at: str
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True, protected_namespaces=())
 
 
 class LogSummary(BaseModel):

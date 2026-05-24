@@ -3,3 +3,4 @@
 from phone_agent.model.client import ModelClient, ModelConfig
 
 __all__ = ["ModelClient", "ModelConfig"]
+# -*- coding: utf-8 -*-

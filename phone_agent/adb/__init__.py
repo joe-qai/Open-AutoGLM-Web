@@ -20,6 +20,7 @@ from phone_agent.adb.device import (
 from phone_agent.adb.input import (
     clear_text,
     detect_and_set_adb_keyboard,
+    install_adb_keyboard,
     restore_keyboard,
     type_text,
 )
@@ -33,6 +34,7 @@ __all__ = [
     "clear_text",
     "detect_and_set_adb_keyboard",
     "restore_keyboard",
+    "install_adb_keyboard",
     # Device control
     "get_current_app",
     "tap",
@@ -48,4 +50,4 @@ __all__ = [
     "ConnectionType",
     "quick_connect",
     "list_devices",
-]
+]# -*- coding: utf-8 -*-

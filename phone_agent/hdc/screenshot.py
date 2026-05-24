@@ -123,3 +123,4 @@ def _create_fallback_screenshot(is_sensitive: bool) -> Screenshot:
         height=default_height,
         is_sensitive=is_sensitive,
     )
+# -*- coding: utf-8 -*-

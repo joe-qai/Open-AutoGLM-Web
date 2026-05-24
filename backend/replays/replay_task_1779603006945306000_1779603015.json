@@ -1,0 +1,12 @@
+[
+  {
+    "step": 0,
+    "action": "wait",
+    "parameters": {
+      "duration": 1000
+    },
+    "reasoning": "Mock response",
+    "success": true,
+    "message": "Waited 1000ms"
+  }
+]

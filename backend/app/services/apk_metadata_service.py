@@ -59,7 +59,7 @@ class ApkMetadataService:
         package_name: Optional[str] = None,
         version: Optional[str] = None,
         file_size: Optional[int] = None,
-        upload_time: str,
+        upload_time: Optional[str] = None,
         status: str = "uploaded",
     ) -> str:
         """Save APK metadata to SQLite. Returns the apk_id."""

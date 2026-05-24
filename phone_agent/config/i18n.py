@@ -79,3 +79,4 @@ def get_message(key: str, lang: str = "cn") -> str:
     """
     messages = get_messages(lang)
     return messages.get(key, key)
+# -*- coding: utf-8 -*-

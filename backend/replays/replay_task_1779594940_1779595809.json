@@ -1,0 +1,1007 @@
+{
+  "task_id": "task_1779594940",
+  "start_time": 1779594940.567162,
+  "end_time": 1779595809.6338668,
+  "steps": [
+    {
+      "step_index": 0,
+      "timestamp": 1779594945.842506,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 1,
+      "timestamp": 1779594951.3815928,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 2,
+      "timestamp": 1779594956.8402696,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 3,
+      "timestamp": 1779594962.389376,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 4,
+      "timestamp": 1779594968.4416077,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 5,
+      "timestamp": 1779594974.4908044,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 6,
+      "timestamp": 1779594980.3245614,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 7,
+      "timestamp": 1779594986.3296578,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 8,
+      "timestamp": 1779594992.3087056,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 9,
+      "timestamp": 1779595000.7297566,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 10,
+      "timestamp": 1779595006.9551346,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 11,
+      "timestamp": 1779595012.6650307,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 12,
+      "timestamp": 1779595018.561281,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 13,
+      "timestamp": 1779595024.536455,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 14,
+      "timestamp": 1779595030.6993248,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 15,
+      "timestamp": 1779595036.8370142,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 16,
+      "timestamp": 1779595042.7219582,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 17,
+      "timestamp": 1779595048.1521451,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 18,
+      "timestamp": 1779595053.9970348,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 19,
+      "timestamp": 1779595059.8528714,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 20,
+      "timestamp": 1779595065.8308072,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 21,
+      "timestamp": 1779595071.8588758,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 22,
+      "timestamp": 1779595081.373382,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 23,
+      "timestamp": 1779595091.043795,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 24,
+      "timestamp": 1779595101.1652892,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 25,
+      "timestamp": 1779595110.0223525,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 26,
+      "timestamp": 1779595118.4001641,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 27,
+      "timestamp": 1779595128.58837,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 28,
+      "timestamp": 1779595138.486121,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 29,
+      "timestamp": 1779595147.861572,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 30,
+      "timestamp": 1779595157.4448838,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 31,
+      "timestamp": 1779595166.8848708,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 32,
+      "timestamp": 1779595176.6985843,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 33,
+      "timestamp": 1779595186.0477922,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 34,
+      "timestamp": 1779595195.9059896,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 35,
+      "timestamp": 1779595206.123533,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 36,
+      "timestamp": 1779595215.9710615,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 37,
+      "timestamp": 1779595225.5100615,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 38,
+      "timestamp": 1779595233.7355945,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 39,
+      "timestamp": 1779595243.4229963,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 40,
+      "timestamp": 1779595253.0064044,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 41,
+      "timestamp": 1779595262.45256,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 42,
+      "timestamp": 1779595271.8130608,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 43,
+      "timestamp": 1779595281.3340425,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 44,
+      "timestamp": 1779595290.5906835,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 45,
+      "timestamp": 1779595299.933745,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 46,
+      "timestamp": 1779595309.3793514,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 47,
+      "timestamp": 1779595319.072224,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 48,
+      "timestamp": 1779595328.5906997,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 49,
+      "timestamp": 1779595338.1335354,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 50,
+      "timestamp": 1779595347.8141975,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 51,
+      "timestamp": 1779595357.3383622,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 52,
+      "timestamp": 1779595366.7248044,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 53,
+      "timestamp": 1779595376.1933973,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 54,
+      "timestamp": 1779595385.5778525,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 55,
+      "timestamp": 1779595395.0436778,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 56,
+      "timestamp": 1779595404.6602676,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 57,
+      "timestamp": 1779595414.1709409,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 58,
+      "timestamp": 1779595424.650269,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 59,
+      "timestamp": 1779595433.984565,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 60,
+      "timestamp": 1779595443.2217607,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 61,
+      "timestamp": 1779595452.6938844,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 62,
+      "timestamp": 1779595462.1872506,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 63,
+      "timestamp": 1779595471.5340493,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 64,
+      "timestamp": 1779595480.6879013,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 65,
+      "timestamp": 1779595490.2182772,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 66,
+      "timestamp": 1779595499.6975152,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 67,
+      "timestamp": 1779595509.2297966,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 68,
+      "timestamp": 1779595518.7247221,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 69,
+      "timestamp": 1779595528.0336769,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 70,
+      "timestamp": 1779595537.4877982,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 71,
+      "timestamp": 1779595546.840055,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 72,
+      "timestamp": 1779595556.261454,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 73,
+      "timestamp": 1779595565.7206469,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 74,
+      "timestamp": 1779595575.103371,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 75,
+      "timestamp": 1779595584.6551127,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 76,
+      "timestamp": 1779595594.1431267,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 77,
+      "timestamp": 1779595603.5765755,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 78,
+      "timestamp": 1779595613.0487123,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 79,
+      "timestamp": 1779595622.5388684,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 80,
+      "timestamp": 1779595631.8190691,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 81,
+      "timestamp": 1779595641.3801572,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 82,
+      "timestamp": 1779595650.9232326,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 83,
+      "timestamp": 1779595660.2977264,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 84,
+      "timestamp": 1779595670.7126055,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 85,
+      "timestamp": 1779595680.8305368,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 86,
+      "timestamp": 1779595690.255292,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 87,
+      "timestamp": 1779595699.702702,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 88,
+      "timestamp": 1779595709.3618147,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 89,
+      "timestamp": 1779595718.8676875,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 90,
+      "timestamp": 1779595728.0232944,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 91,
+      "timestamp": 1779595737.3456218,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 92,
+      "timestamp": 1779595747.6242585,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 93,
+      "timestamp": 1779595757.1437871,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 94,
+      "timestamp": 1779595765.0519228,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 95,
+      "timestamp": 1779595774.6284602,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 96,
+      "timestamp": 1779595782.8312213,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 97,
+      "timestamp": 1779595791.0109115,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 98,
+      "timestamp": 1779595800.8933644,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    },
+    {
+      "step_index": 99,
+      "timestamp": 1779595808.8331242,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    }
+  ]
+}

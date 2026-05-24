@@ -1,26 +1,23 @@
 """FastAPI main entry point for LOCKIN Agent Platform."""
 
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from app.api.v1 import tasks, devices, reports, websocket, scripts, apks, projects, settings as settings_router, logs
+from app.api.v1 import tasks, devices, reports, websocket, scripts, apks, projects, settings as settings_router, logs, model_configs
 from app.api.v1.middleware import AuditLogMiddleware
 from app.core.agent.engine import AgentEngine
 from app.config import settings
+from app.db import db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application startup and shutdown lifecycle."""
-    # Initialize Agent Engine
+    await db.init_db()
     app.state.agent_engine = AgentEngine()
-    
     yield
-    
-    # Cleanup resources
-    pass
+    await db.close()
 
 
 app = FastAPI(
@@ -49,6 +46,7 @@ app.include_router(scripts.router, prefix="/api/v1/scripts", tags=["scripts"])
 app.include_router(apks.router, prefix="/api/v1/apks", tags=["apks"])
 app.include_router(projects.router, prefix="/api/v1/projects", tags=["projects"])
 app.include_router(settings_router.router, prefix="/api/v1/settings", tags=["settings"])
+app.include_router(model_configs.router, prefix="/api/v1/model_configs", tags=["model_configs"])
 app.include_router(logs.router, prefix="/api/v1/logs", tags=["logs"])
 app.include_router(websocket.router, prefix="/ws", tags=["websocket"])
 

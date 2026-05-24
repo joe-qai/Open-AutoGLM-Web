@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import api, { deviceApi } from '../services/api';
+import { deviceApi } from '../services/api';
 
 export interface Device {
   device_id: string;
@@ -14,9 +14,6 @@ export interface Device {
   screen_width?: number;
   screen_height?: number;
   battery_level?: number;
-  device_type?: string;
-  android_sdk_version?: string;
-  last_seen?: string;
 }
 
 interface DeviceState {

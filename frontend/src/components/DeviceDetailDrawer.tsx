@@ -98,18 +98,6 @@ export function DeviceDetailDrawer() {
                 <span className="text-[#94a3b8]">{selectedDevice.os_version}</span>
               </div>
             )}
-            {selectedDevice.device_type && (
-              <div className="flex justify-between">
-                <span className="text-[#64748b]">设备类型</span>
-                <span className="text-[#94a3b8]">{selectedDevice.device_type}</span>
-              </div>
-            )}
-            {selectedDevice.android_sdk_version && (
-              <div className="flex justify-between">
-                <span className="text-[#64748b]">SDK版本</span>
-                <span className="text-[#94a3b8]">{selectedDevice.android_sdk_version}</span>
-              </div>
-            )}
             {selectedDevice.screen_width && selectedDevice.screen_height && (
               <div className="flex justify-between">
                 <span className="text-[#64748b]">分辨率</span>
@@ -119,10 +107,10 @@ export function DeviceDetailDrawer() {
             {selectedDevice.connection_type && (
               <div className="flex justify-between">
                 <span className="text-[#64748b]">连接方式</span>
-                <span className="text-[#94a3b8]">{selectedDevice.connection_type === 'usb' ? 'USB' : '无线'}</span>
+                <span className="text-[#94a3b8]">{selectedDevice.connection_type === 'usb' ? 'USB' : 'TCP/IP'}</span>
               </div>
             )}
-            {selectedDevice.ip && (
+            {selectedDevice.ip && selectedDevice.connection_type === 'tcpip' && (
               <div className="flex justify-between">
                 <span className="text-[#64748b]">IP地址</span>
                 <span className="text-[#94a3b8]">{selectedDevice.ip}</span>
@@ -132,12 +120,6 @@ export function DeviceDetailDrawer() {
               <div className="flex justify-between">
                 <span className="text-[#64748b]">电量</span>
                 <span className="text-[#94a3b8]">{selectedDevice.battery_level}%</span>
-              </div>
-            )}
-            {selectedDevice.last_seen && (
-              <div className="flex justify-between">
-                <span className="text-[#64748b]">最后在线</span>
-                <span className="text-[#94a3b8]">{selectedDevice.last_seen}</span>
               </div>
             )}
             <div className="flex justify-between">

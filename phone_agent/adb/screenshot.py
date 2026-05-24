@@ -1,15 +1,15 @@
-"""Screenshot utilities for capturing Android device screen."""
+"""Screenshot utilities for capturing Android device screen using uiautomator2."""
 
 import base64
 import os
-import subprocess
 import tempfile
 import uuid
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Tuple
 
 from PIL import Image
+
+from phone_agent.adb.device import _get_device
 
 
 @dataclass
@@ -24,10 +24,10 @@ class Screenshot:
 
 def get_screenshot(device_id: str | None = None, timeout: int = 10) -> Screenshot:
     """
-    Capture a screenshot from the connected Android device.
+    Capture a screenshot from the connected Android device using uiautomator2.
 
     Args:
-        device_id: Optional ADB device ID for multi-device setups.
+        device_id: Optional device ID for multi-device setups.
         timeout: Timeout in seconds for screenshot operations.
 
     Returns:
@@ -38,7 +38,50 @@ def get_screenshot(device_id: str | None = None, timeout: int = 10) -> Screensho
         a black fallback image is returned with is_sensitive=True.
     """
     temp_path = os.path.join(tempfile.gettempdir(), f"screenshot_{uuid.uuid4()}.png")
-    adb_prefix = _get_adb_prefix(device_id)
+
+    try:
+        # Use uiautomator2 for screenshot
+        d = _get_device(device_id)
+        
+        # Capture screenshot directly via uiautomator2
+        screenshot_data = d.screenshot()
+        
+        if isinstance(screenshot_data, bytes):
+            # If bytes are returned directly
+            img = Image.open(BytesIO(screenshot_data))
+        elif isinstance(screenshot_data, str):
+            # If path is returned
+            img = Image.open(screenshot_data)
+            # Copy to temp path for consistency
+            img.save(temp_path)
+            img = Image.open(temp_path)
+        else:
+            return _create_fallback_screenshot(is_sensitive=False)
+
+        width, height = img.size
+
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        base64_data = base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+        return Screenshot(
+            base64_data=base64_data, width=width, height=height, is_sensitive=False
+        )
+
+    except Exception as e:
+        print(f"Screenshot error: {e}")
+        # Fallback to ADB command if uiautomator2 fails
+        return _fallback_screenshot_adb(device_id, timeout)
+
+
+def _fallback_screenshot_adb(device_id: str | None = None, timeout: int = 10) -> Screenshot:
+    """Fallback screenshot using ADB command."""
+    import subprocess
+    
+    temp_path = os.path.join(tempfile.gettempdir(), f"screenshot_{uuid.uuid4()}.png")
+    adb_prefix = ["adb"]
+    if device_id:
+        adb_prefix.extend(["-s", device_id])
 
     try:
         # Execute screenshot command
@@ -81,15 +124,8 @@ def get_screenshot(device_id: str | None = None, timeout: int = 10) -> Screensho
         )
 
     except Exception as e:
-        print(f"Screenshot error: {e}")
+        print(f"ADB fallback screenshot error: {e}")
         return _create_fallback_screenshot(is_sensitive=False)
-
-
-def _get_adb_prefix(device_id: str | None) -> list:
-    """Get ADB command prefix with optional device specifier."""
-    if device_id:
-        return ["adb", "-s", device_id]
-    return ["adb"]
 
 
 def _create_fallback_screenshot(is_sensitive: bool) -> Screenshot:
@@ -107,3 +143,4 @@ def _create_fallback_screenshot(is_sensitive: bool) -> Screenshot:
         height=default_height,
         is_sensitive=is_sensitive,
     )
+# -*- coding: utf-8 -*-

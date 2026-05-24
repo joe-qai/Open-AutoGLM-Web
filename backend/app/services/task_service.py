@@ -1,23 +1,34 @@
 """Task service for managing tasks — SQLite persistence + subprocess executor."""
 
 from typing import List, Optional, Dict
+import asyncio
 import time
-import subprocess
 import tempfile
 import datetime
 import os
 import sys
+import traceback
 
+from fastapi import BackgroundTasks
 from app.config import settings
 from app.db import db
 from app.schemas.task import TaskResponse, TaskStatus, TaskType
 
 
+
 class TaskService:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(TaskService, cls).__new__(cls)
+            cls._instance.task_processes = {}
+            cls._instance.task_errors = {}
+        return cls._instance
 
     def __init__(self):
-        self.task_processes: Dict[str, subprocess.Popen] = {}
-        self.task_errors: Dict[str, str] = {}
+        # Already initialized in __new__
+        pass
 
     async def create_task(
         self,
@@ -30,15 +41,16 @@ class TaskService:
         script_id: Optional[str] = None,
         device_id: Optional[str] = None,
         apk_id: Optional[str] = None,
+        model_config_id: Optional[str] = None,
     ) -> str:
         task_id = f"task_{int(time.time_ns())}"
         timestamp = time.strftime("%Y-%m-%dT%H:%M:%S")
         conn = await db.get_connection()
         await conn.execute(
-            """INSERT INTO tasks (task_id, name, task_type, platform, status, script_id, device_id, apk_id, description, progress, created_at, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)""",
+            """INSERT INTO tasks (task_id, name, task_type, platform, status, script_id, device_id, apk_id, model_config_id, description, progress, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)""",
             (task_id, name, task_type or "functional", platform or "android",
-             TaskStatus.PENDING.value, script_id, device_id, apk_id, description,
+             TaskStatus.PENDING.value, script_id, device_id, apk_id, model_config_id, description,
              timestamp, timestamp)
         )
         await conn.commit()
@@ -60,21 +72,24 @@ class TaskService:
         dev_cursor = await conn.execute("SELECT device_id FROM task_devices WHERE task_id = ?", (task_id,))
         dev_rows = await dev_cursor.fetchall()
         device_ids = [r["device_id"] for r in dev_rows]
+        # Convert row to dict for safe field access
+        row_dict = dict(row) if row else {}
         result = TaskResponse(
-            task_id=row["task_id"],
-            name=row["name"],
-            task_type=TaskType(row["task_type"]) if row["task_type"] in TaskType._value2member_map_ else TaskType.FUNCTIONAL,
-            platform=row["platform"],
+            task_id=row_dict.get("task_id", ""),
+            name=row_dict.get("name", ""),
+            task_type=TaskType(row_dict.get("task_type")) if row_dict.get("task_type") in TaskType._value2member_map_ else TaskType.FUNCTIONAL,
+            platform=row_dict.get("platform", "android"),
             devices=device_ids,
-            status=TaskStatus(row["status"]),
-            description=row["description"],
-            script_id=row["script_id"],
-            device_id=row["device_id"],
-            apk_id=row["apk_id"],
-            created_at=row["created_at"],
-            updated_at=row["updated_at"],
-            started_at=row["started_at"],
-            completed_at=row["completed_at"]
+            status=TaskStatus(row_dict.get("status", "pending")),
+            description=row_dict.get("description"),
+            script_id=row_dict.get("script_id"),
+            device_id=row_dict.get("device_id"),
+            apk_id=row_dict.get("apk_id"),
+            model_config_id=row_dict.get("model_config_id"),
+            created_at=row_dict.get("created_at"),
+            updated_at=row_dict.get("updated_at"),
+            started_at=row_dict.get("started_at"),
+            completed_at=row_dict.get("completed_at")
         )
         result.error_message = self.task_errors.get(task_id)
         return result
@@ -105,23 +120,25 @@ class TaskService:
         rows = await cursor.fetchall()
         result = []
         for row in rows:
+            row_dict = dict(row) if row else {}
             task_resp = TaskResponse(
-                task_id=row["task_id"],
-                name=row["name"],
-                task_type=TaskType(row["task_type"]) if row["task_type"] in TaskType._value2member_map_ else TaskType.FUNCTIONAL,
-                platform=row["platform"],
+                task_id=row_dict.get("task_id", ""),
+                name=row_dict.get("name", ""),
+                task_type=TaskType(row_dict.get("task_type")) if row_dict.get("task_type") in TaskType._value2member_map_ else TaskType.FUNCTIONAL,
+                platform=row_dict.get("platform", "android"),
                 devices=[],
-                status=TaskStatus(row["status"]),
-                description=row["description"],
-                script_id=row["script_id"],
-                device_id=row["device_id"],
-                apk_id=row["apk_id"],
-                created_at=row["created_at"],
-                updated_at=row["updated_at"],
-                started_at=row["started_at"],
-                completed_at=row["completed_at"]
+                status=TaskStatus(row_dict.get("status", "pending")),
+                description=row_dict.get("description"),
+                script_id=row_dict.get("script_id"),
+                device_id=row_dict.get("device_id"),
+                apk_id=row_dict.get("apk_id"),
+                model_config_id=row_dict.get("model_config_id"),
+                created_at=row_dict.get("created_at"),
+                updated_at=row_dict.get("updated_at"),
+                started_at=row_dict.get("started_at"),
+                completed_at=row_dict.get("completed_at")
             )
-            task_resp.error_message = self.task_errors.get(row["task_id"])
+            task_resp.error_message = self.task_errors.get(row_dict.get("task_id"))
             result.append(task_resp)
         return result
 
@@ -130,6 +147,12 @@ class TaskService:
         cursor = await conn.execute("SELECT content FROM scripts WHERE script_id = ?", (script_id,))
         row = await cursor.fetchone()
         return row["content"] if row else None
+
+    async def _get_script_content_full(self, script_id: str) -> Optional[dict]:
+        conn = await db.get_connection()
+        cursor = await conn.execute("SELECT * FROM scripts WHERE script_id = ?", (script_id,))
+        row = await cursor.fetchone()
+        return dict(row) if row else None
 
     async def execute_task(self, task_id: str):
         task = await self.get_task(task_id)
@@ -168,18 +191,40 @@ class TaskService:
 
             # 构建环境变量
             env_vars = os.environ.copy()
+            
+            # Use selected model config or default
+            from app.services.model_config_service import ModelConfigService
+            model_service = ModelConfigService()
+            model_config = None
+            if task.model_config_id:
+                model_config = await model_service.get_config(task.model_config_id)
+            if not model_config:
+                model_config = await model_service.get_default_config()
+            
+            if model_config:
+                env_vars['PHONE_AGENT_BASE_URL'] = model_config.base_url or ""
+                env_vars['PHONE_AGENT_MODEL'] = model_config.model_name
+                env_vars['PHONE_AGENT_API_KEY'] = model_config.api_key
+                env_vars['PHONE_AGENT_PROVIDER'] = model_config.provider.value
+            else:
+                # Fallback to hardcoded defaults if no config exists
+                env_vars['PHONE_AGENT_BASE_URL'] = "http://localhost:8000/v1"
+                env_vars['PHONE_AGENT_MODEL'] = "AutoPhone-phone-9b"
+                env_vars['PHONE_AGENT_API_KEY'] = "EMPTY"
+            
             if task.device_id:
                 env_vars['PHONE_AGENT_DEVICE_ID'] = task.device_id
-            env_vars['PHONE_AGENT_BASE_URL'] = settings.model_api_url
-            env_vars['PHONE_AGENT_MODEL'] = settings.model_name
-            env_vars['PHONE_AGENT_API_KEY'] = settings.api_key
             
-            # Compute project root for subprocess cwd (still needed as working directory)
+            # Compute project root (Open-AutoGLM directory)
             current_dir = os.path.dirname(os.path.abspath(__file__))
-            project_root = os.path.dirname(os.path.dirname(current_dir))
-
-            # Don't override PYTHONPATH — let the venv Python resolve packages naturally
-            # The script's imports are resolved via the venv's site-packages
+            # backend/app/services -> backend/app -> backend -> Open-AutoGLM
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
+            
+            # Ensure project root is in PYTHONPATH so script can import phone_agent
+            if 'PYTHONPATH' in env_vars:
+                env_vars['PYTHONPATH'] = f"{project_root}{os.pathsep}{env_vars['PYTHONPATH']}"
+            else:
+                env_vars['PYTHONPATH'] = project_root
 
             # Add diagnostic logging before subprocess launch
             await self._log(task_id, "INFO", f"Python executable: {sys.executable}")
@@ -190,27 +235,33 @@ class TaskService:
             # Use the venv Python that's already running the backend
             python_executable = sys.executable
 
-            # 启动子进程执行脚本
-            process = subprocess.Popen(
-                [python_executable, temp_script_path],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+            # 使用 asyncio 启动子进程执行脚本
+            process = await asyncio.create_subprocess_exec(
+                python_executable, temp_script_path,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
                 env=env_vars,
-                cwd=project_root,
-                text=True,
-                encoding='utf-8',
-                errors='replace'
+                cwd=project_root
             )
             self.task_processes[task_id] = process
             
             await self._log(task_id, "INFO", f"Subprocess started with PID: {process.pid}")
 
-            # 等待进程完成
-            stdout, stderr = process.communicate()
+            # 等待进程完成并获取输出
+            stdout_data, stderr_data = await process.communicate()
+            stdout = stdout_data.decode('utf-8', errors='replace')
+            stderr = stderr_data.decode('utf-8', errors='replace')
 
             await self._log(task_id, "INFO", f"Subprocess completed with return code: {process.returncode}")
 
-            if process.returncode == 0:
+            # Re-fetch task to check if it was stopped by user
+            updated_task = await self.get_task(task_id)
+            if not updated_task:
+                return
+
+            if updated_task.status == TaskStatus.STOPPED:
+                await self._log(task_id, "INFO", "Task was stopped by user, keeping STOPPED status")
+            elif process.returncode == 0:
                 await self._update_task_status(task_id, TaskStatus.COMPLETED, progress=100)
                 await self._log(task_id, "INFO", "Task completed successfully")
                 if stdout:
@@ -230,16 +281,36 @@ class TaskService:
                 else:
                     await self._log(task_id, "ERROR", f"Task failed: {error_msg}")
 
-            await self._generate_report(
-                task_id,
-                stdout if stdout else "",
-                stderr if stderr else ""
-            )
+            # Re-fetch task again to get final status for report decision
+            final_task = await self.get_task(task_id)
+            if not final_task:
+                return
+
+            # Skip report generation for STOPPED tasks or non-AI script failures
+            should_generate_report = True
+            if final_task.status == TaskStatus.STOPPED:
+                should_generate_report = False
+                await self._log(task_id, "INFO", "Skipping report generation for stopped task")
+            elif final_task.status == TaskStatus.FAILED and final_task.script_id:
+                script_content_full = await self._get_script_content_full(final_task.script_id)
+                if script_content_full and script_content_full.get("script_type") != "ai_generated":
+                    should_generate_report = False
+                    await self._log(task_id, "INFO", "Skipping report generation for non-AI script on failure")
+
+            if should_generate_report:
+                await self._generate_report(
+                    task_id,
+                    stdout if stdout else "",
+                    stderr if stderr else ""
+                )
         except Exception as e:
-            error_msg = f"Subprocess error: {str(e)}"
-            self.task_errors[task_id] = error_msg
+            full_tb = traceback.format_exc()
+            error_msg = f"Subprocess error: {str(e)}\n{full_tb}"
+            self.task_errors[task_id] = f"Subprocess error: {str(e)}"
             await self._update_task_status(task_id, TaskStatus.FAILED)
-            await self._log(task_id, "ERROR", error_msg)
+            # Log traceback in chunks
+            for i in range(0, len(error_msg), 2000):
+                await self._log(task_id, "ERROR", error_msg[i:i+2000])
         finally:
             # 清理临时脚本文件
             if temp_script_path and os.path.exists(temp_script_path):
@@ -359,13 +430,17 @@ th {{ background: #1e293b; color: #94a3b8; }}
             return
         process = self.task_processes.get(task_id)
         if process:
-            process.terminate()
             try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-            del self.task_processes[task_id]
+                process.terminate()
+                try:
+                    await asyncio.wait_for(process.wait(), timeout=5.0)
+                except asyncio.TimeoutError:
+                    process.kill()
+                    await process.wait()
+            except Exception as e:
+                print(f"Error stopping task {task_id}: {e}")
+            finally:
+                self.task_processes.pop(task_id, None)
         await self._update_task_status(task_id, TaskStatus.STOPPED)
         await self._log(task_id, "INFO", "Task stopped by user")
 
@@ -373,8 +448,12 @@ th {{ background: #1e293b; color: #94a3b8; }}
         self.task_errors.pop(task_id, None)
         process = self.task_processes.get(task_id)
         if process:
-            process.kill()
-            del self.task_processes[task_id]
+            try:
+                process.kill()
+                await process.wait()
+            except Exception:
+                pass
+            self.task_processes.pop(task_id, None)
         conn = await db.get_connection()
         await conn.execute("DELETE FROM task_logs WHERE task_id = ?", (task_id,))
         await conn.execute("DELETE FROM task_devices WHERE task_id = ?", (task_id,))
@@ -392,8 +471,12 @@ th {{ background: #1e293b; color: #94a3b8; }}
                 self.task_errors.pop(task_id, None)
                 process = self.task_processes.get(task_id)
                 if process:
-                    process.kill()
-                    del self.task_processes[task_id]
+                    try:
+                        process.kill()
+                        await process.wait()
+                    except Exception:
+                        pass
+                    self.task_processes.pop(task_id, None)
                 await conn.execute("DELETE FROM task_logs WHERE task_id = ?", (task_id,))
                 await conn.execute("DELETE FROM task_devices WHERE task_id = ?", (task_id,))
                 await conn.execute("DELETE FROM reports WHERE task_id = ?", (task_id,))
@@ -431,3 +514,132 @@ th {{ background: #1e293b; color: #94a3b8; }}
                 "message": row["message"]
             })
         return logs
+    
+    async def execute_natural_language_task(
+        self,
+        task_description: str,
+        device_id: Optional[str],
+        platform: Optional[str],
+        max_steps: int,
+        mode: str,
+        background_tasks: BackgroundTasks,
+    ) -> str:
+        """Execute a task using natural language via AgentEngine."""
+        task_id = f"task_{int(time.time_ns())}"
+        conn = await db.get_connection()
+        await conn.execute(
+            """INSERT INTO tasks (task_id, name, task_type, platform, status, device_id, description, progress, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)""",
+            (task_id, task_description[:100] + "...", "natural_language", platform or "android",
+             TaskStatus.EXECUTING.value, device_id, task_description,
+             time.strftime("%Y-%m-%dT%H:%M:%S"), time.strftime("%Y-%m-%dT%H:%M:%S"))
+        )
+        await conn.commit()
+        
+        await self._log(task_id, "INFO", f"Starting natural language task: {task_description}")
+        
+        # Run in background to avoid blocking the API response
+        background_tasks.add_task(
+            self._execute_natural_language_task_bg,
+            task_id,
+            task_description,
+            device_id,
+            platform,
+            max_steps,
+            mode,
+        )
+        
+        return task_id
+    
+    async def _execute_natural_language_task_bg(
+        self,
+        task_id: str,
+        task_description: str,
+        device_id: Optional[str],
+        platform: Optional[str],
+        max_steps: int,
+        mode: str,
+    ):
+        """Background execution of natural language task using AgentEngine."""
+        try:
+            await self._log(task_id, "INFO", "Initializing AgentEngine")
+            
+            from app.core.agent.engine import AgentEngine
+            from app.core.layers.decision import DecisionMode
+            from app.core.adapters.base import Platform as AdapterPlatform
+            from app.api.v1.websocket import manager as ws_manager
+            
+            platform_enum_map = {
+                "android": AdapterPlatform.ANDROID,
+                "ios": AdapterPlatform.IOS,
+                "harmonyos": AdapterPlatform.HARMONYOS,
+            }
+            adapter_platform = platform_enum_map.get(platform or "android", AdapterPlatform.ANDROID)
+            
+            mode_enum_map = {
+                "llm": DecisionMode.LLM,
+                "vlm": DecisionMode.VLM,
+                "auto": DecisionMode.AUTO,
+            }
+            decision_mode = mode_enum_map.get(mode or "llm", DecisionMode.LLM)
+            
+            engine = AgentEngine(mode=decision_mode)
+            
+            device_kwargs = {}
+            if device_id:
+                device_kwargs["device_id"] = device_id
+            engine.set_device(adapter_platform, **device_kwargs)
+            
+            await self._log(task_id, "INFO", f"AgentEngine initialized, starting execution (mode: {mode})")
+            await self._log(task_id, "INFO", f"Task: {task_description}")
+            
+            execution_history = []
+            
+            async def step_callback(data: dict):
+                step_info = {
+                    "step": data.get("step", 0),
+                    "action": data.get("proposed_action", data.get("action", "")),
+                    "parameters": data.get("params", {}),
+                    "reasoning": data.get("thought", ""),
+                    "success": data.get("success", False),
+                    "message": data.get("result", ""),
+                }
+                execution_history.append(step_info)
+                await self._log(
+                    task_id, "INFO",
+                    f"[{data.get('event', '?')}] Step {data.get('step', 0)}: {data.get('action', '')}"
+                )
+                if task_id:
+                    await ws_manager.send_task_update(task_id, data)
+            
+            result = await engine.execute_task(
+                task_description=task_description,
+                max_steps=max_steps,
+                step_callback=step_callback,
+            )
+            
+            import json
+            history_path = f"replays/replay_task_{task_id.replace('task_', '')}_{int(time.time())}.json"
+            os.makedirs("replays", exist_ok=True)
+            with open(history_path, 'w', encoding='utf-8') as f:
+                json.dump(execution_history, f, ensure_ascii=False, indent=2)
+            
+            total_steps = result.get("total_steps", 0)
+            await self._log(task_id, "INFO", f"任务执行完成，共执行 {total_steps} 步")
+            
+            if result.get("success"):
+                await self._update_task_status(task_id, TaskStatus.COMPLETED, progress=100)
+            else:
+                await self._update_task_status(task_id, TaskStatus.FAILED, progress=100)
+                final_msg = result.get("final_message", "")
+                if final_msg:
+                    self.task_errors[task_id] = str(final_msg)
+                    await self._log(task_id, "ERROR", f"任务错误: {final_msg}")
+            
+            await self._generate_report(task_id, "", "")
+            
+        except Exception as e:
+            full_tb = traceback.format_exc()
+            await self._log(task_id, "ERROR", f"自然语言任务执行失败: {str(e)}\n{full_tb}")
+            self.task_errors[task_id] = str(e)
+            await self._update_task_status(task_id, TaskStatus.FAILED, progress=100)

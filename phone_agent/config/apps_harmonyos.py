@@ -264,3 +264,4 @@ def list_supported_apps() -> list[str]:
         List of app names.
     """
     return list(APP_PACKAGES.keys())
+# -*- coding: utf-8 -*-

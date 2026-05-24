@@ -2,11 +2,21 @@
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from typing import Optional
+from pydantic import BaseModel
 from app.schemas.task import TaskResponse, TaskStatus, TaskCreate, BatchDeleteTasksRequest, BatchDeleteTasksResponse
 from app.services.task_service import TaskService
 
 router = APIRouter()
 task_service = TaskService()
+
+
+class NaturalLanguageTaskRequest(BaseModel):
+    """Request to execute a task via natural language."""
+    task_description: str
+    device_id: Optional[str] = None
+    platform: Optional[str] = "android"
+    max_steps: Optional[int] = 100
+    mode: Optional[str] = "llm"  # "llm", "vlm", or "auto"
 
 
 @router.post("/", response_model=TaskResponse)
@@ -21,6 +31,7 @@ async def create_task(task: TaskCreate):
         script_id=task.script_id,
         device_id=task.device_id,
         apk_id=task.apk_id,
+        model_config_id=task.model_config_id,
     )
     return await task_service.get_task(task_id)
 
@@ -83,3 +94,17 @@ async def delete_task(task_id: str):
 async def get_task_logs(task_id: str, limit: int = 100):
     logs = await task_service.get_task_logs(task_id, limit)
     return {"logs": logs}
+
+
+@router.post("/natural-language")
+async def execute_natural_language_task(request: NaturalLanguageTaskRequest, background_tasks: BackgroundTasks):
+    """Execute a task using natural language."""
+    task_id = await task_service.execute_natural_language_task(
+        task_description=request.task_description,
+        device_id=request.device_id,
+        platform=request.platform,
+        max_steps=request.max_steps,
+        mode=request.mode,
+        background_tasks=background_tasks,
+    )
+    return {"task_id": task_id, "status": "executing"}

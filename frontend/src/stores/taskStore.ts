@@ -34,6 +34,7 @@ interface TaskState {
     script_id: string;
     device_id: string;
     apk_id?: string;
+    model_config_id?: string;
   }) => Promise<string | null>;
   executeTask: (taskId: string) => Promise<void>;
   stopTask: (taskId: string) => Promise<void>;
@@ -60,16 +61,10 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   createTask: async (data) => {
     try {
-      const requestData = {
-        name: data.name,
-        description: data.description,
-        script_id: data.script_id,
-        device_id: data.device_id,
-        ...(data.apk_id && { apk_id: data.apk_id }),
-      };
-      const response = await taskApi.createTask(requestData) as unknown as { task_id: string };
-      await get().fetchTasks();
-      return response.task_id;
+      const response = await taskApi.createTask(data as any);
+      const newTask = response as Task;
+      set((state) => ({ tasks: [newTask, ...state.tasks] }));
+      return newTask.task_id;
     } catch (error) {
       set({ error: 'Failed to create task' });
       return null;

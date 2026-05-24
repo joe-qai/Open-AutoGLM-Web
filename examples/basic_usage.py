@@ -3,7 +3,7 @@
 Phone Agent Usage Examples / Phone Agent 使用示例
 
 Demonstrates how to use Phone Agent for phone automation tasks via Python API.
-演示如何通过 Python API 使用 Phone Agent 进行手机自动化任务。
+演示如何通过 Python API 使用 Phone Agent 进行手机自动化任务?
 """
 
 from phone_agent import PhoneAgent
@@ -19,7 +19,7 @@ def example_basic_task(lang: str = "cn"):
     # Configure model endpoint
     model_config = ModelConfig(
         base_url="http://localhost:8000/v1",
-        model_name="autoglm-phone-9b",
+        model_name="AutoPhone-phone-9b",
         temperature=0.1,
     )
 
@@ -37,7 +37,7 @@ def example_basic_task(lang: str = "cn"):
     )
 
     # Execute task
-    result = agent.run("打开小红书搜索美食攻略")
+    result = agent.run("打开小红书搜索美食攻击")
     print(f"{msgs['task_result']}: {result}")
 
 
@@ -188,3 +188,4 @@ if __name__ == "__main__":
     # print(f"\n5. Remote Device Example")
     # print("-" * 30)
     # example_remote_device(args.lang)
+

@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 """Action handler for processing AI model outputs."""
 
 import ast
+import json
 import re
 import subprocess
 import time
@@ -116,7 +118,12 @@ class ActionHandler:
         return x, y
 
     def _handle_launch(self, action: dict, width: int, height: int) -> ActionResult:
-        """Handle app launch action."""
+        """Handle app launch action.
+
+        If the app name is found in the supported list, launch it directly.
+        If not found, go to Home screen so the VLM can visually find the
+        app icon and tap it.
+        """
         app_name = action.get("app")
         if not app_name:
             return ActionResult(False, False, "No app name specified")
@@ -125,7 +132,18 @@ class ActionHandler:
         success = device_factory.launch_app(app_name, self.device_id)
         if success:
             return ActionResult(True, False)
-        return ActionResult(False, False, f"App not found: {app_name}")
+
+        # App not found in supported list - go to Home screen so the
+        # VLM can see app icons and tap the correct one visually
+        device_factory.home(self.device_id)
+        time.sleep(TIMING_CONFIG.device.default_home_delay)
+
+        return ActionResult(
+            False,
+            False,
+            f"App '{app_name}' not in supported list. Went to Home screen. "
+            f"Please find the app icon on the home screen and tap it (use Tap action).",
+        )
 
     def _handle_tap(self, action: dict, width: int, height: int) -> ActionResult:
         """Handle tap action."""
@@ -333,11 +351,19 @@ def parse_action(response: str) -> dict[str, Any]:
     """
     Parse action from model response.
 
+    Supports two formats:
+    - Python pseudo-code (AutoPhone native): do(action="Tap", element=[x,y]), finish(message="xxx")
+    - JSON (generic cloud models): {"action": "Tap", "element": [x,y]}, {"action": "finish", "message": "xxx"}
+
+    Auto-detects format based on the first character:
+    - '{' �?JSON format
+    - 'do' or 'finish' �?Python pseudo-code format
+
     Args:
         response: Raw response string from the model.
 
     Returns:
-        Parsed action dictionary.
+        Parsed action dictionary with '_metadata' field indicating action type.
 
     Raises:
         ValueError: If the response cannot be parsed.
@@ -345,6 +371,23 @@ def parse_action(response: str) -> dict[str, Any]:
     print(f"Parsing action: {response}")
     try:
         response = response.strip()
+
+        # --- JSON format ---
+        if response.startswith("{"):
+            try:
+                action_dict = json.loads(response)
+
+                # Map JSON "finish" action to internal metadata format
+                if action_dict.get("action") == "finish":
+                    action_dict["_metadata"] = "finish"
+                else:
+                    action_dict["_metadata"] = "do"
+
+                return action_dict
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Failed to parse JSON action: {e}")
+
+        # --- Python pseudo-code format (AutoPhone native) ---
         if response.startswith('do(action="Type"') or response.startswith(
             'do(action="Type_Name"'
         ):
@@ -397,3 +440,4 @@ def finish(**kwargs) -> dict[str, Any]:
     """Helper function for creating 'finish' actions."""
     kwargs["_metadata"] = "finish"
     return kwargs
+

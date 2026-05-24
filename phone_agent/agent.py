@@ -20,12 +20,13 @@ class AgentConfig:
     max_steps: int = 100
     device_id: str | None = None
     lang: str = "cn"
+    format: str = "pseudo"  # Output format: 'pseudo' (AutoPhone) or 'json' (generic cloud models)
     system_prompt: str | None = None
     verbose: bool = True
 
     def __post_init__(self):
         if self.system_prompt is None:
-            self.system_prompt = get_system_prompt(self.lang)
+            self.system_prompt = get_system_prompt(self.lang, self.format)
 
 
 @dataclass
@@ -223,6 +224,14 @@ class PhoneAgent:
             )
         )
 
+        # If the action failed, add a feedback message so the model knows what happened
+        if not result.success and result.message:
+            self._context.append(
+                MessageBuilder.create_user_message(
+                    text=f"[Action failed: {result.message}]"
+                )
+            )
+
         # Check if finished
         finished = action.get("_metadata") == "finish" or result.should_finish
 
@@ -251,3 +260,4 @@ class PhoneAgent:
     def step_count(self) -> int:
         """Get the current step count."""
         return self._step_count
+# -*- coding: utf-8 -*-

@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Tuple, Optional, List
+from typing import Tuple, List
 import xml.etree.ElementTree as ET
 import re
 
@@ -48,7 +48,7 @@ class UITreeExtractor:
 
     def extract(self) -> str:
         """Get raw UI tree XML from device."""
-        dump = getattr(self.device, 'dump_ui_tree', None)
+        dump = getattr(self.device, "dump_ui_tree", None)
         if dump and callable(dump):
             return dump()
         return ""
@@ -95,7 +95,11 @@ class UITreeExtractor:
 
     def _get_display_resolution(self) -> str:
         try:
-            di = self.device.display_info if hasattr(self.device, 'display_info') else None
+            di = (
+                self.device.display_info
+                if hasattr(self.device, "display_info")
+                else None
+            )
             if di:
                 return f"{di.width}x{di.height}"
         except Exception:
@@ -145,11 +149,15 @@ class UITreeExtractor:
         match = re.search(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds_str)
         if match:
             return (
-                int(match.group(1)), int(match.group(2)),
-                int(match.group(3)), int(match.group(4)),
+                int(match.group(1)),
+                int(match.group(2)),
+                int(match.group(3)),
+                int(match.group(4)),
             )
         return (0, 0, 0, 0)
 
     def _sort_by_priority(self, elements: List["RawUIElement"]) -> List["RawUIElement"]:
         """Sort by locator priority, then top-to-bottom left-to-right."""
-        return sorted(elements, key=lambda e: (e.priority_key, e.bounds[1], e.bounds[0]))
+        return sorted(
+            elements, key=lambda e: (e.priority_key, e.bounds[1], e.bounds[0])
+        )

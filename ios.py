@@ -7,7 +7,7 @@ Usage:
 
 Environment Variables:
     PHONE_AGENT_BASE_URL: Model API base URL (default: http://localhost:8000/v1)
-    PHONE_AGENT_MODEL: Model name (default: autoglm-phone-9b)
+    PHONE_AGENT_MODEL: Model name (default: AutoPhone-phone-9b)
     PHONE_AGENT_MAX_STEPS: Maximum steps per task (default: 100)
     PHONE_AGENT_WDA_URL: WebDriverAgent URL (default: http://localhost:8100)
     PHONE_AGENT_DEVICE_ID: iOS device UDID for multi-device setups
@@ -51,7 +51,7 @@ def check_system_requirements(wda_url: str = "http://localhost:8100") -> bool:
     # Check 1: libimobiledevice installed
     print("1. Checking libimobiledevice installation...", end=" ")
     if shutil.which("idevice_id") is None:
-        print("❌ FAILED")
+        print("�?FAILED")
         print("   Error: libimobiledevice is not installed or not in PATH.")
         print("   Solution: Install libimobiledevice:")
         print("     - macOS: brew install libimobiledevice")
@@ -64,24 +64,24 @@ def check_system_requirements(wda_url: str = "http://localhost:8100") -> bool:
                 ["idevice_id", "-ln"], capture_output=True, text=True, timeout=10
             )
             if result.returncode == 0:
-                print("✅ OK")
+                print("�?OK")
             else:
-                print("❌ FAILED")
+                print("�?FAILED")
                 print("   Error: idevice_id command failed to run.")
                 all_passed = False
         except FileNotFoundError:
-            print("❌ FAILED")
+            print("�?FAILED")
             print("   Error: idevice_id command not found.")
             all_passed = False
         except subprocess.TimeoutExpired:
-            print("❌ FAILED")
+            print("�?FAILED")
             print("   Error: idevice_id command timed out.")
             all_passed = False
 
     # If libimobiledevice is not installed, skip remaining checks
     if not all_passed:
         print("-" * 50)
-        print("❌ System check failed. Please fix the issues above.")
+        print("�?System check failed. Please fix the issues above.")
         return False
 
     # Check 2: iOS Device connected
@@ -90,7 +90,7 @@ def check_system_requirements(wda_url: str = "http://localhost:8100") -> bool:
         devices = list_devices()
 
         if not devices:
-            print("❌ FAILED")
+            print("�?FAILED")
             print("   Error: No iOS devices connected.")
             print("   Solution:")
             print("     1. Connect your iOS device via USB")
@@ -102,16 +102,16 @@ def check_system_requirements(wda_url: str = "http://localhost:8100") -> bool:
             device_names = [
                 d.device_name or d.device_id[:8] + "..." for d in devices
             ]
-            print(f"✅ OK ({len(devices)} device(s): {', '.join(device_names)})")
+            print(f"�?OK ({len(devices)} device(s): {', '.join(device_names)})")
     except Exception as e:
-        print("❌ FAILED")
+        print("�?FAILED")
         print(f"   Error: {e}")
         all_passed = False
 
     # If no device connected, skip WebDriverAgent check
     if not all_passed:
         print("-" * 50)
-        print("❌ System check failed. Please fix the issues above.")
+        print("�?System check failed. Please fix the issues above.")
         return False
 
     # Check 3: WebDriverAgent running
@@ -120,14 +120,14 @@ def check_system_requirements(wda_url: str = "http://localhost:8100") -> bool:
         conn = XCTestConnection(wda_url=wda_url)
 
         if conn.is_wda_ready():
-            print("✅ OK")
+            print("�?OK")
             # Get WDA status for additional info
             status = conn.get_wda_status()
             if status:
                 session_id = status.get("sessionId", "N/A")
                 print(f"   Session ID: {session_id}")
         else:
-            print("❌ FAILED")
+            print("�?FAILED")
             print("   Error: WebDriverAgent is not running or not accessible.")
             print("   Solution:")
             print("     1. Run WebDriverAgent on your iOS device via Xcode")
@@ -145,16 +145,16 @@ def check_system_requirements(wda_url: str = "http://localhost:8100") -> bool:
             print("     # Configure signing, then Product > Test (Cmd+U)")
             all_passed = False
     except Exception as e:
-        print("❌ FAILED")
+        print("�?FAILED")
         print(f"   Error: {e}")
         all_passed = False
 
     print("-" * 50)
 
     if all_passed:
-        print("✅ All system checks passed!\n")
+        print("�?All system checks passed!\n")
     else:
-        print("❌ System check failed. Please fix the issues above.")
+        print("�?System check failed. Please fix the issues above.")
 
     return all_passed
 
@@ -192,14 +192,14 @@ def check_model_api(base_url: str, api_key: str, model_name: str) -> bool:
         models_response = client.models.list()
         available_models = [model.id for model in models_response.data]
 
-        print("✅ OK")
+        print("�?OK")
 
         # Check 2: Model exists
         print(f"2. Checking model '{model_name}'...", end=" ")
         if model_name in available_models:
-            print("✅ OK")
+            print("�?OK")
         else:
-            print("❌ FAILED")
+            print("�?FAILED")
             print(f"   Error: Model '{model_name}' not found.")
             print(f"   Available models:")
             for m in available_models[:10]:  # Show first 10 models
@@ -209,7 +209,7 @@ def check_model_api(base_url: str, api_key: str, model_name: str) -> bool:
             all_passed = False
 
     except Exception as e:
-        print("❌ FAILED")
+        print("�?FAILED")
         error_msg = str(e)
 
         # Provide more specific error messages
@@ -240,9 +240,9 @@ def check_model_api(base_url: str, api_key: str, model_name: str) -> bool:
     print("-" * 50)
 
     if all_passed:
-        print("✅ Model API checks passed!\n")
+        print("�?Model API checks passed!\n")
     else:
-        print("❌ Model API check failed. Please fix the issues above.")
+        print("�?Model API check failed. Please fix the issues above.")
 
     return all_passed
 
@@ -291,14 +291,22 @@ Examples:
     parser.add_argument(
         "--api-key",
         type=str,
-        default="EMPTY",
+        default=os.getenv("PHONE_AGENT_API_KEY", "EMPTY"),
         help="Model API KEY",
+    )
+
+    parser.add_argument(
+        "--provider",
+        type=str,
+        default=os.getenv("PHONE_AGENT_PROVIDER", "openai"),
+        choices=["openai", "anthropic"],
+        help="Model provider (openai or anthropic)",
     )
 
     parser.add_argument(
         "--model",
         type=str,
-        default=os.getenv("PHONE_AGENT_MODEL", "autoglm-phone-9b"),
+        default=os.getenv("PHONE_AGENT_MODEL", "AutoPhone-phone-9b"),
         help="Model name",
     )
 
@@ -359,6 +367,14 @@ Examples:
     )
 
     parser.add_argument(
+        "--format",
+        type=str,
+        choices=["pseudo", "json"],
+        default=os.getenv("PHONE_AGENT_FORMAT", "pseudo"),
+        help="Model output format: pseudo for AutoPhone native, json for generic cloud models (default: pseudo)",
+    )
+
+    parser.add_argument(
         "task",
         nargs="?",
         type=str,
@@ -395,7 +411,7 @@ def handle_device_commands(args) -> bool:
                 ios_info = f"iOS {device.ios_version}" if device.ios_version else ""
                 name_info = device.device_name or "Unnamed"
 
-                print(f"  ✓ {name_info}")
+                print(f"  �?{name_info}")
                 print(f"    UDID: {device.device_id}")
                 print(f"    Model: {model_info}")
                 print(f"    OS: {ios_info}")
@@ -407,7 +423,7 @@ def handle_device_commands(args) -> bool:
     if args.pair:
         print("Pairing with iOS device...")
         success, message = conn.pair_device(args.device_id)
-        print(f"{'✓' if success else '✗'} {message}")
+        print(f"{'�? if success else '�?} {message}")
         return True
 
     # Handle --wda-status
@@ -416,7 +432,7 @@ def handle_device_commands(args) -> bool:
         print("-" * 50)
 
         if conn.is_wda_ready():
-            print("✓ WebDriverAgent is running")
+            print("�?WebDriverAgent is running")
 
             status = conn.get_wda_status()
             if status:
@@ -431,7 +447,7 @@ def handle_device_commands(args) -> bool:
                     print(f"  Bundle ID: {current_app.get('bundleId', 'N/A')}")
                     print(f"  Process ID: {current_app.get('pid', 'N/A')}")
         else:
-            print("✗ WebDriverAgent is not running")
+            print("�?WebDriverAgent is not running")
             print("\nPlease start WebDriverAgent on your iOS device:")
             print("  1. Open WebDriverAgent.xcodeproj in Xcode")
             print("  2. Select your device")
@@ -476,7 +492,9 @@ def main():
     model_config = ModelConfig(
         base_url=args.base_url,
         model_name=args.model,
-        api_key=args.api_key
+        api_key=args.api_key,
+        provider=args.provider,
+        lang=args.lang,
     )
 
     agent_config = IOSAgentConfig(
@@ -485,6 +503,7 @@ def main():
         device_id=args.device_id,
         verbose=not args.quiet,
         lang=args.lang,
+        format=args.format,
     )
 
     # Create iOS agent
@@ -502,6 +521,7 @@ def main():
     print(f"WDA URL: {args.wda_url}")
     print(f"Max Steps: {agent_config.max_steps}")
     print(f"Language: {agent_config.lang}")
+    print(f"Format: {agent_config.format}")
 
     # Show device info
     devices = list_devices()
@@ -548,3 +568,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

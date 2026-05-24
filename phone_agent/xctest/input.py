@@ -297,3 +297,4 @@ def get_pasteboard(
         print(f"Error getting pasteboard: {e}")
 
     return None
+# -*- coding: utf-8 -*-

@@ -337,3 +337,4 @@ def get_app_info_by_id(app_store_id: str) -> dict | None:
         print(f"Error fetching app info by ID: {e}")
 
     return None
+# -*- coding: utf-8 -*-

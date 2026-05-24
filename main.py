@@ -7,7 +7,7 @@ Usage:
 
 Environment Variables:
     PHONE_AGENT_BASE_URL: Model API base URL (default: http://localhost:8000/v1)
-    PHONE_AGENT_MODEL: Model name (default: autoglm-phone-9b)
+    PHONE_AGENT_MODEL: Model name (default: AutoPhone-phone-9b)
     PHONE_AGENT_API_KEY: API key for model authentication (default: EMPTY)
     PHONE_AGENT_MAX_STEPS: Maximum steps per task (default: 100)
     PHONE_AGENT_DEVICE_ID: ADB device ID for multi-device setups
@@ -69,7 +69,7 @@ def check_system_requirements(
     # Check 1: Tool installed
     print(f"1. Checking {tool_name} installation...", end=" ")
     if shutil.which(tool_cmd) is None:
-        print("❌ FAILED")
+        print("❌FAILED")
         print(f"   Error: {tool_name} is not installed or not in PATH.")
         print(f"   Solution: Install {tool_name}:")
         if device_type == DeviceType.ADB:
@@ -102,24 +102,24 @@ def check_system_requirements(
             )
             if result.returncode == 0:
                 version_line = result.stdout.strip().split("\n")[0]
-                print(f"✅ OK ({version_line if version_line else 'installed'})")
+                print(f"✅OK ({version_line if version_line else 'installed'})")
             else:
-                print("❌ FAILED")
+                print("❌FAILED")
                 print(f"   Error: {tool_name} command failed to run.")
                 all_passed = False
         except FileNotFoundError:
-            print("❌ FAILED")
+            print("❌FAILED")
             print(f"   Error: {tool_name} command not found.")
             all_passed = False
         except subprocess.TimeoutExpired:
-            print("❌ FAILED")
+            print("❌FAILED")
             print(f"   Error: {tool_name} command timed out.")
             all_passed = False
 
     # If ADB is not installed, skip remaining checks
     if not all_passed:
         print("-" * 50)
-        print("❌ System check failed. Please fix the issues above.")
+        print("❌System check failed. Please fix the issues above.")
         return False
 
     # Check 2: Device connected
@@ -145,7 +145,7 @@ def check_system_requirements(
             devices = [d.device_id for d in ios_devices]
 
         if not devices:
-            print("❌ FAILED")
+            print("❌FAILED")
             print("   Error: No devices connected.")
             print("   Solution:")
             if device_type == DeviceType.ADB:
@@ -174,21 +174,21 @@ def check_system_requirements(
             else:  # IOS
                 device_ids = devices
             print(
-                f"✅ OK ({len(devices)} device(s): {', '.join(device_ids[:2])}{'...' if len(device_ids) > 2 else ''})"
+                f"✅OK ({len(devices)} device(s): {', '.join(device_ids[:2])}{'...' if len(device_ids) > 2 else ''})"
             )
     except subprocess.TimeoutExpired:
-        print("❌ FAILED")
+        print("❌FAILED")
         print(f"   Error: {tool_name} command timed out.")
         all_passed = False
     except Exception as e:
-        print("❌ FAILED")
+        print("❌FAILED")
         print(f"   Error: {e}")
         all_passed = False
 
     # If no device connected, skip ADB Keyboard check
     if not all_passed:
         print("-" * 50)
-        print("❌ System check failed. Please fix the issues above.")
+        print("❌System check failed. Please fix the issues above.")
         return False
 
     # Check 3: ADB Keyboard installed (only for ADB) or WebDriverAgent (for iOS)
@@ -204,32 +204,64 @@ def check_system_requirements(
             ime_list = result.stdout.strip()
 
             if "com.android.adbkeyboard/.AdbIME" in ime_list:
-                print("✅ OK")
+                print("✅OK")
             else:
-                print("❌ FAILED")
-                print("   Error: ADB Keyboard is not installed on the device.")
-                print("   Solution:")
-                print("     1. Download ADB Keyboard APK from:")
-                print(
-                    "        https://github.com/senzhk/ADBKeyBoard/blob/master/ADBKeyboard.apk"
+                print("❌NOT INSTALLED")
+                # Offer automatic installation
+                from phone_agent.adb.input import install_adb_keyboard
+
+                auto_install = input(
+                    "   ADB Keyboard is not installed. Install automatically? (Y/N): "
                 )
-                print("     2. Install it on your device: adb install ADBKeyboard.apk")
-                print(
-                    "     3. Enable it in Settings > System > Languages & Input > Virtual Keyboard"
-                )
-                all_passed = False
+                if auto_install.upper() == "Y":
+                    success, message = install_adb_keyboard(
+                        device_id=(
+                            args.device_id if "args" in dir() else None
+                        )
+                    )
+                    if success:
+                        print(f"   ✅{message}")
+                    else:
+                        print(f"   ✅{message}")
+                        print("   Please install manually:")
+                        print(
+                            "     1. Download ADB Keyboard APK from:"
+                        )
+                        print(
+                            "        https://github.com/senzhk/ADBKeyBoard/blob/master/ADBKeyboard.apk"
+                        )
+                        print(
+                            "     2. Install: adb install ADBKeyboard.apk"
+                        )
+                        print(
+                            "     3. Enable in Settings > System > Languages & Input > Virtual Keyboard"
+                        )
+                        all_passed = False
+                else:
+                    print("   Skipping auto-install. Please install manually:")
+                    print(
+                        "     1. Download ADB Keyboard APK from:"
+                    )
+                    print(
+                        "        https://github.com/senzhk/ADBKeyBoard/blob/master/ADBKeyboard.apk"
+                    )
+                    print("     2. Install: adb install ADBKeyboard.apk")
+                    print(
+                        "     3. Enable in Settings > System > Languages & Input > Virtual Keyboard"
+                    )
+                    all_passed = False
         except subprocess.TimeoutExpired:
-            print("❌ FAILED")
+            print("❌FAILED")
             print("   Error: ADB command timed out.")
             all_passed = False
         except Exception as e:
-            print("❌ FAILED")
+            print("❌FAILED")
             print(f"   Error: {e}")
             all_passed = False
     elif device_type == DeviceType.HDC:
         # For HDC, skip keyboard check as it uses different input method
         print("3. Skipping keyboard check for HarmonyOS...", end=" ")
-        print("✅ OK (using native input)")
+        print("✅OK (using native input)")
     else:  # IOS
         # Check WebDriverAgent
         print(f"3. Checking WebDriverAgent ({wda_url})...", end=" ")
@@ -237,14 +269,14 @@ def check_system_requirements(
             conn = XCTestConnection(wda_url=wda_url)
 
             if conn.is_wda_ready():
-                print("✅ OK")
+                print("✅OK")
                 # Get WDA status for additional info
                 status = conn.get_wda_status()
                 if status:
                     session_id = status.get("sessionId", "N/A")
                     print(f"   Session ID: {session_id}")
             else:
-                print("❌ FAILED")
+                print("❌FAILED")
                 print("   Error: WebDriverAgent is not running or not accessible.")
                 print("   Solution:")
                 print("     1. Run WebDriverAgent on your iOS device via Xcode")
@@ -255,16 +287,16 @@ def check_system_requirements(
                 print("     4. Verify in browser: open http://localhost:8100/status")
                 all_passed = False
         except Exception as e:
-            print("❌ FAILED")
+            print("❌FAILED")
             print(f"   Error: {e}")
             all_passed = False
 
     print("-" * 50)
 
     if all_passed:
-        print("✅ All system checks passed!\n")
+        print("✅All system checks passed!\n")
     else:
-        print("❌ System check failed. Please fix the issues above.")
+        print("❌System check failed. Please fix the issues above.")
 
     return all_passed
 
@@ -307,14 +339,14 @@ def check_model_api(base_url: str, model_name: str, api_key: str = "EMPTY") -> b
 
         # Check if we got a valid response
         if response.choices and len(response.choices) > 0:
-            print("✅ OK")
+            print("✅OK")
         else:
-            print("❌ FAILED")
+            print("❌FAILED")
             print("   Error: Received empty response from API")
             all_passed = False
 
     except Exception as e:
-        print("❌ FAILED")
+        print("❌FAILED")
         error_msg = str(e)
 
         # Provide more specific error messages
@@ -345,9 +377,9 @@ def check_model_api(base_url: str, model_name: str, api_key: str = "EMPTY") -> b
     print("-" * 50)
 
     if all_passed:
-        print("✅ Model API checks passed!\n")
+        print("✅Model API checks passed!\n")
     else:
-        print("❌ Model API check failed. Please fix the issues above.")
+        print("✅Model API check failed. Please fix the issues above.")
 
     return all_passed
 
@@ -412,7 +444,7 @@ Examples:
     parser.add_argument(
         "--model",
         type=str,
-        default=os.getenv("PHONE_AGENT_MODEL", "autoglm-phone-9b"),
+        default=os.getenv("PHONE_AGENT_MODEL", "AutoPhone-phone-9b"),
         help="Model name",
     )
 
@@ -421,6 +453,14 @@ Examples:
         type=str,
         default=os.getenv("PHONE_AGENT_API_KEY", "EMPTY"),
         help="API key for model authentication",
+    )
+
+    parser.add_argument(
+        "--provider",
+        type=str,
+        default=os.getenv("PHONE_AGENT_PROVIDER", "openai"),
+        choices=["openai", "anthropic"],
+        help="Model provider (openai or anthropic)",
     )
 
     parser.add_argument(
@@ -453,7 +493,7 @@ Examples:
         nargs="?",
         const="all",
         metavar="ADDRESS",
-        help="Disconnect from remote device (or 'all' to disconnect all)",
+        help="Disconnect from remote (TCP/IP) device only. USB devices cannot be disconnected. Use 'all' to disconnect all remote devices",
     )
 
     parser.add_argument(
@@ -467,6 +507,12 @@ Examples:
         const=5555,
         metavar="PORT",
         help="Enable TCP/IP debugging on USB device (default port: 5555)",
+    )
+
+    parser.add_argument(
+        "--install-keyboard",
+        action="store_true",
+        help="Install ADB Keyboard on connected device and exit",
     )
 
     # iOS specific options
@@ -504,6 +550,14 @@ Examples:
         choices=["cn", "en"],
         default=os.getenv("PHONE_AGENT_LANG", "cn"),
         help="Language for system prompt (cn or en, default: cn)",
+    )
+
+    parser.add_argument(
+        "--format",
+        type=str,
+        choices=["pseudo", "json"],
+        default=os.getenv("PHONE_AGENT_FORMAT", "pseudo"),
+        help="Model output format: pseudo for AutoPhone native, json for generic cloud models (default: pseudo)",
     )
 
     parser.add_argument(
@@ -551,7 +605,7 @@ def handle_ios_device_commands(args) -> bool:
                 ios_info = f"iOS {device.ios_version}" if device.ios_version else ""
                 name_info = device.device_name or "Unnamed"
 
-                print(f"  ✓ {name_info}")
+                print(f"  ✅{name_info}")
                 print(f"    UUID: {device.device_id}")
                 print(f"    Model: {model_info}")
                 print(f"    OS: {ios_info}")
@@ -563,7 +617,7 @@ def handle_ios_device_commands(args) -> bool:
     if args.pair:
         print("Pairing with iOS device...")
         success, message = conn.pair_device(args.device_id)
-        print(f"{'✓' if success else '✗'} {message}")
+        print(f"{'✅' if success else '❌'} {message}")
         return True
 
     # Handle --wda-status
@@ -572,7 +626,7 @@ def handle_ios_device_commands(args) -> bool:
         print("-" * 50)
 
         if conn.is_wda_ready():
-            print("✓ WebDriverAgent is running")
+            print("✅WebDriverAgent is running")
 
             status = conn.get_wda_status()
             if status:
@@ -587,7 +641,7 @@ def handle_ios_device_commands(args) -> bool:
                     print(f"  Bundle ID: {current_app.get('bundleId', 'N/A')}")
                     print(f"  Process ID: {current_app.get('pid', 'N/A')}")
         else:
-            print("✗ WebDriverAgent is not running")
+            print("✅WebDriverAgent is not running")
             print("\nPlease start WebDriverAgent on your iOS device:")
             print("  1. Open WebDriverAgent.xcodeproj in Xcode")
             print("  2. Select your device")
@@ -629,7 +683,7 @@ def handle_device_commands(args) -> bool:
             print("Connected devices:")
             print("-" * 60)
             for device in devices:
-                status_icon = "✓" if device.status == "device" else "✗"
+                status_icon = "✅" if device.status == "device" else "❌"
                 conn_type = device.connection_type.value
                 model_info = f" ({device.model})" if device.model else ""
                 print(
@@ -641,7 +695,7 @@ def handle_device_commands(args) -> bool:
     if args.connect:
         print(f"Connecting to {args.connect}...")
         success, message = conn.connect(args.connect)
-        print(f"{'✓' if success else '✗'} {message}")
+        print(f"{'✅' if success else '❌'} {message}")
         if success:
             # Set as default device
             args.device_id = args.connect
@@ -655,7 +709,7 @@ def handle_device_commands(args) -> bool:
         else:
             print(f"Disconnecting from {args.disconnect}...")
             success, message = conn.disconnect(args.disconnect)
-        print(f"{'✓' if success else '✗'} {message}")
+        print(f"{'✅' if success else '❌'} {message}")
         return True
 
     # Handle --enable-tcpip
@@ -664,7 +718,7 @@ def handle_device_commands(args) -> bool:
         print(f"Enabling TCP/IP debugging on port {port}...")
 
         success, message = conn.enable_tcpip(port, args.device_id)
-        print(f"{'✓' if success else '✗'} {message}")
+        print(f"{'✅' if success else '❌'} {message}")
 
         if success:
             # Try to get device IP
@@ -684,6 +738,20 @@ def handle_device_commands(args) -> bool:
 def main():
     """Main entry point."""
     args = parse_args()
+
+    # Handle --install-keyboard (standalone command)
+    if args.install_keyboard:
+        from phone_agent.adb.input import install_adb_keyboard
+
+        print("Installing ADB Keyboard on connected device...")
+        print("-" * 50)
+        success, message = install_adb_keyboard(device_id=args.device_id)
+        print("-" * 50)
+        if success:
+            print(f"\n✅{message}")
+        else:
+            print(f"\n✅{message}")
+        return
 
     # Set device type globally based on args
     if args.device_type == "adb":
@@ -749,6 +817,7 @@ def main():
         base_url=args.base_url,
         model_name=args.model,
         api_key=args.apikey,
+        provider=args.provider,
         lang=args.lang,
     )
 
@@ -760,6 +829,7 @@ def main():
             device_id=args.device_id,
             verbose=not args.quiet,
             lang=args.lang,
+            format=args.format,
         )
 
         agent = IOSPhoneAgent(
@@ -773,6 +843,7 @@ def main():
             device_id=args.device_id,
             verbose=not args.quiet,
             lang=args.lang,
+            format=args.format,
         )
 
         agent = PhoneAgent(
@@ -791,6 +862,7 @@ def main():
     print(f"Base URL: {model_config.base_url}")
     print(f"Max Steps: {agent_config.max_steps}")
     print(f"Language: {agent_config.lang}")
+    print(f"Format: {agent_config.format}")
     print(f"Device Type: {args.device_type.upper()}")
 
     # Show iOS-specific config
@@ -851,3 +923,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

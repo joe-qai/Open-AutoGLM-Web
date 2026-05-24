@@ -1,0 +1,1 @@
+"""LOCKIN Agent Platform backend application."""

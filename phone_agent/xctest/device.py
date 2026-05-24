@@ -456,3 +456,4 @@ def press_button(
         print("Error: requests library required. Install: pip install requests")
     except Exception as e:
         print(f"Error pressing button: {e}")
+# -*- coding: utf-8 -*-

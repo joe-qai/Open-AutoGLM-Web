@@ -71,6 +71,8 @@ class XCTestConnection:
                 ["idevice_id", "-ln"],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=5,
             )
 
@@ -127,6 +129,8 @@ class XCTestConnection:
                 ["ideviceinfo", "-u", udid],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=5,
             )
 
@@ -287,7 +291,7 @@ class XCTestConnection:
                 cmd.extend(["-u", device_id])
             cmd.append("pair")
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
 
             output = result.stdout + result.stderr
 
@@ -320,7 +324,7 @@ class XCTestConnection:
                 cmd.extend(["-u", device_id])
             cmd.extend(["-k", "DeviceName"])
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+            result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5)
 
             return result.stdout.strip() or None
 
@@ -380,3 +384,4 @@ def list_devices() -> list[DeviceInfo]:
     """
     conn = XCTestConnection()
     return conn.list_devices()
+# -*- coding: utf-8 -*-

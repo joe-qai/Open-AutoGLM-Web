@@ -60,6 +60,7 @@ class DeviceInfo:
     status: str
     connection_type: ConnectionType
     model: str | None = None
+    manufacturer: str | None = None
     harmony_version: str | None = None
 
 
@@ -111,6 +112,8 @@ class HDCConnection:
                 [self.hdc_path, "tconn", address],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=timeout,
             )
 
@@ -130,31 +133,36 @@ class HDCConnection:
 
     def disconnect(self, address: str | None = None) -> tuple[bool, str]:
         """
-        Disconnect from a remote device.
+        Disconnect from a device.
+
+        For TCP/IP devices, runs hdc tdisconn. For USB devices,
+        hdc tdisconn will return an appropriate message.
 
         Args:
-            address: Device address to disconnect. If None, disconnects all.
+            address: Device address to disconnect. If None, disconnects all TCP/IP devices.
 
         Returns:
             Tuple of (success, message).
         """
         try:
-            if address:
-                cmd = [self.hdc_path, "tdisconn", address]
-            else:
-                # HDC doesn't have a "disconnect all" command, so we need to list and disconnect each
+            if address is None:
                 devices = self.list_devices()
-                for device in devices:
-                    if ":" in device.device_id:  # Remote device
-                        _run_hdc_command(
-                            [self.hdc_path, "tdisconn", device.device_id],
-                            capture_output=True,
-                            text=True,
-                            timeout=5
-                        )
+                remote_devices = [d for d in devices if d.connection_type == ConnectionType.REMOTE]
+                if not remote_devices:
+                    return True, "No remote devices to disconnect"
+                for device in remote_devices:
+                    _run_hdc_command(
+                        [self.hdc_path, "tdisconn", device.device_id],
+                        capture_output=True,
+                        text=True,
+                        encoding="utf-8",
+                        errors="replace",
+                        timeout=5
+                    )
                 return True, "Disconnected all remote devices"
 
-            result = _run_hdc_command(cmd, capture_output=True, text=True, encoding="utf-8", timeout=5)
+            cmd = [self.hdc_path, "tdisconn", address]
+            result = _run_hdc_command(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5)
 
             output = result.stdout + result.stderr
             return True, output.strip() or "Disconnected"
@@ -162,18 +170,47 @@ class HDCConnection:
         except Exception as e:
             return False, f"Disconnect error: {e}"
 
+    def _get_device_details(self, device_id: str) -> dict[str, str]:
+        """
+        Get detailed information about a specific HarmonyOS device via shell param get.
+
+        Args:
+            device_id: Device serial number.
+
+        Returns:
+            Dictionary with model, manufacturer, and harmony_version.
+        """
+        props = {
+            "const.product.model": "model",
+            "const.product.manufacturer": "manufacturer",
+            "const.ohos.version": "harmony_version",
+        }
+        info = {}
+        try:
+            for param, key in props.items():
+                cmd = [self.hdc_path, "-t", device_id, "shell", "param", "get", param]
+                result = _run_hdc_command(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5)
+                value = result.stdout.strip()
+                if value:
+                    info[key] = value
+        except Exception:
+            pass
+        return info
+
     def list_devices(self) -> list[DeviceInfo]:
         """
         List all connected devices.
 
         Returns:
-            List of DeviceInfo objects.
+            List of DeviceInfo objects with model, manufacturer, and harmony_version populated.
         """
         try:
             result = _run_hdc_command(
                 [self.hdc_path, "list", "targets"],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=5,
             )
 
@@ -192,14 +229,17 @@ class HDCConnection:
                 else:
                     conn_type = ConnectionType.USB
 
-                # HDC doesn't provide detailed status in list command
-                # We assume "Connected" status for devices that appear
+                # Query detailed device info via shell param get
+                details = self._get_device_details(device_id)
+
                 devices.append(
                     DeviceInfo(
                         device_id=device_id,
                         status="device",
                         connection_type=conn_type,
-                        model=None,
+                        model=details.get("model"),
+                        manufacturer=details.get("manufacturer"),
+                        harmony_version=details.get("harmony_version"),
                     )
                 )
 
@@ -278,7 +318,7 @@ class HDCConnection:
                 cmd.extend(["-t", device_id])
             cmd.extend(["tmode", "port", str(port)])
 
-            result = _run_hdc_command(cmd, capture_output=True, text=True, encoding="utf-8", timeout=10)
+            result = _run_hdc_command(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=10)
 
             output = result.stdout + result.stderr
 
@@ -307,7 +347,7 @@ class HDCConnection:
                 cmd.extend(["-t", device_id])
             cmd.extend(["shell", "ifconfig"])
 
-            result = _run_hdc_command(cmd, capture_output=True, text=True, encoding="utf-8", timeout=5)
+            result = _run_hdc_command(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5)
 
             # Parse IP from ifconfig output
             for line in result.stdout.split("\n"):
@@ -340,14 +380,14 @@ class HDCConnection:
         try:
             # Kill server
             _run_hdc_command(
-                [self.hdc_path, "kill"], capture_output=True, timeout=5
+                [self.hdc_path, "kill"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5
             )
 
             time.sleep(TIMING_CONFIG.connection.server_restart_delay)
 
             # Start server (HDC auto-starts when running commands)
             _run_hdc_command(
-                [self.hdc_path, "start", "-r"], capture_output=True, timeout=5
+                [self.hdc_path, "start", "-r"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5
             )
 
             return True, "HDC server restarted"

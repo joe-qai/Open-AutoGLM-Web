@@ -51,3 +51,4 @@ __all__ = [
     "list_devices",
     "set_hdc_verbose",
 ]
+# -*- coding: utf-8 -*-

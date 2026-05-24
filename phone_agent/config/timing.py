@@ -165,3 +165,4 @@ __all__ = [
     "get_timing_config",
     "update_timing_config",
 ]
+# -*- coding: utf-8 -*-

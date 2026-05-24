@@ -3,3 +3,4 @@
 from phone_agent.actions.handler import ActionHandler, ActionResult
 
 __all__ = ["ActionHandler", "ActionResult"]
+# -*- coding: utf-8 -*-

@@ -1,6 +1,6 @@
 """APK management schemas."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from enum import Enum
 from typing import Optional
 from datetime import datetime
@@ -24,9 +24,9 @@ class ApkInfo(BaseModel):
     upload_time: datetime
     status: ApkStatus
     file_path: Optional[str] = None
-    icon_base64: Optional[str] = None
+
     
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True, protected_namespaces=())
 
 
 class ApkUploadResponse(BaseModel):
@@ -46,3 +46,8 @@ class ApkActionResponse(BaseModel):
     """Response for APK actions."""
     success: bool
     message: str
+
+
+class ApkBatchDeleteRequest(BaseModel):
+    """Request for batch deleting APKs."""
+    apk_ids: list[str]

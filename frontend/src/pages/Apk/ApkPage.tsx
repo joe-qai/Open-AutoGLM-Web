@@ -1,10 +1,12 @@
-import { Package, Upload, Trash2, FolderOpen, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
-import { useRef, useEffect } from 'react';
+import { Package, Upload, Trash2, FolderOpen, AlertCircle, CheckCircle, Loader2, X } from 'lucide-react';
+import { useRef, useEffect, useState } from 'react';
 import { useApkStore } from '../../stores/apkStore';
 
 export function ApkPage() {
-  const { apks, loading, uploading, error, success, fetchApks, uploadApk, deleteApk, clearMessages } = useApkStore();
+  const { apks, loading, uploading, error, success, fetchApks, uploadApk, deleteApk, batchDeleteApks, clearMessages } = useApkStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [batchMode, setBatchMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchApks();
@@ -24,6 +26,31 @@ export function ApkPage() {
     } else if (file) {
       alert('请选择APK文件');
     }
+  };
+
+  const toggleSelect = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    setSelectedIds(next);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === apks.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(apks.map(a => a.id)));
+    }
+  };
+
+  const handleBatchDelete = () => {
+    if (selectedIds.size === 0) return;
+    batchDeleteApks(Array.from(selectedIds));
+    setSelectedIds(new Set());
+    setBatchMode(false);
   };
 
   const formatFileSize = (bytes?: number) => {
@@ -53,14 +80,46 @@ export function ApkPage() {
           </h1>
           <p className="text-[#94a3b8] mt-1">管理您的测试APK文件</p>
         </div>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 text-white rounded-lg flex items-center gap-2 transition-colors"
-        >
-          {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-          {uploading ? '上传中...' : '上传APK'}
-        </button>
+        <div className="flex items-center gap-2">
+          {batchMode ? (
+            <>
+              <span className="text-[#94a3b8] text-sm">{selectedIds.size} 已选择</span>
+              <button
+                onClick={handleBatchDelete}
+                disabled={selectedIds.size === 0}
+                className="px-4 py-2 bg-red-600 hover:bg-red-500 disabled:bg-red-800 text-white rounded-lg flex items-center gap-2 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                批量删除
+              </button>
+              <button
+                onClick={() => { setBatchMode(false); setSelectedIds(new Set()); }}
+                className="px-4 py-2 bg-[#334155] hover:bg-[#475569] text-white rounded-lg flex items-center gap-2 transition-colors"
+              >
+                <X className="w-4 h-4" />
+                取消
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setBatchMode(true)}
+                className="px-4 py-2 bg-[#334155] hover:bg-[#475569] text-white rounded-lg flex items-center gap-2 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                批量删除
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 text-white rounded-lg flex items-center gap-2 transition-colors"
+              >
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                {uploading ? '上传中...' : '上传APK'}
+              </button>
+            </>
+          )}
+        </div>
         <input
           ref={fileInputRef}
           type="file"
@@ -104,17 +163,24 @@ export function ApkPage() {
             <table className="w-full">
               <thead className="bg-[#0f172a] border-b border-[#334155]">
                 <tr>
+                  {batchMode && (
+                    <th className="px-4 py-3 text-left">
+                      <input
+                        type="checkbox"
+                        checked={apks.length > 0 && selectedIds.size === apks.length}
+                        onChange={toggleSelectAll}
+                        className="w-4 h-4 accent-indigo-500"
+                      />
+                    </th>
+                  )}
                   <th className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider">
-                    APK信息
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider">
-                    原始文件名
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider">
-                    版本号
+                    APK文件名
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider">
                     包名
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider">
+                    版本号
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-[#94a3b8] uppercase tracking-wider">
                     大小
@@ -130,26 +196,24 @@ export function ApkPage() {
               <tbody className="divide-y divide-[#334155]">
                 {apks.map((apk) => (
                   <tr key={apk.id} className="hover:bg-[#0f172a]/50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                          <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center">
-                            <Package className="w-5 h-5 text-indigo-400" />
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-white">{apk.name}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#94a3b8]">
+                    {batchMode && (
+                      <td className="px-4 py-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(apk.id)}
+                          onChange={() => toggleSelect(apk.id)}
+                          className="w-4 h-4 accent-indigo-500"
+                        />
+                      </td>
+                    )}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                       {apk.original_filename || apk.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#94a3b8]">
-                      {apk.version || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[#94a3b8] font-mono">
                       {apk.package_name || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#94a3b8]">
+                      {apk.version || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[#94a3b8]">
                       {formatFileSize(apk.file_size)}
@@ -158,13 +222,15 @@ export function ApkPage() {
                       {formatDate(apk.upload_time)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => deleteApk(apk.id)}
-                        className="text-red-400 hover:text-red-300 flex items-center gap-1"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        删除
-                      </button>
+                      {!batchMode && (
+                        <button
+                          onClick={() => deleteApk(apk.id)}
+                          className="text-red-400 hover:text-red-300 flex items-center gap-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          删除
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

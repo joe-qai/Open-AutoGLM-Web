@@ -26,6 +26,7 @@ interface ApkState {
   fetchApks: () => Promise<void>;
   uploadApk: (file: File) => Promise<void>;
   deleteApk: (apkId: string) => Promise<void>;
+  batchDeleteApks: (apkIds: string[]) => Promise<void>;
   installApk: (deviceId: string, apkId: string) => Promise<void>;
   clearMessages: () => void;
 }
@@ -70,6 +71,16 @@ export const useApkStore = create<ApkState>((set, get) => ({
       await get().fetchApks();
     } catch (error: any) {
       set({ error: error.response?.data?.detail || 'Failed to delete APK' });
+    }
+  },
+
+  batchDeleteApks: async (apkIds: string[]) => {
+    try {
+      await apkApi.batchDeleteApks(apkIds);
+      set({ success: `${apkIds.length} APKs deleted successfully` });
+      await get().fetchApks();
+    } catch (error: any) {
+      set({ error: error.response?.data?.detail || 'Failed to batch delete APKs' });
     }
   },
 

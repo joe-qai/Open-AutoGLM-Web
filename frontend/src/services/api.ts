@@ -67,13 +67,21 @@ export const taskApi = {
     script_id: string;
     device_id: string;
     apk_id?: string;
+    model_config_id?: string;
   }) => api.post('/api/v1/tasks', data),
   executeTask: (taskId: string) => api.post(`/api/v1/tasks/${taskId}/execute`),
   stopTask: (taskId: string) => api.post(`/api/v1/tasks/${taskId}/stop`),
   deleteTask: (taskId: string) => api.delete(`/api/v1/tasks/${taskId}`),
-  getTaskLogs: (taskId: string) => api.get(`/api/v1/tasks/${taskId}/logs`),
+  getTaskLogs: (taskId: string, limit?: number) => api.get(`/api/v1/tasks/${taskId}/logs`, { params: { limit } }),
   batchDeleteTasks: (taskIds: string[]) =>
     api.delete('/api/v1/tasks/batch', { data: { task_ids: taskIds } }),
+  executeNaturalLanguageTask: (data: {
+    task_description: string;
+    device_id?: string;
+    platform?: string;
+    max_steps?: number;
+    mode?: string;
+  }) => api.post('/api/v1/tasks/natural-language', data),
 };
 
 // 脚本相关API
@@ -98,8 +106,11 @@ export const scriptApi = {
     platform: string;
     device_id?: string;
   }) => api.post('/api/v1/scripts/generate', data),
-  executeScript: (scriptId: string, deviceId?: string) =>
-    api.post(`/api/v1/scripts/${scriptId}/execute`, { device_id: deviceId }),
+  executeScript: (scriptId: string, deviceId?: string, modelConfigId?: string) =>
+    api.post(`/api/v1/scripts/${scriptId}/execute`, {
+      device_id: deviceId,
+      model_config_id: modelConfigId,
+    }),
   getScriptVersions: (scriptId: string) => api.get(`/api/v1/scripts/${scriptId}/versions`),
   deleteScript: (scriptId: string) => api.delete(`/api/v1/scripts/${scriptId}`),
 };
@@ -152,6 +163,16 @@ export const projectApi = {
     platform?: string;
   }) => api.put(`/api/v1/projects/${projectId}`, data),
   deleteProject: (projectId: string) => api.delete(`/api/v1/projects/${projectId}`),
+};
+
+// 模型配置相关API
+export const modelConfigApi = {
+  getConfigs: () => api.get('/api/v1/model_configs'),
+  getConfig: (id: string) => api.get(`/api/v1/model_configs/${id}`),
+  createConfig: (data: any) => api.post('/api/v1/model_configs', data),
+  updateConfig: (id: string, data: any) => api.put(`/api/v1/model_configs/${id}`, data),
+  deleteConfig: (id: string) => api.delete(`/api/v1/model_configs/${id}`),
+  getDefaultConfig: () => api.get('/api/v1/model_configs/default'),
 };
 
 // 设置相关API

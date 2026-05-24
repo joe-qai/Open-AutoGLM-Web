@@ -45,3 +45,4 @@ __all__ = [
     "quick_connect",
     "list_devices",
 ]
+# -*- coding: utf-8 -*-

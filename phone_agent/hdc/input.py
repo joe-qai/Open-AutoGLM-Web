@@ -147,3 +147,4 @@ def _get_hdc_prefix(device_id: str | None) -> list:
     if device_id:
         return ["hdc", "-t", device_id]
     return ["hdc"]
+# -*- coding: utf-8 -*-

@@ -1,0 +1,17 @@
+{
+  "task_id": "task_1779603007",
+  "start_time": 1779603007.2503364,
+  "end_time": 1779603014.384403,
+  "steps": [
+    {
+      "step_index": 0,
+      "timestamp": 1779603014.3843584,
+      "action": "wait",
+      "action_params": {
+        "duration": 1000
+      },
+      "screenshot_path": null,
+      "thinking": "Mock response"
+    }
+  ]
+}

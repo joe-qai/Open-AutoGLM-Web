@@ -124,7 +124,12 @@ class IOSActionHandler:
         return x, y
 
     def _handle_launch(self, action: dict, width: int, height: int) -> ActionResult:
-        """Handle app launch action."""
+        """Handle app launch action.
+
+        If the app name is found in the supported list, launch it directly.
+        If not found, go to Home screen so the VLM can visually find the
+        app icon and tap it.
+        """
         app_name = action.get("app")
         if not app_name:
             return ActionResult(False, False, "No app name specified")
@@ -134,7 +139,16 @@ class IOSActionHandler:
         )
         if success:
             return ActionResult(True, False)
-        return ActionResult(False, False, f"App not found: {app_name}")
+
+        # App not found — go to Home screen so VLM can find the icon visually
+        home(wda_url=self.wda_url, session_id=self.session_id)
+
+        return ActionResult(
+            False,
+            False,
+            f"App '{app_name}' not in supported list. Went to Home screen. "
+            f"Please find the app icon on the home screen and tap it (use Tap action).",
+        )
 
     def _handle_tap(self, action: dict, width: int, height: int) -> ActionResult:
         """Handle tap action."""
@@ -278,3 +292,4 @@ class IOSActionHandler:
     def _default_takeover(message: str) -> None:
         """Default takeover callback using console input."""
         input(f"{message}\nPress Enter after completing manual operation...")
+# -*- coding: utf-8 -*-
