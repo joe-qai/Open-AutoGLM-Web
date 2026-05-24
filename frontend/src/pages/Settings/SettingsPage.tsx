@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Settings, Server, Key, Globe, Plus, Trash2, Edit2, Check, Save, X, Bot, Zap } from 'lucide-react';
 import { useModelConfigStore, type ModelConfig } from '../../stores/modelConfigStore';
+import { modelConfigApi } from '../../services/api';
 
 export function SettingsPage() {
   const { configs, fetchConfigs, createConfig, updateConfig, deleteConfig } = useModelConfigStore();
@@ -18,6 +19,40 @@ export function SettingsPage() {
   useEffect(() => {
     fetchConfigs();
   }, []);
+
+  const [testStatus, setTestStatus] = useState<{
+    loading: boolean;
+    success?: boolean;
+    message?: string;
+  }>({ loading: false });
+
+  const handleTestConnection = async () => {
+    if (testStatus.loading) return;
+    setTestStatus({ loading: true });
+    try {
+      const res: any = await modelConfigApi.testConfig({
+        name: name || 'test',
+        provider,
+        base_url: baseUrl || undefined,
+        api_key: apiKey,
+        model_name: modelName,
+        is_default: false,
+      });
+      setTestStatus({
+        loading: false,
+        success: res.success,
+        message: res.success
+          ? `连接成功 (${res.response_time_ms}ms)`
+          : res.message,
+      });
+    } catch (err: any) {
+      setTestStatus({
+        loading: false,
+        success: false,
+        message: err?.response?.data?.detail || '网络请求失败',
+      });
+    }
+  };
 
   const resetForm = () => {
     setName('');
@@ -41,6 +76,7 @@ export function SettingsPage() {
     } else {
       resetForm();
     }
+    setTestStatus({ loading: false });
     setIsModalOpen(true);
   };
 
@@ -253,6 +289,29 @@ export function SettingsPage() {
             </div>
 
             <div className="flex gap-3 p-6 pt-0">
+              <button
+                onClick={handleTestConnection}
+                disabled={!name || !apiKey || !modelName || testStatus.loading}
+                className={`px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm ${
+                  testStatus.success !== undefined
+                    ? testStatus.success
+                      ? 'bg-green-600/20 text-green-400 border border-green-600/30'
+                      : 'bg-red-600/20 text-red-400 border border-red-600/30'
+                    : 'bg-[#1e293b] border border-[#334155] text-[#94a3b8] hover:bg-[#334155] hover:text-white'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {testStatus.loading ? (
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : testStatus.success === true ? (
+                  <Check className="w-4 h-4" />
+                ) : testStatus.success === false ? (
+                  <X className="w-4 h-4" />
+                ) : null}
+                {testStatus.loading ? '测试中...' : testStatus.message || '测试连接'}
+              </button>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="flex-1 px-4 py-2.5 bg-[#334155] hover:bg-[#475569] text-white rounded-lg transition-colors"
