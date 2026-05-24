@@ -1,0 +1,5802 @@
+[
+  {
+    "step": 1,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 1,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 1,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 1,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 2,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 2,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 2,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 2,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 3,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 3,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 3,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 3,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 4,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 4,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 4,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 4,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 5,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 5,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 5,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 5,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 6,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 6,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 6,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 6,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 7,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 7,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 7,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 7,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 8,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 8,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 8,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 8,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 9,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 9,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 9,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 9,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 10,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 10,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 10,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 10,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 11,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 11,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 11,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 11,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 12,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 12,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 12,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 12,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 13,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 13,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 13,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 13,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 14,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 14,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 14,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 14,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 15,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 15,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 15,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 15,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 16,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 16,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 16,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 16,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 17,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 17,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 17,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 17,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 18,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 18,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 18,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 18,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 19,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 19,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 19,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 19,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 20,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 20,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 20,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 20,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 21,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 21,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 21,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 21,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 22,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 22,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 22,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 22,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 23,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 23,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 23,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 23,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 24,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 24,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 24,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 24,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 25,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 25,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 25,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 25,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 26,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 26,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 26,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 26,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 27,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 27,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 27,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 27,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 28,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 28,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 28,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 28,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 29,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 29,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 29,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 29,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 30,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 30,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 30,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 30,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 31,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 31,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 31,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 31,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 32,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 32,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 32,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 32,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 33,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 33,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 33,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 33,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 34,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 34,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 34,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 34,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 35,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 35,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 35,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 35,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 36,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 36,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 36,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 36,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 37,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 37,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 37,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 37,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 38,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 38,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 38,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 38,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 39,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 39,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 39,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 39,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 40,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 40,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 40,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 40,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 41,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 41,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 41,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 41,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 42,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 42,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 42,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 42,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 43,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 43,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 43,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 43,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 44,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 44,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 44,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 44,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 45,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 45,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 45,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 45,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 46,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 46,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 46,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 46,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 47,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 47,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 47,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 47,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 48,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 48,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 48,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 48,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 49,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 49,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 49,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 49,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 50,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 50,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 50,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 50,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 51,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 51,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 51,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 51,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 52,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 52,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 52,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 52,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 53,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 53,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 53,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 53,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 54,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 54,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 54,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 54,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 55,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 55,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 55,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 55,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 56,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 56,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 56,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 56,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 57,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 57,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 57,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 57,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 58,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 58,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 58,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 58,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 59,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 59,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 59,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 59,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 60,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 60,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 60,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 60,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 61,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 61,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 61,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 61,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 62,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 62,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 62,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 62,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 63,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 63,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 63,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 63,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 64,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 64,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 64,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 64,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 65,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 65,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 65,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 65,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 66,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 66,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 66,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 66,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 67,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 67,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 67,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 67,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 68,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 68,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 68,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 68,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 69,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 69,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 69,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 69,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 70,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 70,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 70,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 70,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 71,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 71,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 71,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 71,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 72,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 72,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 72,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 72,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 73,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 73,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 73,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 73,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 74,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 74,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 74,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 74,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 75,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 75,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 75,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 75,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 76,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 76,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 76,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 76,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 77,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 77,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 77,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 77,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 78,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 78,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 78,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 78,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 79,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 79,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 79,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 79,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 80,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 80,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 80,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 80,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 81,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 81,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 81,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 81,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 82,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 82,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 82,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 82,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 83,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 83,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 83,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 83,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 84,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 84,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 84,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 84,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 85,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 85,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 85,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 85,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 86,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 86,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 86,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 86,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 87,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 87,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 87,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 87,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 88,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 88,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 88,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 88,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 89,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 89,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 89,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 89,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 90,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 90,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 90,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 90,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 91,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 91,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 91,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 91,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 92,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 92,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 92,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 92,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 93,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 93,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 93,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 93,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 94,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 94,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 94,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 94,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 95,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 95,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 95,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 95,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 96,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 96,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 96,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 96,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 97,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 97,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 97,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 97,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 98,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 98,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 98,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 98,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 99,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 99,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 99,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 99,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 100,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 100,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "Model request failed: Error code: 404 - {'detail': 'Not Found'}",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 100,
+    "action": "wait",
+    "parameters": {
+      "locator_type": null,
+      "locator_value": null,
+      "locator_index": 0,
+      "fallback_coords": null,
+      "text": null,
+      "app": null,
+      "duration": null,
+      "start_x": null,
+      "start_y": null,
+      "end_x": null,
+      "end_y": null,
+      "message": null
+    },
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  },
+  {
+    "step": 100,
+    "action": "",
+    "parameters": {},
+    "reasoning": "",
+    "success": false,
+    "message": ""
+  }
+]

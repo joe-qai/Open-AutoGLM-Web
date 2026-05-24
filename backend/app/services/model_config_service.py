@@ -1,9 +1,22 @@
 """Model configuration service for managing different LLM providers."""
 
 import time
+import asyncio
 from typing import List, Optional
 from app.db import db
-from app.schemas.model_config import ModelConfigCreate, ModelConfigUpdate, ModelConfigResponse
+from app.schemas.model_config import ModelConfigCreate, ModelConfigUpdate, ModelConfigResponse, ModelConfigTestResponse
+
+try:
+    from openai import OpenAI
+    has_openai = True
+except ImportError:
+    has_openai = False
+
+try:
+    import anthropic
+    has_anthropic = True
+except ImportError:
+    has_anthropic = False
 
 class ModelConfigService:
     async def create_config(self, config: ModelConfigCreate) -> str:
@@ -84,3 +97,109 @@ class ModelConfigService:
         if not row:
             return None
         return ModelConfigResponse(**dict(row))
+
+    async def test_config(self, config: ModelConfigCreate) -> ModelConfigTestResponse:
+        provider = config.provider
+        if provider.value == "openai":
+            if not has_openai:
+                return ModelConfigTestResponse(
+                    success=False,
+                    message="OpenAI SDK 未安装，请执行 pip install openai"
+                )
+            return await self._test_openai(config)
+        elif provider.value == "anthropic":
+            if not has_anthropic:
+                return ModelConfigTestResponse(
+                    success=False,
+                    message="Anthropic SDK 未安装，请执行 pip install anthropic"
+                )
+            return await self._test_anthropic(config)
+        else:
+            return ModelConfigTestResponse(
+                success=False,
+                message=f"不支持的 provider: {provider.value}"
+            )
+
+    async def _test_openai(self, config: ModelConfigCreate) -> ModelConfigTestResponse:
+        start = time.time()
+        try:
+            client = OpenAI(
+                base_url=config.base_url,
+                api_key=config.api_key,
+                timeout=15,
+            )
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: client.chat.completions.create(
+                    model=config.model_name,
+                    messages=[{"role": "user", "content": "Respond with exactly: OK"}],
+                    max_tokens=10,
+                )
+            )
+            elapsed = round((time.time() - start) * 1000)
+            if response.choices and response.choices[0].message.content:
+                return ModelConfigTestResponse(
+                    success=True,
+                    message="连接成功",
+                    response_time_ms=elapsed,
+                )
+            else:
+                return ModelConfigTestResponse(
+                    success=False,
+                    message="响应格式异常",
+                    response_time_ms=elapsed,
+                )
+        except Exception as e:
+            elapsed = round((time.time() - start) * 1000)
+            msg = self._classify_error(e)
+            return ModelConfigTestResponse(
+                success=False,
+                message=msg,
+                response_time_ms=elapsed,
+            )
+
+    async def _test_anthropic(self, config: ModelConfigCreate) -> ModelConfigTestResponse:
+        start = time.time()
+        try:
+            client = anthropic.Anthropic(
+                base_url=config.base_url,
+                api_key=config.api_key,
+                timeout=15,
+            )
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: client.messages.create(
+                    model=config.model_name,
+                    max_tokens=10,
+                    messages=[{"role": "user", "content": "Respond with exactly: OK"}],
+                )
+            )
+            elapsed = round((time.time() - start) * 1000)
+            return ModelConfigTestResponse(
+                success=True,
+                message="连接成功",
+                response_time_ms=elapsed,
+            )
+        except Exception as e:
+            elapsed = round((time.time() - start) * 1000)
+            msg = self._classify_error(e)
+            return ModelConfigTestResponse(
+                success=False,
+                message=msg,
+                response_time_ms=elapsed,
+            )
+
+    @staticmethod
+    def _classify_error(e: Exception) -> str:
+        msg = str(e).lower()
+        if any(x in msg for x in ["connect", "connection refused", "connection error", "name resolution"]):
+            return "无法连接到服务器，请检查 API Base URL"
+        if any(x in msg for x in ["401", "unauthorized", "403", "forbidden", "invalid api key", "authentication"]):
+            return "API Key 无效或权限不足"
+        if any(x in msg for x in ["404", "not found", "model_not_found", "model not found"]):
+            return "模型名称不存在"
+        if any(x in msg for x in ["timeout", "timed out"]):
+            return "连接超时，请检查网络"
+        return f"连接失败: {str(e)}"
