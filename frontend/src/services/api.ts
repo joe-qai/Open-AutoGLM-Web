@@ -173,6 +173,7 @@ export const modelConfigApi = {
   updateConfig: (id: string, data: any) => api.put(`/api/v1/model_configs/${id}`, data),
   deleteConfig: (id: string) => api.delete(`/api/v1/model_configs/${id}`),
   getDefaultConfig: () => api.get('/api/v1/model_configs/default'),
+  testConfig: (data: any) => api.post('/api/v1/model_configs/test', data),
 };
 
 // 设置相关API
