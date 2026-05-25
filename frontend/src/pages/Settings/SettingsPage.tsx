@@ -174,7 +174,7 @@ export function SettingsPage() {
       {/* Model Config List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {configs.map((config) => (
-          <div key={config.config_id} className="bg-[#1e293b] border border-[#334155] rounded-xl p-6 relative overflow-hidden group">
+          <div key={config.config_id} className="bg-[#1e293b] border border-[#334155] rounded-xl p-4 relative overflow-hidden group">
             {config.is_default && (
               <div className="absolute top-0 right-0 px-3 py-1 bg-indigo-500 text-white text-[10px] font-bold rounded-bl-lg flex items-center gap-1">
                 <Check className="w-3 h-3" />
@@ -192,7 +192,7 @@ export function SettingsPage() {
                   <p className="text-[#64748b] text-xs uppercase tracking-wider">{config.provider}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-2 transition-opacity">
                 <button
                   onClick={() => handleCardTestConnection(config)}
                   disabled={cardTestId !== null}
@@ -229,19 +229,21 @@ export function SettingsPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex items-center gap-2 text-sm">
-                <Server className="w-4 h-4 text-[#475569]" />
-                <span className="text-[#94a3b8]">模型:</span>
-                <span className="text-[#e2e8f0]">{config.model_name}</span>
-              </div>
-              {config.base_url && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Globe className="w-4 h-4 text-[#475569]" />
-                  <span className="text-[#94a3b8]">地址:</span>
-                  <span className="text-[#e2e8f0] truncate max-w-[200px]">{config.base_url}</span>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <Server className="w-4 h-4 text-[#475569] shrink-0" />
+                  <span className="text-[#94a3b8] shrink-0">模型:</span>
+                  <span className="text-[#e2e8f0] truncate">{config.model_name}</span>
                 </div>
-              )}
+                {config.base_url && (
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <Globe className="w-4 h-4 text-[#475569] shrink-0" />
+                    <span className="text-[#94a3b8] shrink-0">地址:</span>
+                    <span className="text-[#e2e8f0] truncate">{config.base_url}</span>
+                  </div>
+                )}
+              </div>
               <div className="flex items-center gap-2 text-sm">
                 <Key className="w-4 h-4 text-[#475569]" />
                 <span className="text-[#94a3b8]">API Key:</span>
