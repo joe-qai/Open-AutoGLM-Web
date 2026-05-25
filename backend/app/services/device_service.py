@@ -73,29 +73,12 @@ class DeviceService:
             "battery_level": None
         }
         
-        # Get model and manufacturer
-        output = self._run_adb_command("shell getprop", device_id)
-        for line in output.split('\n'):
-            if 'ro.product.model' in line:
-                match = re.search(r'\[(.+)\]', line)
-                if match:
-                    info["model"] = match.group(1)
-            elif 'ro.product.manufacturer' in line:
-                match = re.search(r'\[(.+)\]', line)
-                if match:
-                    info["manufacturer"] = match.group(1)
-            elif 'ro.build.version.release' in line:
-                match = re.search(r'\[(.+)\]', line)
-                if match:
-                    info["os_version"] = match.group(1)
-            elif 'ro.build.version.sdk' in line:
-                match = re.search(r'\[(.+)\]', line)
-                if match:
-                    info["android_sdk_version"] = match.group(1)
-            elif 'ro.build.characteristics' in line:
-                match = re.search(r'\[(.+)\]', line)
-                if match:
-                    info["device_type"] = match.group(1)
+        # Get model, manufacturer, OS version, SDK version, device type
+        info["model"] = self._run_adb_command("shell getprop ro.product.model", device_id).strip()
+        info["manufacturer"] = self._run_adb_command("shell getprop ro.product.manufacturer", device_id).strip()
+        info["os_version"] = self._run_adb_command("shell getprop ro.build.version.release", device_id).strip()
+        info["android_sdk_version"] = self._run_adb_command("shell getprop ro.build.version.sdk", device_id).strip()
+        info["device_type"] = self._run_adb_command("shell getprop ro.build.characteristics", device_id).strip()
         
         # Get screen resolution
         output = self._run_adb_command("shell wm size", device_id)

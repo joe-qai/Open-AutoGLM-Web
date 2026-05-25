@@ -295,3 +295,34 @@ class TestEnableWirelessConnection:
             assert result["success"] is True
             assert result["ip"] == "192.168.1.50"
             assert result["port"] == 5555
+
+
+# --- _get_device_info: individual getprop calls ---
+
+
+class TestGetDeviceInfo:
+    """Verify _get_device_info reads props via individual getprop commands."""
+
+    def test_get_device_info_individual_getprop_calls(self, device_service):
+        """Each property should be fetched with a separate adb getprop command."""
+        expected_values = {
+            "shell getprop ro.product.model": "Pixel 7 Pro",
+            "shell getprop ro.product.manufacturer": "Google",
+            "shell getprop ro.build.version.release": "15",
+            "shell getprop ro.build.version.sdk": "35",
+            "shell getprop ro.build.characteristics": "tablet",
+        }
+
+        with patch.object(device_service, '_run_adb_command') as mock_run:
+            def side_effect(cmd, device_id):
+                return expected_values.get(cmd, "")
+            mock_run.side_effect = side_effect
+
+            info = device_service._get_device_info("test123")
+
+        assert info["model"] == "Pixel 7 Pro"
+        assert info["manufacturer"] == "Google"
+        assert info["os_version"] == "15"
+        assert info["android_sdk_version"] == "35"
+        assert info["device_type"] == "tablet"
+        assert info["name"] == "Pixel 7 Pro"
