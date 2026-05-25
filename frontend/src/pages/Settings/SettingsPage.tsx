@@ -17,7 +17,9 @@ export function SettingsPage() {
   const [isDefault, setIsDefault] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [pageToast, setPageToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [testLoading, setTestLoading] = useState(false);
+  const [cardTestId, setCardTestId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchConfigs();
@@ -29,6 +31,13 @@ export function SettingsPage() {
       return () => clearTimeout(timer);
     }
   }, [toast]);
+
+  useEffect(() => {
+    if (pageToast) {
+      const timer = setTimeout(() => setPageToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [pageToast]);
 
   const handleTestConnection = async () => {
     if (testLoading) return;
@@ -51,6 +60,29 @@ export function SettingsPage() {
     } catch (err: any) {
       setTestLoading(false);
       setToast({ type: 'error', text: err?.response?.data?.detail || '网络请求失败' });
+    }
+  };
+
+  const handleCardTestConnection = async (config: ModelConfig) => {
+    if (cardTestId) return;
+    setCardTestId(config.config_id);
+    try {
+      const res: any = await modelConfigApi.testConfig({
+        name: config.name,
+        provider: config.provider,
+        base_url: config.base_url || undefined,
+        api_key: config.api_key,
+        model_name: config.model_name,
+        is_default: false,
+      });
+      setCardTestId(null);
+      setPageToast({
+        type: res.success ? 'success' : 'error',
+        text: res.success ? `连接成功 (${res.response_time_ms}ms)` : res.message,
+      });
+    } catch (err: any) {
+      setCardTestId(null);
+      setPageToast({ type: 'error', text: err?.response?.data?.detail || '网络请求失败' });
     }
   };
 
@@ -109,15 +141,15 @@ export function SettingsPage() {
 
   return (
     <div className="animate-fade-in">
-      {/* Toast */}
-      {toast && (
+      {/* Page Toast (for card testing) */}
+      {pageToast && (
         <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm ${
-          toast.type === 'success'
+          pageToast.type === 'success'
             ? 'bg-green-900/30 border border-green-500/30 text-green-300'
             : 'bg-red-900/30 border border-red-500/30 text-red-300'
         }`}>
-          {toast.type === 'success' ? <Check className="w-4 h-4 shrink-0" /> : <X className="w-4 h-4 shrink-0" />}
-          {toast.text}
+          {pageToast.type === 'success' ? <Check className="w-4 h-4 shrink-0" /> : <X className="w-4 h-4 shrink-0" />}
+          {pageToast.text}
         </div>
       )}
 
@@ -161,6 +193,21 @@ export function SettingsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => handleCardTestConnection(config)}
+                  disabled={cardTestId !== null}
+                  className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg transition-colors disabled:opacity-50"
+                  title="测试连接"
+                >
+                  {cardTestId === config.config_id ? (
+                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <Zap className="w-4 h-4" />
+                  )}
+                </button>
                 <button
                   onClick={() => handleOpenModal(config)}
                   className="p-2 text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors"
@@ -318,6 +365,16 @@ export function SettingsPage() {
               </div>
             </div>
 
+            {toast && (
+              <div className={`mx-6 mb-2 p-3 rounded-lg flex items-center gap-2 text-sm ${
+                toast.type === 'success'
+                  ? 'bg-green-900/30 border border-green-500/30 text-green-300'
+                  : 'bg-red-900/30 border border-red-500/30 text-red-300'
+              }`}>
+                {toast.type === 'success' ? <Check className="w-4 h-4 shrink-0" /> : <X className="w-4 h-4 shrink-0" />}
+                {toast.text}
+              </div>
+            )}
             <div className="flex gap-3 p-6 pt-0">
               <button
                 onClick={handleTestConnection}
