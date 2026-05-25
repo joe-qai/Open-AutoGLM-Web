@@ -16,20 +16,23 @@ export function SettingsPage() {
   const [modelName, setModelName] = useState('');
   const [isDefault, setIsDefault] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [testLoading, setTestLoading] = useState(false);
 
   useEffect(() => {
     fetchConfigs();
   }, []);
 
-  const [testStatus, setTestStatus] = useState<{
-    loading: boolean;
-    success?: boolean;
-    message?: string;
-  }>({ loading: false });
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const handleTestConnection = async () => {
-    if (testStatus.loading) return;
-    setTestStatus({ loading: true });
+    if (testLoading) return;
+    setTestLoading(true);
     try {
       const res: any = await modelConfigApi.testConfig({
         name: name || 'test',
@@ -39,19 +42,15 @@ export function SettingsPage() {
         model_name: modelName,
         is_default: false,
       });
-      setTestStatus({
-        loading: false,
-        success: res.success,
-        message: res.success
-          ? `连接成功 (${res.response_time_ms}ms)`
-          : res.message,
-      });
+      setTestLoading(false);
+      if (res.success) {
+        setToast({ type: 'success', text: `连接成功 (${res.response_time_ms}ms)` });
+      } else {
+        setToast({ type: 'error', text: res.message });
+      }
     } catch (err: any) {
-      setTestStatus({
-        loading: false,
-        success: false,
-        message: err?.response?.data?.detail || '网络请求失败',
-      });
+      setTestLoading(false);
+      setToast({ type: 'error', text: err?.response?.data?.detail || '网络请求失败' });
     }
   };
 
@@ -63,6 +62,8 @@ export function SettingsPage() {
     setModelName('');
     setIsDefault(false);
     setShowApiKey(false);
+    setToast(null);
+    setTestLoading(false);
     setEditingConfig(null);
   };
 
@@ -78,7 +79,8 @@ export function SettingsPage() {
     } else {
       resetForm();
     }
-    setTestStatus({ loading: false });
+    setToast(null);
+    setTestLoading(false);
     setIsModalOpen(true);
   };
 
@@ -107,6 +109,18 @@ export function SettingsPage() {
 
   return (
     <div className="animate-fade-in">
+      {/* Toast */}
+      {toast && (
+        <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm ${
+          toast.type === 'success'
+            ? 'bg-green-900/30 border border-green-500/30 text-green-300'
+            : 'bg-red-900/30 border border-red-500/30 text-red-300'
+        }`}>
+          {toast.type === 'success' ? <Check className="w-4 h-4 shrink-0" /> : <X className="w-4 h-4 shrink-0" />}
+          {toast.text}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -307,26 +321,16 @@ export function SettingsPage() {
             <div className="flex gap-3 p-6 pt-0">
               <button
                 onClick={handleTestConnection}
-                disabled={!name || !baseUrl || !apiKey || !modelName || testStatus.loading}
-                className={`px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm ${
-                  testStatus.success !== undefined
-                    ? testStatus.success
-                      ? 'bg-green-600/20 text-green-400 border border-green-600/30'
-                      : 'bg-red-600/20 text-red-400 border border-red-600/30'
-                    : 'bg-[#1e293b] border border-[#334155] text-[#94a3b8] hover:bg-[#334155] hover:text-white'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                disabled={!name || !baseUrl || !apiKey || !modelName || testLoading}
+                className="px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm bg-[#1e293b] border border-[#334155] text-[#94a3b8] hover:bg-[#334155] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {testStatus.loading ? (
+                {testLoading ? (
                   <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
-                ) : testStatus.success === true ? (
-                  <Check className="w-4 h-4" />
-                ) : testStatus.success === false ? (
-                  <X className="w-4 h-4" />
                 ) : null}
-                {testStatus.loading ? '测试中...' : testStatus.message || '测试连接'}
+                {testLoading ? '测试中...' : '测试连接'}
               </button>
               <button
                 onClick={() => setIsModalOpen(false)}
