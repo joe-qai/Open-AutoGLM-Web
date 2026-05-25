@@ -129,7 +129,7 @@ class ModelConfigService:
                 timeout=15,
             )
             loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(
+            raw = await loop.run_in_executor(
                 None,
                 lambda: client.chat.completions.create(
                     model=config.model_name,
@@ -138,7 +138,13 @@ class ModelConfigService:
                 )
             )
             elapsed = round((time.time() - start) * 1000)
-            if response.choices and response.choices[0].message.content:
+            if not hasattr(raw, 'choices'):
+                return ModelConfigTestResponse(
+                    success=False,
+                    message=f"响应格式异常: 期望对象类型但收到 {type(raw).__name__}",
+                    response_time_ms=elapsed,
+                )
+            if raw.choices and raw.choices[0].message.content:
                 return ModelConfigTestResponse(
                     success=True,
                     message="连接成功",

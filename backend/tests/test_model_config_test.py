@@ -137,6 +137,28 @@ async def test_test_openai_connection_error(service):
 
 
 @pytest.mark.asyncio
+async def test_test_openai_response_is_string(service):
+    config = ModelConfigCreate(
+        name="test",
+        provider="openai",
+        base_url="https://api.openai.com/v1",
+        api_key="sk-test",
+        model_name="gpt-4o",
+    )
+
+    with patch("app.services.model_config_service.OpenAI") as mock_openai:
+        mock_client = MagicMock()
+        mock_openai.return_value = mock_client
+        mock_client.chat.completions.create.return_value = "unexpected string response"
+
+        result = await service.test_config(config)
+
+    assert result.success is False
+    assert "字符串" in result.message or "string" in result.message.lower() or "str" in result.message.lower()
+    assert "格式异常" in result.message
+
+
+@pytest.mark.asyncio
 async def test_test_anthropic_sdk_not_installed(service):
     config = ModelConfigCreate(
         name="test",
