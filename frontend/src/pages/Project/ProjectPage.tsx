@@ -95,20 +95,20 @@ export function ProjectPage() {
                   <MoreVertical className="w-4 h-4 text-[#64748b]" />
                 </button>
                 <div className="absolute right-0 top-0 mt-8 w-32 bg-[#1e293b] border border-[#334155] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                  <button
-                    onClick={() => handleEditProject(project)}
-                    className="w-full px-4 py-2 text-left text-sm text-[#94a3b8] hover:text-white hover:bg-[#334155] flex items-center gap-2 rounded-t-lg"
-                  >
-                    <Edit className="w-4 h-4" />
-                    编辑
-                  </button>
-                  <button
-                    onClick={() => deleteProject(project.project_id)}
-                    className="w-full px-4 py-2 text-left text-sm text-red-400 hover:text-red-300 hover:bg-[#334155] flex items-center gap-2 rounded-b-lg"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    删除
-                  </button>
+                    <button
+                      onClick={() => handleEditProject(project)}
+                      title="编辑"
+                      className="w-full px-4 py-2 text-left text-sm text-[#94a3b8] hover:text-white hover:bg-[#334155] flex items-center gap-2 rounded-t-lg"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => deleteProject(project.project_id)}
+                      title="删除"
+                      className="w-full px-4 py-2 text-left text-sm text-red-400 hover:text-red-300 hover:bg-[#334155] flex items-center gap-2 rounded-b-lg"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                 </div>
               </div>
             </div>
@@ -129,10 +129,10 @@ export function ProjectPage() {
           <p className="text-[#64748b] mb-4">创建您的第一个测试项目</p>
           <button
             onClick={handleCreateProject}
+            title="新建项目"
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg flex items-center gap-2 mx-auto transition-colors"
           >
             <Plus className="w-4 h-4" />
-            新建项目
           </button>
         </div>
       )}

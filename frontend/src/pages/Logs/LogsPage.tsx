@@ -150,9 +150,8 @@ export function LogsPage() {
             <RefreshCw className="w-4 h-4" />
             刷新
           </button>
-          <button onClick={handleClearLogs} className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg flex items-center gap-2 transition-colors">
+          <button onClick={handleClearLogs} title="清空日志" className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg flex items-center gap-2 transition-colors">
             <Trash2 className="w-4 h-4" />
-            清空日志
           </button>
         </div>
       </div>

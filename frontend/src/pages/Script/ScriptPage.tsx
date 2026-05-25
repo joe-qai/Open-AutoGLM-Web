@@ -255,10 +255,10 @@ export function ScriptPage() {
               </button>
               <button
                 onClick={() => handleEdit(script)}
+                title="编辑"
                 className="flex-1 py-2 bg-[#334155] hover:bg-[#475569] text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
               >
                 <Edit className="w-4 h-4" />
-                编辑
               </button>
               <button
                 onClick={() => handleDownload(script)}

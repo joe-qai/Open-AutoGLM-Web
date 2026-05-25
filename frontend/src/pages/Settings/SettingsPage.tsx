@@ -197,9 +197,10 @@ export function SettingsPage() {
             <p className="text-[#64748b] text-sm mb-6">创建一个模型配置以开始使用 Agent</p>
             <button
               onClick={() => handleOpenModal()}
+              title="新增"
               className="px-4 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-600/30 rounded-lg transition-colors text-sm"
             >
-              立即新增
+              <Plus className="w-4 h-4" />
             </button>
           </div>
         )}

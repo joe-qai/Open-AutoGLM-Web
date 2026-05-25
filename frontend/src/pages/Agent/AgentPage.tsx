@@ -630,10 +630,10 @@ export function AgentPage() {
                   </button>
                   <button
                     onClick={() => setIsEditing(!isEditing)}
+                    title={isEditing ? '完成' : '编辑'}
                     className="px-3 py-1.5 text-sm text-[#94a3b8] hover:text-white bg-[#334155] hover:bg-[#475569] rounded-lg flex items-center gap-1.5 transition-colors"
                   >
                     <Edit3 className="w-4 h-4" />
-                    {isEditing ? '完成' : '编辑'}
                   </button>
                   <button
                     onClick={handleCopy}
@@ -652,10 +652,10 @@ export function AgentPage() {
                   </button>
                   <button
                     onClick={handleDownload}
+                    title="下载"
                     className="px-3 py-1.5 text-sm text-[#94a3b8] hover:text-white bg-[#334155] hover:bg-[#475569] rounded-lg flex items-center gap-1.5 transition-colors"
                   >
                     <Download className="w-4 h-4" />
-                    下载
                   </button>
                 </div>
               </div>

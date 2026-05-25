@@ -191,10 +191,10 @@ export function TaskPage() {
             <button
               onClick={handleBatchDeleteClick}
               disabled={batchDeleting}
+              title={batchDeleting ? '删除中' : '批量删除'}
               className="px-4 py-1.5 bg-red-600 hover:bg-red-500 disabled:bg-red-800 text-white text-sm rounded-lg flex items-center gap-1.5 transition-colors"
             >
               {batchDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-              {batchDeleting ? '删除中...' : '批量删除'}
             </button>
             <button
               onClick={() => setSelectedTaskIds(new Set())}

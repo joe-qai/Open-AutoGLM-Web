@@ -87,10 +87,10 @@ export function ApkPage() {
               <button
                 onClick={handleBatchDelete}
                 disabled={selectedIds.size === 0}
+                title="批量删除"
                 className="px-4 py-2 bg-red-600 hover:bg-red-500 disabled:bg-red-800 text-white rounded-lg flex items-center gap-2 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
-                批量删除
               </button>
               <button
                 onClick={() => { setBatchMode(false); setSelectedIds(new Set()); }}
@@ -104,10 +104,10 @@ export function ApkPage() {
             <>
               <button
                 onClick={() => setBatchMode(true)}
+                title="批量删除"
                 className="px-4 py-2 bg-[#334155] hover:bg-[#475569] text-white rounded-lg flex items-center gap-2 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
-                批量删除
               </button>
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -225,10 +225,10 @@ export function ApkPage() {
                       {!batchMode && (
                         <button
                           onClick={() => deleteApk(apk.id)}
+                          title="删除"
                           className="text-red-400 hover:text-red-300 flex items-center gap-1"
                         >
                           <Trash2 className="w-4 h-4" />
-                          删除
                         </button>
                       )}
                     </td>
