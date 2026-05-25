@@ -58,7 +58,7 @@ export function DeviceDetailDrawer() {
       />
 
       {/* Drawer Panel */}
-      <div className="fixed right-0 top-0 h-full w-[400px] bg-[#1e293b] border-l border-[#334155] z-50 animate-slide-in-right max-h-screen overflow-y-auto">
+      <div className="fixed right-0 top-0 h-full w-[400px] bg-[#1e293b] border-l border-[#334155] z-50 animate-slide-in-right overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-[#334155]">
           <div className="flex items-center gap-3">
