@@ -58,7 +58,7 @@ export function DeviceDetailDrawer() {
       />
 
       {/* Drawer Panel */}
-      <div className="fixed right-0 top-0 h-full w-[400px] bg-[#1e293b] border-l border-[#334155] z-50 animate-slide-in-right overflow-y-auto">
+      <div className="fixed right-0 top-0 h-full w-[400px] bg-[#1e293b] border-l border-[#334155] z-50 animate-slide-in-right max-h-screen overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-[#334155]">
           <div className="flex items-center gap-3">
@@ -77,7 +77,7 @@ export function DeviceDetailDrawer() {
         </div>
 
         {/* Device Info Section */}
-        <div className="p-4 border-b border-[#334155]">
+        <div className="p-3 border-b border-[#334155]">
           <h3 className="text-[#94a3b8] text-sm font-medium mb-3">设备信息</h3>
           <div className="space-y-2 text-sm">
             {selectedDevice.model && (
@@ -130,7 +130,7 @@ export function DeviceDetailDrawer() {
         </div>
 
         {/* Screenshot Section */}
-        <div className="p-4 border-b border-[#334155]">
+        <div className="p-3 border-b border-[#334155]">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-[#94a3b8] text-sm font-medium">实时截图</h3>
             {screenshotData && (
@@ -150,7 +150,7 @@ export function DeviceDetailDrawer() {
             <img
               src={`data:image/png;base64,${screenshotData}`}
               alt="Device screenshot"
-              className="w-full rounded-lg border border-[#334155]"
+              className="w-full max-h-[200px] object-contain rounded-lg border border-[#334155]"
             />
           ) : (
             <div className="flex flex-col items-center justify-center py-8 text-[#64748b]">
@@ -161,7 +161,7 @@ export function DeviceDetailDrawer() {
         </div>
 
         {/* Action Buttons */}
-        <div className="p-4">
+        <div className="p-3">
           <div className="flex gap-2">
             {selectedDevice.status === 'disconnected' ? (
               <button
