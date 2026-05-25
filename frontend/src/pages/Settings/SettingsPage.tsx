@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Settings, Server, Key, Globe, Plus, Trash2, Edit2, Check, Save, X, Bot, Zap } from 'lucide-react';
+import { Settings, Server, Key, Globe, Plus, Trash2, Edit2, Check, Save, X, Bot, Zap, Eye, EyeOff } from 'lucide-react';
 import { useModelConfigStore, type ModelConfig } from '../../stores/modelConfigStore';
 import { modelConfigApi } from '../../services/api';
 
@@ -15,6 +15,7 @@ export function SettingsPage() {
   const [apiKey, setApiKey] = useState('');
   const [modelName, setModelName] = useState('');
   const [isDefault, setIsDefault] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
 
   useEffect(() => {
     fetchConfigs();
@@ -61,6 +62,7 @@ export function SettingsPage() {
     setApiKey('');
     setModelName('');
     setIsDefault(false);
+    setShowApiKey(false);
     setEditingConfig(null);
   };
 
@@ -256,7 +258,9 @@ export function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-[#94a3b8] text-sm mb-2">API Base URL (选填)</label>
+                <label className="block text-[#94a3b8] text-sm mb-2">
+                  API Base URL <span className="text-red-400">*</span>
+                </label>
                 <input
                   type="text"
                   value={baseUrl}
@@ -267,14 +271,25 @@ export function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-[#94a3b8] text-sm mb-2">API Key</label>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full bg-[#0f172a] border border-[#334155] rounded-lg py-2.5 px-4 text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
-                  placeholder="输入您的 API Key"
-                />
+                <label className="block text-[#94a3b8] text-sm mb-2">
+                  API Key <span className="text-red-400">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showApiKey ? 'text' : 'password'}
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="w-full bg-[#0f172a] border border-[#334155] rounded-lg py-2.5 pl-4 pr-10 text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
+                    placeholder="输入您的 API Key"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#64748b] hover:text-[#94a3b8] transition-colors"
+                  >
+                    {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center gap-3 py-2">
@@ -291,7 +306,7 @@ export function SettingsPage() {
             <div className="flex gap-3 p-6 pt-0">
               <button
                 onClick={handleTestConnection}
-                disabled={!name || !apiKey || !modelName || testStatus.loading}
+                disabled={!name || !baseUrl || !apiKey || !modelName || testStatus.loading}
                 className={`px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm ${
                   testStatus.success !== undefined
                     ? testStatus.success
@@ -320,7 +335,7 @@ export function SettingsPage() {
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={!name || !apiKey || !modelName}
+                disabled={!name || !baseUrl || !apiKey || !modelName}
                 className="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg flex items-center justify-center gap-2 transition-colors"
               >
                 <Save className="w-4 h-4" />
