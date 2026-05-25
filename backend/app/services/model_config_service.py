@@ -1,16 +1,12 @@
 """Model configuration service for managing different LLM providers."""
 
 import time
-import asyncio
+import json
 from typing import List, Optional
 from app.db import db
 from app.schemas.model_config import ModelConfigCreate, ModelConfigUpdate, ModelConfigResponse, ModelConfigTestResponse
 
-try:
-    from openai import OpenAI
-    has_openai = True
-except ImportError:
-    has_openai = False
+has_openai = True  # uses httpx, no SDK required
 
 try:
     import anthropic
@@ -121,49 +117,78 @@ class ModelConfigService:
             )
 
     async def _test_openai(self, config: ModelConfigCreate) -> ModelConfigTestResponse:
+        import httpx
         start = time.time()
+        url = config.base_url.rstrip("/") + "/chat/completions"
+        body = {
+            "model": config.model_name,
+            "messages": [{"role": "user", "content": "Respond with exactly: OK"}],
+            "max_tokens": 10,
+        }
+        print(f"\n[LLM TEST] URL={url}, Model={config.model_name}, Key={config.api_key[:12]}...")
+        print(f"[LLM TEST] Request: {json.dumps(body, ensure_ascii=False)}")
         try:
-            client = OpenAI(
-                base_url=config.base_url,
-                api_key=config.api_key,
-                timeout=15,
-            )
-            loop = asyncio.get_event_loop()
-            raw = await loop.run_in_executor(
-                None,
-                lambda: client.chat.completions.create(
-                    model=config.model_name,
-                    messages=[{"role": "user", "content": "Respond with exactly: OK"}],
-                    max_tokens=10,
+            async with httpx.AsyncClient(timeout=15) as client:
+                resp = await client.post(
+                    url, json=body,
+                    headers={"Authorization": f"Bearer {config.api_key}", "Content-Type": "application/json"},
                 )
-            )
+                elapsed = round((time.time() - start) * 1000)
+                ct = resp.headers.get("content-type", "N/A")
+                print(f"[LLM TEST] 状态码: {resp.status_code}, Content-Type: {ct}")
+                print(f"[LLM TEST] 响应体前300字: {resp.text[:300]}")
+
+                if resp.status_code != 200:
+                    detail = resp.text[:200]
+                    if "invalid api key" in resp.text.lower() or "unauthorized" in resp.text.lower() or resp.status_code == 401:
+                        return ModelConfigTestResponse(success=False, message="API Key 无效或权限不足", response_time_ms=elapsed)
+                    if "not found" in resp.text.lower() or resp.status_code == 404:
+                        return ModelConfigTestResponse(success=False, message="模型名称不存在", response_time_ms=elapsed)
+                    return ModelConfigTestResponse(success=False, message=f"HTTP {resp.status_code}: {detail}", response_time_ms=elapsed)
+
+                # 尝试解析 SSE 流式响应
+                if "text/event-stream" in ct or resp.text.startswith("data:"):
+                    content = ""
+                    for line in resp.text.splitlines():
+                        line = line.strip()
+                        if line.startswith("data:") and "[DONE]" not in line:
+                            try:
+                                chunk = json.loads(line[5:])
+                                delta = chunk.get("choices", [{}])[0].get("delta", {})
+                                if delta.get("content"):
+                                    content += delta["content"]
+                            except (json.JSONDecodeError, IndexError, KeyError):
+                                pass
+                    if content.strip():
+                        print(f"[LLM TEST] SSE 解析成功, content={content}")
+                        return ModelConfigTestResponse(success=True, message="连接成功", response_time_ms=elapsed)
+                    print(f"[LLM TEST] SSE 解析得到空内容，完整响应: {resp.text[:500]}")
+                    return ModelConfigTestResponse(success=False, message=f"SSE 响应为空: {resp.text[:200]}", response_time_ms=elapsed)
+
+                # 尝试解析标准 JSON 响应
+                try:
+                    data = resp.json()
+                    choices = data.get("choices", [])
+                    if choices and choices[0].get("message", {}).get("content"):
+                        return ModelConfigTestResponse(success=True, message="连接成功", response_time_ms=elapsed)
+                    print(f"[LLM TEST] JSON 无有效 choices: {resp.text[:300]}")
+                    return ModelConfigTestResponse(success=False, message=f"JSON 响应无有效内容: {resp.text[:200]}", response_time_ms=elapsed)
+                except json.JSONDecodeError:
+                    print(f"[LLM TEST] 无法解析响应: {resp.text[:300]}")
+                    return ModelConfigTestResponse(success=False, message=f"无法解析响应: {resp.text[:200]}", response_time_ms=elapsed)
+
+        except httpx.ConnectError:
             elapsed = round((time.time() - start) * 1000)
-            if not hasattr(raw, 'choices'):
-                return ModelConfigTestResponse(
-                    success=False,
-                    message=f"响应格式异常: 期望对象类型但收到 {type(raw).__name__}",
-                    response_time_ms=elapsed,
-                )
-            if raw.choices and raw.choices[0].message.content:
-                return ModelConfigTestResponse(
-                    success=True,
-                    message="连接成功",
-                    response_time_ms=elapsed,
-                )
-            else:
-                return ModelConfigTestResponse(
-                    success=False,
-                    message="响应格式异常",
-                    response_time_ms=elapsed,
-                )
+            return ModelConfigTestResponse(success=False, message="无法连接到服务器，请检查 API Base URL", response_time_ms=elapsed)
+        except httpx.TimeoutException:
+            elapsed = round((time.time() - start) * 1000)
+            return ModelConfigTestResponse(success=False, message="连接超时，请检查网络", response_time_ms=elapsed)
         except Exception as e:
             elapsed = round((time.time() - start) * 1000)
-            msg = self._classify_error(e, api_key=config.api_key)
-            return ModelConfigTestResponse(
-                success=False,
-                message=msg,
-                response_time_ms=elapsed,
-            )
+            print(f"[LLM TEST] 异常: {type(e).__name__}: {e}")
+            import traceback
+            print(f"[LLM TEST] 堆栈: {''.join(traceback.format_tb(e.__traceback__))}")
+            return ModelConfigTestResponse(success=False, message=f"{type(e).__name__}: {e}", response_time_ms=elapsed)
 
     async def _test_anthropic(self, config: ModelConfigCreate) -> ModelConfigTestResponse:
         start = time.time()

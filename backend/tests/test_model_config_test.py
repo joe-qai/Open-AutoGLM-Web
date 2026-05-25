@@ -1,8 +1,8 @@
 """Tests for model config test endpoint."""
 
 import pytest
-from unittest.mock import patch, MagicMock
-from app.schemas.model_config import ModelConfigCreate, ModelConfigTestResponse
+from unittest.mock import patch, AsyncMock, MagicMock
+from app.schemas.model_config import ModelConfigCreate
 from app.services.model_config_service import ModelConfigService
 
 
@@ -11,23 +11,23 @@ def service():
     return ModelConfigService()
 
 
+def _mock_response(status=200, text='{"choices":[{"message":{"content":"OK"}}]}', content_type="application/json"):
+    m = MagicMock()
+    m.status_code = status
+    m.text = text
+    m.headers = {"content-type": content_type}
+    m.json.return_value = {"choices": [{"message": {"content": "OK"}}]}
+    return m
+
+
 @pytest.mark.asyncio
 async def test_test_openai_success(service):
     config = ModelConfigCreate(
-        name="test",
-        provider="openai",
-        base_url="https://api.openai.com/v1",
-        api_key="sk-test",
-        model_name="gpt-4o",
+        name="test", provider="openai",
+        base_url="https://api.openai.com/v1", api_key="sk-test", model_name="gpt-4o",
     )
-    mock_response = MagicMock()
-    mock_response.choices = [MagicMock()]
-    mock_response.choices[0].message.content = "OK"
-
-    with patch("app.services.model_config_service.OpenAI") as mock_openai:
-        mock_client = MagicMock()
-        mock_openai.return_value = mock_client
-        mock_client.chat.completions.create.return_value = mock_response
+    with patch("httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__.return_value.post = AsyncMock(return_value=_mock_response())
 
         result = await service.test_config(config)
 
@@ -39,22 +39,12 @@ async def test_test_openai_success(service):
 @pytest.mark.asyncio
 async def test_test_openai_auth_error(service):
     config = ModelConfigCreate(
-        name="test",
-        provider="openai",
-        base_url="https://api.openai.com/v1",
-        api_key="sk-bad",
-        model_name="gpt-4o",
+        name="test", provider="openai",
+        base_url="https://api.openai.com/v1", api_key="sk-bad", model_name="gpt-4o",
     )
-
-    with patch("app.services.model_config_service.OpenAI") as mock_openai:
-        mock_client = MagicMock()
-        mock_openai.return_value = mock_client
-        from openai import AuthenticationError
-        mock_client.chat.completions.create.side_effect = AuthenticationError(
-            "Invalid API key provided",
-            response=MagicMock(),
-            body=None,
-        )
+    with patch("httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__.return_value.post = AsyncMock(
+            return_value=_mock_response(status=401, text='{"detail":"Invalid API key"}'))
 
         result = await service.test_config(config)
 
@@ -65,22 +55,12 @@ async def test_test_openai_auth_error(service):
 @pytest.mark.asyncio
 async def test_test_openai_model_not_found(service):
     config = ModelConfigCreate(
-        name="test",
-        provider="openai",
-        base_url="https://api.openai.com/v1",
-        api_key="sk-test",
-        model_name="nonexistent-model",
+        name="test", provider="openai",
+        base_url="https://api.openai.com/v1", api_key="sk-test", model_name="nonexistent",
     )
-
-    with patch("app.services.model_config_service.OpenAI") as mock_openai:
-        mock_client = MagicMock()
-        mock_openai.return_value = mock_client
-        from openai import NotFoundError
-        mock_client.chat.completions.create.side_effect = NotFoundError(
-            "Model not found",
-            response=MagicMock(),
-            body=None,
-        )
+    with patch("httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__.return_value.post = AsyncMock(
+            return_value=_mock_response(status=404, text='{"error":"not found"}'))
 
         result = await service.test_config(config)
 
@@ -91,18 +71,12 @@ async def test_test_openai_model_not_found(service):
 @pytest.mark.asyncio
 async def test_test_openai_timeout(service):
     config = ModelConfigCreate(
-        name="test",
-        provider="openai",
-        base_url="https://api.openai.com/v1",
-        api_key="sk-test",
-        model_name="gpt-4o",
+        name="test", provider="openai",
+        base_url="https://api.openai.com/v1", api_key="sk-test", model_name="gpt-4o",
     )
-
-    with patch("app.services.model_config_service.OpenAI") as mock_openai:
-        mock_client = MagicMock()
-        mock_openai.return_value = mock_client
-        from openai import APITimeoutError
-        mock_client.chat.completions.create.side_effect = APITimeoutError("Request timed out")
+    with patch("httpx.AsyncClient") as mock_cls:
+        import httpx
+        mock_cls.return_value.__aenter__.return_value.post = AsyncMock(side_effect=httpx.TimeoutException("timed out"))
 
         result = await service.test_config(config)
 
@@ -113,22 +87,12 @@ async def test_test_openai_timeout(service):
 @pytest.mark.asyncio
 async def test_test_openai_connection_error(service):
     config = ModelConfigCreate(
-        name="test",
-        provider="openai",
-        base_url="https://invalid-url.com",
-        api_key="sk-test",
-        model_name="gpt-4o",
+        name="test", provider="openai",
+        base_url="https://invalid-url.com", api_key="sk-test", model_name="gpt-4o",
     )
-
-    with patch("app.services.model_config_service.OpenAI") as mock_openai:
-        mock_client = MagicMock()
-        mock_openai.return_value = mock_client
-        from openai import APIConnectionError
+    with patch("httpx.AsyncClient") as mock_cls:
         import httpx
-        mock_request = httpx.Request("POST", "https://invalid-url.com/v1/chat/completions")
-        mock_client.chat.completions.create.side_effect = APIConnectionError(
-            message="Connection refused", request=mock_request
-        )
+        mock_cls.return_value.__aenter__.return_value.post = AsyncMock(side_effect=httpx.ConnectError("connection refused"))
 
         result = await service.test_config(config)
 
@@ -137,35 +101,47 @@ async def test_test_openai_connection_error(service):
 
 
 @pytest.mark.asyncio
-async def test_test_openai_response_is_string(service):
+async def test_test_openai_sse_response(service):
     config = ModelConfigCreate(
-        name="test",
-        provider="openai",
-        base_url="https://api.openai.com/v1",
-        api_key="sk-test",
-        model_name="gpt-4o",
+        name="test", provider="openai",
+        base_url="https://api.openai.com/v1", api_key="sk-test", model_name="glm-5.1",
     )
+    sse_body = (
+        'data: {"id":"x","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant","content":"1"}}]}\n'
+        'data: {"id":"x","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"2"}}]}\n'
+        'data: [DONE]\n'
+    )
+    with patch("httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__.return_value.post = AsyncMock(
+            return_value=_mock_response(status=200, text=sse_body, content_type="text/event-stream"))
 
-    with patch("app.services.model_config_service.OpenAI") as mock_openai:
-        mock_client = MagicMock()
-        mock_openai.return_value = mock_client
-        mock_client.chat.completions.create.return_value = "unexpected string response"
+        result = await service.test_config(config)
+
+    assert result.success is True
+    assert result.message == "连接成功"
+
+
+@pytest.mark.asyncio
+async def test_test_openai_json_no_content(service):
+    config = ModelConfigCreate(
+        name="test", provider="openai",
+        base_url="https://api.openai.com/v1", api_key="sk-test", model_name="gpt-4o",
+    )
+    resp = _mock_response(text='{"choices":[{"message":{"content":""}}]}')
+    resp.json.return_value = {"choices": [{"message": {"content": ""}}]}
+    with patch("httpx.AsyncClient") as mock_cls:
+        mock_cls.return_value.__aenter__.return_value.post = AsyncMock(return_value=resp)
 
         result = await service.test_config(config)
 
     assert result.success is False
-    assert "字符串" in result.message or "string" in result.message.lower() or "str" in result.message.lower()
-    assert "格式异常" in result.message
 
 
 @pytest.mark.asyncio
 async def test_test_anthropic_sdk_not_installed(service):
     config = ModelConfigCreate(
-        name="test",
-        provider="anthropic",
-        base_url="https://api.anthropic.com",
-        api_key="sk-ant-test",
-        model_name="claude-3-5-sonnet-20240620",
+        name="test", provider="anthropic",
+        base_url="https://api.anthropic.com", api_key="sk-ant-test", model_name="claude-3-5-sonnet-20240620",
     )
 
     result = await service.test_config(config)
