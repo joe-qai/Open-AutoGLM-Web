@@ -2,7 +2,7 @@
 
 <img src=resources/logo.svg width="150">
 
-# LOCKIN Agent Platform
+# Open-AutoGLM
 
 **AI 驱动的多平台手机自动化测试平台** - 支持 Android / HarmonyOS / iOS，Web UI 与 CLI 双模式
 
@@ -13,7 +13,7 @@
 ![React](https://img.shields.io/badge/React-18-61DAFB.svg)
 ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 
----
+</div>
 
 ## ✨ 核心特性
 
@@ -46,8 +46,6 @@
 - **APP 包映射** - 预置 150+ 应用包名映射（Android / HarmonyOS / iOS）
 - **记忆与回放** - JSON 持久化记忆 + 执行步骤完整录制与回放
 - **审计日志** - 所有操作记录至 SQLite，支持查询与统计
-
----
 
 ## 🚀 快速开始
 
@@ -96,7 +94,7 @@ python main.py --device-type ios --base-url http://localhost:8000/v1 --wda-url h
 
 ### 🎯 模型服务配置
 
-LOCKIN Agent Platform 只需要一个 OpenAI 兼容的 VLM 模型服务：
+Open-AutoGLM 只需要一个 OpenAI 兼容的 VLM 模型服务：
 
 | 服务商 | Base URL | 模型名 |
 |--------|----------|--------|
@@ -111,16 +109,14 @@ python main.py --base-url https://open.bigmodel.cn/api/paas/v4 --model "AutoPhon
 python main.py --base-url http://localhost:8000/v1 --model "AutoPhone-phone-9b" "打开小红书"
 ```
 
----
-
 ## 🛠️ 开发指南
 
 ### 源码安装
 
 ```bash
 # 克隆仓库
-git clone https://github.com/zai-org/Open-AutoGLM.git
-cd Open-AutoGLM
+git clone https://github.com/joe-qai/Open-AutoGLM-Web.git
+cd Open-AutoGLM-Web
 
 # 后端依赖
 cd backend && pip install -r requirements.txt
@@ -162,8 +158,6 @@ cd backend && pytest
 cd backend && python test_agent_engine.py
 ```
 
----
-
 ## 🔧 架构概览
 
 ### 整体架构
@@ -195,8 +189,6 @@ API层: FastAPI (11 路由模块)
 | 模型 | OpenAI SDK · Anthropic SDK · GLM-4.1V-9B-Thinking |
 | 实时 | WebSocket · Socket.IO · Scrcpy H.264 |
 | 设备 | ADB · HDC · WebDriverAgent |
-
----
 
 ## 📝 许可证
 

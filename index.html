@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open-AutoGLM — 多平台手机自动化测试平台</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0b0b0f;
+      --surface: #121218;
+      --surface2: #181820;
+      --border: rgba(255,255,255,.06);
+      --text: #f0f0f0;
+      --muted: rgba(255,255,255,.4);
+      --dim: rgba(255,255,255,.18);
+      --red: #ff2950;
+      --purple: #6c5ce7;
+      --teal: #00d4aa;
+      --blue: #4a9eff;
+      --gold: #ffb347;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: rgba(255,41,80,.3); color: #fff; }
+
+    /* ── Ambient background layers ── */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .bg-layer .grad-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+    }
+
+    .bg-layer .o1 {
+      width: 500px; height: 500px;
+      background: rgba(255,41,80,.08);
+      top: -200px; right: -100px;
+      animation: orbit1 20s ease-in-out infinite;
+    }
+
+    .bg-layer .o2 {
+      width: 400px; height: 400px;
+      background: rgba(108,92,231,.06);
+      bottom: -150px; left: -80px;
+      animation: orbit2 25s ease-in-out infinite;
+    }
+
+    .bg-layer .o3 {
+      width: 300px; height: 300px;
+      background: rgba(0,212,170,.05);
+      top: 50%; left: 60%;
+      animation: orbit3 18s ease-in-out infinite;
+    }
+
+    @keyframes orbit1 {
+      0%, 100% { translate: 0 0; }
+      50% { translate: 30px -40px; }
+    }
+    @keyframes orbit2 {
+      0%, 100% { translate: 0 0; }
+      50% { translate: -40px 30px; }
+    }
+    @keyframes orbit3 {
+      0%, 100% { translate: 0 0; }
+      50% { translate: 20px 20px; }
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      background-image:
+        linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 70%);
+    }
+
+    /* ── Navigation ── */
+    nav {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      translate: -50% 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      padding: 12px 28px;
+      border-radius: 999px;
+      background: rgba(18,18,24,.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      background: linear-gradient(135deg, var(--red), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 4px;
+    }
+
+    .nav-links a {
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      border-radius: 999px;
+      transition: all .2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      background: rgba(255,255,255,.06);
+    }
+
+    nav .btn {
+      padding: 7px 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 999px;
+      background: var(--red);
+      color: #fff;
+      transition: opacity .2s;
+    }
+
+    nav .btn:hover { opacity: .85; }
+
+    /* ── Sections ── */
+    .section {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ══════ HERO ══════ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 0 80px;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px 6px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      margin-bottom: 28px;
+    }
+
+    .hero-badge .live {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 8px var(--teal);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--teal); }
+      50% { opacity: .4; box-shadow: 0 0 2px var(--teal); }
+    }
+
+    .hero h1 {
+      font-size: 68px;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: .92;
+    }
+
+    .hero h1 .line2 {
+      display: block;
+      background: linear-gradient(135deg, var(--red), var(--purple), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-top: 24px;
+      max-width: 440px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 36px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 999px;
+      transition: all .2s;
+      cursor: pointer;
+    }
+
+    .btn-fill {
+      background: var(--red);
+      color: #fff;
+      box-shadow: 0 8px 32px rgba(255,41,80,.25);
+    }
+
+    .btn-fill:hover {
+      background: #e62248;
+      box-shadow: 0 12px 40px rgba(255,41,80,.35);
+      translate: 0 -2px;
+    }
+
+    .btn-ghost {
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: rgba(255,255,255,.04);
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(255,255,255,.15);
+      background: rgba(255,255,255,.08);
+    }
+
+    /* ── Hero right: illustration ── */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero-cards-stack {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+    }
+
+    .hero-cards-stack .hc {
+      position: absolute;
+      padding: 24px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      width: 55%;
+      transition: all .4s cubic-bezier(.22,1,.36,1);
+    }
+
+    .hero-cards-stack .hc:hover {
+      translate: 0 -8px;
+    }
+
+    .hc-1 {
+      top: 5%; right: 5%;
+      z-index: 3;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+
+    .hc-2 {
+      bottom: 15%; left: 5%;
+      z-index: 2;
+      box-shadow: 0 16px 48px rgba(0,0,0,.4);
+    }
+
+    .hc-3 {
+      top: 50%; left: 50%;
+      translate: -50% -50%;
+      z-index: 1;
+      box-shadow: 0 12px 40px rgba(0,0,0,.3);
+      width: 65%;
+    }
+
+    .hc .hci {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hc .hci .ic {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .hc .hci .ic.r { background: rgba(255,41,80,.12); color: var(--red); }
+    .hc .hci .ic.p { background: rgba(108,92,231,.12); color: var(--purple); }
+    .hc .hci .ic.g { background: rgba(0,212,170,.12); color: var(--teal); }
+
+    .hc .hci .hi h4 { font-size: 14px; font-weight: 700; }
+    .hc .hci .hi p { font-size: 12px; color: var(--muted); margin: 0; }
+
+    .hc .hc-stat {
+      display: flex;
+      gap: 16px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .hc .hc-stat span {
+      font-size: 11px;
+      color: var(--dim);
+    }
+
+    .hc .hc-stat strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .hc-1 .hc-stat strong { color: var(--teal); }
+    .hc-2 .hc-stat strong { color: var(--blue); }
+
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      margin-top: 56px;
+    }
+
+    .hero-stats .hs .hsn {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -.02em;
+      line-height: 1;
+    }
+
+    .hero-stats .hs .hsn.r { color: var(--red); }
+    .hero-stats .hs .hsn.p { color: var(--purple); }
+    .hero-stats .hs .hsn.t { color: var(--teal); }
+
+    .hero-stats .hs .hsl {
+      font-size: 12px;
+      color: var(--dim);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* ══════ CAPABILITIES ══════ */
+    .caps {
+      padding: 100px 0;
+    }
+
+    .sec-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .sec-label .bar {
+      width: 24px;
+      height: 2px;
+      background: var(--red);
+      border-radius: 2px;
+    }
+
+    .caps h2 {
+      font-size: 44px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+      margin-bottom: 56px;
+    }
+
+    .caps h2 .accent { color: var(--red); }
+
+    .caps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .cap-card {
+      padding: 36px 28px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: all .3s cubic-bezier(.22,1,.36,1);
+      position: relative;
+    }
+
+    .cap-card:hover {
+      border-color: rgba(255,255,255,.1);
+      background: var(--surface2);
+      translate: 0 -4px;
+    }
+
+    .cap-card .cc-n {
+      font-size: 48px;
+      font-weight: 900;
+      color: rgba(255,255,255,.04);
+      line-height: 1;
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      pointer-events: none;
+    }
+
+    .cap-card .cci {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    .cap-card .cci.r { background: rgba(255,41,80,.1); color: var(--red); }
+    .cap-card .cci.p { background: rgba(108,92,231,.1); color: var(--purple); }
+    .cap-card .cci.g { background: rgba(0,212,170,.1); color: var(--teal); }
+
+    .cap-card h3 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .cap-card > p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .cap-card ul {
+      list-style: none;
+      margin-top: 18px;
+    }
+
+    .cap-card ul li {
+      font-size: 13px;
+      color: var(--muted);
+      padding: 5px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cap-card ul li::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--dim);
+      flex-shrink: 0;
+    }
+
+    .cap-card ul li.r::before { background: var(--red); }
+    .cap-card ul li.p::before { background: var(--purple); }
+    .cap-card ul li.g::before { background: var(--teal); }
+
+    /* ══════ ARCHITECTURE ══════ */
+    .arch {
+      padding: 100px 0;
+    }
+
+    .arch h2 {
+      font-size: 44px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .arch h2 .accent { color: var(--purple); }
+
+    .arch .desc {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 480px;
+      margin-bottom: 48px;
+    }
+
+    .pipeline-flow {
+      display: flex;
+      gap: 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .pipe {
+      flex: 1;
+      padding: 28px 16px;
+      text-align: center;
+      position: relative;
+      transition: background .2s;
+    }
+
+    .pipe:hover { background: rgba(255,255,255,.03); }
+    .pipe + .pipe { border-left: 1px solid var(--border); }
+
+    .pipe .pn {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--dim);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .pipe:hover .pn { color: var(--text); }
+
+    .pipe .pd {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--dim);
+    }
+
+    .pipe .arrow {
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      translate: 0 -50%;
+      font-size: 14px;
+      color: var(--border);
+      pointer-events: none;
+    }
+
+    .pipe:last-child .arrow { display: none; }
+
+    .arch-foot {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .arch-foot .af {
+      padding: 20px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .af .afn { font-size: 15px; font-weight: 700; }
+    .af .afd { font-size: 11px; color: var(--dim); margin-top: 2px; }
+
+    /* ══════ QUICK START ══════ */
+    .start {
+      padding: 100px 0;
+    }
+
+    .start h2 {
+      font-size: 44px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .start h2 .accent { color: var(--teal); }
+
+    .start .desc {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 480px;
+      margin-bottom: 48px;
+    }
+
+    .start-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .start-card {
+      padding: 28px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: all .3s;
+    }
+
+    .start-card:hover {
+      border-color: rgba(0,212,170,.15);
+    }
+
+    .start-card .sc-n {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--teal);
+      margin-bottom: 12px;
+    }
+
+    .start-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .start-card pre {
+      font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", ui-monospace, monospace;
+      font-size: 13px;
+      line-height: 1.9;
+      color: var(--muted);
+      overflow-x: auto;
+    }
+
+    .start-card .cm { color: rgba(255,255,255,.15); }
+    .start-card .hl { color: var(--teal); }
+    .start-card .hl2 { color: var(--red); }
+
+    /* ══════ CTA ══════ */
+    .cta {
+      padding: 100px 0 60px;
+      text-align: center;
+    }
+
+    .cta-box {
+      padding: 64px 48px;
+      border-radius: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-box .glow {
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,41,80,.06), transparent 70%);
+      top: -120px; right: -80px;
+      pointer-events: none;
+    }
+
+    .cta-box .glow2 {
+      bottom: -120px; left: -80px;
+      background: radial-gradient(circle, rgba(108,92,231,.06), transparent 70%);
+    }
+
+    .cta-box h2 {
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+    }
+
+    .cta-box h2 .accent {
+      background: linear-gradient(135deg, var(--red), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .cta-box p {
+      color: var(--muted);
+      margin-top: 12px;
+      font-size: 15px;
+    }
+
+    .cta-box .cta-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 32px;
+    }
+
+    .cta-box .btn-fill {
+      background: linear-gradient(135deg, var(--red), var(--purple));
+      box-shadow: 0 8px 32px rgba(255,41,80,.2);
+    }
+
+    .cta-box .btn-fill:hover {
+      box-shadow: 0 12px 40px rgba(255,41,80,.3);
+    }
+
+    .platform-tags {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .platform-tags span {
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      color: var(--dim);
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 40px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+    }
+
+    footer .fl {
+      font-size: 12px;
+      color: rgba(255,255,255,.15);
+    }
+
+    footer .fl a { color: rgba(255,255,255,.3); text-decoration: none; }
+    footer .fl a:hover { color: var(--red); }
+
+    footer .fr {
+      display: flex;
+      gap: 20px;
+    }
+
+    footer .fr a {
+      font-size: 12px;
+      color: var(--dim);
+      text-decoration: none;
+      transition: color .2s;
+    }
+
+    footer .fr a:hover { color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .hero h1 { font-size: 52px; }
+      .caps-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      nav { gap: 16px; padding: 10px 18px; top: 12px; flex-wrap: wrap; justify-content: center; }
+      .nav-links { order: 3; width: 100%; justify-content: center; }
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 40px; }
+      .hero-visual { display: none; }
+      .caps-grid { grid-template-columns: 1fr; }
+      .start-grid { grid-template-columns: 1fr; }
+      .pipeline-flow { flex-direction: column; }
+      .pipe + .pipe { border-left: none; border-top: 1px solid var(--border); }
+      .pipe .arrow { display: none; }
+      .arch-foot { grid-template-columns: 1fr; }
+      .cta-box { padding: 40px 24px; }
+      .cta-box h2 { font-size: 28px; }
+      .cta-box .cta-actions { flex-direction: column; align-items: center; }
+      .hero-stats { gap: 24px; flex-wrap: wrap; }
+      footer { flex-direction: column; gap: 16px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-layer">
+    <div class="grad-orb o1"></div>
+    <div class="grad-orb o2"></div>
+    <div class="grad-orb o3"></div>
+  </div>
+  <div class="bg-grid"></div>
+
+  <nav>
+    <div class="logo">Open‑AutoGLM</div>
+    <div class="nav-links">
+      <a href="#caps">核心能力</a>
+      <a href="#arch">架构</a>
+      <a href="#start">快速开始</a>
+    </div>
+    <a href="https://github.com/joe-qai/Open-AutoGLM-Web" class="btn" target="_blank">GitHub</a>
+  </nav>
+
+  <!-- ══ HERO ══ -->
+  <section class="section hero" id="top">
+    <div class="container" style="width:100%">
+      <div class="hero-inner">
+        <div>
+          <div class="hero-badge">
+            <span class="live"></span>
+            开源 &middot; VLM 驱动 &middot; 多平台
+          </div>
+          <h1>
+            手机自动化，<br>
+            <span class="line2">跨平台统一。</span>
+          </h1>
+          <p>一条自然语言指令，完成多端设备操作闭环。Android / HarmonyOS / iOS 三端统一，从感知到验证全链路覆盖。</p>
+          <div class="hero-actions">
+            <a href="#start" class="btn btn-fill">快速开始</a>
+            <a href="#caps" class="btn btn-ghost">核心能力</a>
+          </div>
+          <div class="hero-stats">
+            <div class="hs"><div class="hsn r">3</div><div class="hsl">平台支持</div></div>
+            <div class="hs"><div class="hsn p">7</div><div class="hsl">流水线层</div></div>
+            <div class="hs"><div class="hsn t">50+</div><div class="hsl">预置应用</div></div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-cards-stack">
+            <div class="hc hc-1">
+              <div class="hci">
+                <div class="ic g">A</div>
+                <div class="hi"><h4>Android</h4><p>ADB + scrcpy</p></div>
+              </div>
+              <div class="hc-stat"><span>状态: <strong>运行中</strong></span><span>3 台设备</span></div>
+            </div>
+            <div class="hc hc-2">
+              <div class="hci">
+                <div class="ic p">i</div>
+                <div class="hi"><h4>iOS</h4><p>WebDriverAgent</p></div>
+              </div>
+              <div class="hc-stat"><span>状态: <strong>运行中</strong></span><span>2 台设备</span></div>
+            </div>
+            <div class="hc hc-3">
+              <div class="hci">
+                <div class="ic r">H</div>
+                <div class="hi"><h4>HarmonyOS</h4><p>HDC native</p></div>
+              </div>
+              <div class="hc-stat"><span>状态: <strong>运行中</strong></span><span>2 台设备</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CAPABILITIES ══ -->
+  <section class="section caps" id="caps">
+    <div class="container">
+      <div class="sec-label"><span class="bar"></span> 核心能力</div>
+      <h2>一套引擎，<span class="accent">三端统一。</span></h2>
+      <div class="caps-grid">
+        <div class="cap-card">
+          <div class="cc-n">A</div>
+          <div class="cci r">A</div>
+          <h3>Android</h3>
+          <p>ADB + uiautomator + scrcpy，支持 USB 与 WiFi 连接，完整手势注入与应用生命周期管理。</p>
+          <ul>
+            <li>触控、滑动、长按</li>
+            <li class="r">安装、启动、停止</li>
+            <li>截图 + XML 结构</li>
+          </ul>
+        </div>
+        <div class="cap-card">
+          <div class="cc-n">H</div>
+          <div class="cci p">H</div>
+          <h3>HarmonyOS</h3>
+          <p>HDC 原生驱动，按 bundle name 启动 Ability，无需额外输入法。</p>
+          <ul>
+            <li>HDC 截图采集</li>
+            <li class="p">Ability 拉起</li>
+            <li>Shell 触摸操作</li>
+          </ul>
+        </div>
+        <div class="cap-card">
+          <div class="cc-n">i</div>
+          <div class="cci g">i</div>
+          <h3>iOS</h3>
+          <p>WebDriverAgent HTTP API，支持 USB 端口映射与 WiFi 连接，元素定位与交互。</p>
+          <ul>
+            <li>WDA 元素查询</li>
+            <li class="g">Alert 自动处理</li>
+            <li>滑动与滚动</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ ARCHITECTURE ══ -->
+  <section class="section arch" id="arch">
+    <div class="container">
+      <div class="sec-label"><span class="bar"></span> 架构</div>
+      <h2>全链路 <span class="accent">流水线。</span></h2>
+      <p class="desc">六层 ReActLoop 闭环——从感知到回放，每层可组合、跨平台。</p>
+      <div class="pipeline-flow">
+        <div class="pipe"><div class="pn">01</div><div class="pd">感知</div><div class="arrow">&rarr;</div></div>
+        <div class="pipe"><div class="pn">02</div><div class="pd">决策</div><div class="arrow">&rarr;</div></div>
+        <div class="pipe"><div class="pn">03</div><div class="pd">执行</div><div class="arrow">&rarr;</div></div>
+        <div class="pipe"><div class="pn">04</div><div class="pd">记忆</div><div class="arrow">&rarr;</div></div>
+        <div class="pipe"><div class="pn">05</div><div class="pd">验证</div><div class="arrow">&rarr;</div></div>
+        <div class="pipe"><div class="pn">06</div><div class="pd">回放</div></div>
+      </div>
+      <div class="arch-foot">
+        <div class="af"><div class="afn">ADB</div><div class="afd">Android 7.0+</div></div>
+        <div class="af"><div class="afn">HDC</div><div class="afd">HarmonyOS NEXT+</div></div>
+        <div class="af"><div class="afn">WDA</div><div class="afd">iOS</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ QUICK START ══ -->
+  <section class="section start" id="start">
+    <div class="container">
+      <div class="sec-label"><span class="bar"></span> 快速开始</div>
+      <h2><span class="accent">三个命令</span>，快速启动。</h2>
+      <p class="desc">后端、前端、CLI，三选一，无需复杂配置。</p>
+      <div class="start-grid">
+        <div class="start-card">
+          <div class="sc-n">第一步</div>
+          <h3>启动后端</h3>
+          <pre><span class="cm"># 端口 8005</span>
+cd backend
+pip install -r req<wbr>s.txt
+python run.py</pre>
+        </div>
+        <div class="start-card">
+          <div class="sc-n">第二步</div>
+          <h3>启动前端</h3>
+          <pre><span class="cm"># 代理 API → :8005</span>
+cd frontend
+npm install
+npm run dev</pre>
+        </div>
+        <div class="start-card">
+          <div class="sc-n">第三步</div>
+          <h3>运行任务</h3>
+          <pre>python main.py <span class="hl">\</span>
+  --base-url &lt;URL&gt; <span class="hl">\</span>
+  --model &lt;NAME&gt; <span class="hl">\</span>
+  <span class="hl2">"打开美团搜索火锅"</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CTA ══ -->
+  <section class="section cta">
+    <div class="container">
+      <div class="cta-box">
+        <div class="glow"></div>
+        <div class="glow glow2"></div>
+        <h2>准备好了吗？<br><span class="accent">开源免费，立即部署。</span></h2>
+        <p>AI 驱动的多平台手机自动化测试平台。</p>
+        <div class="cta-actions">
+          <a href="https://github.com/joe-qai/Open-AutoGLM-Web" class="btn btn-fill" target="_blank">Star on GitHub</a>
+          <a href="http://localhost:8005/docs" class="btn btn-ghost">API 文档</a>
+        </div>
+        <div class="platform-tags">
+          <span>Android 7.0+</span>
+          <span>HarmonyOS NEXT+</span>
+          <span>iOS</span>
+          <span>OpenAI API</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="fl">&copy; 2025 Open-AutoGLM &mdash; <a href="https://github.com/zai-org/Open-AutoGLM" target="_blank">原项目地址</a></div>
+    <div class="fr">
+      <a href="https://github.com/joe-qai/Open-AutoGLM-Web" target="_blank">GitHub</a>
+      <a href="#top">返回顶部</a>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) t.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>
