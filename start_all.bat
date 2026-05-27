@@ -10,6 +10,7 @@ set "SCRIPT_DIR=%~dp0"
 set "VENV_DIR=%SCRIPT_DIR%.venv"
 set "BACKEND_DIR=%SCRIPT_DIR%backend"
 set "FRONTEND_DIR=%SCRIPT_DIR%frontend"
+set "KILL_SCRIPT=%SCRIPT_DIR%kill_ports.bat"
 
 :: 检查虚拟环境是否存在
 if not exist "%VENV_DIR%\Scripts\python.exe" (
@@ -27,23 +28,35 @@ if not exist "%VENV_DIR%\Scripts\python.exe" (
 )
 
 echo.
-echo ==================== AutoPhone 启动脚本 ====================
+echo ==================== AutoPhone 重启脚本 ====================
 echo.
 echo 项目目录: %SCRIPT_DIR%
 echo 虚拟环境: %VENV_DIR%
 echo.
 
+:: 先杀掉占用端口的进程
+echo [0/3] 停止现有服务...
+if exist "%KILL_SCRIPT%" (
+    call "%KILL_SCRIPT%"
+    echo 端口清理完成
+) else (
+    echo 未找到 kill_ports.bat，跳过端口清理
+)
+echo.
+
 :: 激活虚拟环境并启动后端服务
-echo [1/2] 启动后端服务...
+echo [1/3] 启动后端服务...
 start "AutoPhone Backend" cmd /k "cd /d %BACKEND_DIR% && call %VENV_DIR%\Scripts\activate.bat && echo 虚拟环境已激活: !VIRTUAL_ENV! && python run.py"
 
-:: 等待后端启动（可选）
+:: 等待后端启动
 timeout /t 3 /nobreak >nul
 
 :: 启动前端服务
-echo [2/2] 启动前端服务...
-start "AutoPhone Frontend" cmd /k "cd /d %FRONTEND_DIR% && npm install && npm run dev"
+echo [2/3] 启动前端服务...
+start "AutoPhone Frontend" cmd /k "cd /d %FRONTEND_DIR% && npm run dev"
 
+echo.
+echo [3/3] 服务启动完成
 echo.
 echo ==================== 服务启动完成 ====================
 echo.
@@ -51,7 +64,7 @@ echo 后端服务窗口: AutoPhone Backend
 echo 前端服务窗口: AutoPhone Frontend
 echo.
 echo 前端访问地址: http://localhost:3000
-echo 后端API地址: http://localhost:8000
+echo 后端API地址: http://localhost:8005
 echo.
 echo 按任意键关闭此窗口...
 pause >nul

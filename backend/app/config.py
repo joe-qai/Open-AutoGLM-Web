@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     
     # API settings
     api_host: str = "0.0.0.0"
-    api_port: int = 8000
+    api_port: int = 8005
     
     # Model settings
     model_api_url: str = "http://localhost:8000/v1"

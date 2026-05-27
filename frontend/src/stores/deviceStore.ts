@@ -5,7 +5,7 @@ export interface Device {
   device_id: string;
   name: string;
   platform: 'android' | 'ios' | 'harmonyos';
-  status: 'connected' | 'disconnected' | 'busy';
+  status: 'connected' | 'disconnected' | 'busy' | 'error';
   connection_type?: 'usb' | 'tcpip';
   ip?: string;
   model?: string;

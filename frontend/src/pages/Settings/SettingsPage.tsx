@@ -174,9 +174,12 @@ export function SettingsPage() {
       {/* Model Config List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {configs.map((config) => (
-          <div key={config.config_id} className="bg-[#1e293b] border border-[#334155] rounded-xl p-4 relative overflow-hidden group">
+          <div
+            key={config.config_id}
+            className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-5 hover:border-slate-600/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 relative"
+          >
             {config.is_default && (
-              <div className="absolute top-0 right-0 px-3 py-1 bg-indigo-500 text-white text-[10px] font-bold rounded-bl-lg flex items-center gap-1">
+              <div className="absolute top-3 right-3 px-3 py-1 bg-indigo-500/20 text-indigo-400 text-xs font-semibold rounded-full flex items-center gap-1">
                 <Check className="w-3 h-3" />
                 默认
               </div>
@@ -184,19 +187,19 @@ export function SettingsPage() {
             
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 ${config.provider === 'openai' ? 'bg-green-500/20 text-green-400' : 'bg-orange-500/20 text-orange-400'} rounded-lg flex items-center justify-center`}>
-                  {config.provider === 'openai' ? <Bot className="w-5 h-5" /> : <Zap className="w-5 h-5" />}
+                <div className={`w-12 h-12 ${config.provider === 'openai' ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30' : 'bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30'} rounded-xl flex items-center justify-center shrink-0`}>
+                  {config.provider === 'openai' ? <Bot className="w-6 h-6 text-green-400" /> : <Zap className="w-6 h-6 text-orange-400" />}
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold">{config.name}</h3>
-                  <p className="text-[#64748b] text-xs uppercase tracking-wider">{config.provider}</p>
+                  <h3 className="text-white font-semibold text-lg">{config.name}</h3>
+                  <p className="text-slate-400 text-sm uppercase tracking-wider">{config.provider}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 transition-opacity">
+              <div className="flex items-center gap-1">
                 <button
                   onClick={() => handleCardTestConnection(config)}
                   disabled={cardTestId !== null}
-                  className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg transition-colors disabled:opacity-50"
+                  className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
                   title="测试连接"
                 >
                   {cardTestId === config.config_id ? (
@@ -210,7 +213,7 @@ export function SettingsPage() {
                 </button>
                 <button
                   onClick={() => handleOpenModal(config)}
-                  className="p-2 text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors"
+                  className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all duration-200"
                   title="编辑"
                 >
                   <Edit2 className="w-4 h-4" />
@@ -221,7 +224,7 @@ export function SettingsPage() {
                       deleteConfig(config.config_id);
                     }
                   }}
-                  className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                  className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
                   title="删除"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -229,41 +232,40 @@ export function SettingsPage() {
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-sm">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <Server className="w-4 h-4 text-[#475569] shrink-0" />
-                  <span className="text-[#94a3b8] shrink-0">模型:</span>
-                  <span className="text-[#e2e8f0] truncate">{config.model_name}</span>
-                </div>
-                {config.base_url && (
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <Globe className="w-4 h-4 text-[#475569] shrink-0" />
-                    <span className="text-[#94a3b8] shrink-0">地址:</span>
-                    <span className="text-[#e2e8f0] truncate">{config.base_url}</span>
-                  </div>
-                )}
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <Server className="w-4 h-4 text-slate-500 shrink-0" />
+                <span className="text-slate-500 shrink-0 w-12">模型:</span>
+                <span className="text-slate-300 truncate">{config.model_name}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Key className="w-4 h-4 text-[#475569]" />
-                <span className="text-[#94a3b8]">API Key:</span>
-                <span className="text-[#e2e8f0]">••••••••••••</span>
+              {config.base_url && (
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-slate-500 shrink-0" />
+                  <span className="text-slate-500 shrink-0 w-12">地址:</span>
+                  <span className="text-slate-300 truncate">{config.base_url}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Key className="w-4 h-4 text-slate-500 shrink-0" />
+                <span className="text-slate-500 shrink-0 w-12">API Key:</span>
+                <span className="text-slate-300">••••••••••••</span>
               </div>
             </div>
           </div>
         ))}
 
         {configs.length === 0 && (
-          <div className="col-span-full bg-[#1e293b] border border-[#334155] border-dashed rounded-xl py-12 flex flex-col items-center justify-center text-center">
-            <Server className="w-12 h-12 text-[#334155] mb-4" />
-            <h3 className="text-white font-medium mb-1">暂无模型配置</h3>
-            <p className="text-[#64748b] text-sm mb-6">创建一个模型配置以开始使用 Agent</p>
+          <div className="col-span-full bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/30 rounded-2xl py-12 flex flex-col items-center justify-center text-center">
+            <Server className="w-16 h-16 text-slate-500 mb-4" />
+            <h3 className="text-white font-medium text-lg mb-2">暂无模型配置</h3>
+            <p className="text-slate-400 text-sm mb-6">创建一个模型配置以开始使用 Agent</p>
             <button
               onClick={() => handleOpenModal()}
               title="新增"
-              className="px-4 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-600/30 rounded-lg transition-colors text-sm"
+              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl flex items-center gap-2 transition-all duration-200"
             >
               <Plus className="w-4 h-4" />
+              新增模型配置
             </button>
           </div>
         )}

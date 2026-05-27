@@ -41,11 +41,33 @@ export function DevicePage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'connected':
-        return <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">在线</span>;
+        return (
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse"></span>
+            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">空闲</span>
+          </div>
+        );
       case 'disconnected':
-        return <span className="px-2 py-1 bg-gray-500/20 text-gray-400 text-xs rounded-full">离线</span>;
+        return (
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+            <span className="px-2 py-1 bg-gray-500/20 text-gray-400 text-xs rounded-full">未初始化</span>
+          </div>
+        );
       case 'busy':
-        return <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-full">忙碌</span>;
+        return (
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse"></span>
+            <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-full">忙碌</span>
+          </div>
+        );
+      case 'error':
+        return (
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse"></span>
+            <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded-full">错误</span>
+          </div>
+        );
       default:
         return null;
     }
@@ -126,51 +148,49 @@ export function DevicePage() {
       )}
 
       {/* Device Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {devices.map((device) => (
           <div
             key={device.device_id}
-            className="bg-[#1e293b] border border-[#334155] rounded-xl p-5 hover:border-[#475569] transition-colors"
+            className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-5 hover:border-slate-600/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300"
           >
             <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-[#0f172a] rounded-xl flex items-center justify-center">
-                  <Smartphone className="w-6 h-6 text-[#64748b]" />
-                </div>
-                <div>
-                  <h3 className="text-white font-medium">{device.name}</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    {getPlatformIcon(device.platform)}
-                    <span className="text-[#94a3b8] text-sm capitalize">{device.platform}</span>
-                    {getConnectionBadge(device.connection_type, device.ip)}
-                  </div>
-                </div>
+              <div>
+                <h3 className="text-white font-semibold text-lg">{device.name}</h3>
+                <p className="text-slate-400 text-sm mt-1">
+                  {device.platform === 'android' ? 'Android' : device.platform === 'ios' ? 'iOS' : device.platform === 'harmonyos' ? 'HarmonyOS' : device.platform} {device.os_version} · {device.model}
+                </p>
               </div>
               {getStatusBadge(device.status)}
             </div>
 
-            <div className="space-y-2 text-sm mb-4">
-              <div className="flex justify-between">
-                <span className="text-[#64748b]">设备ID</span>
-                <span className="text-[#94a3b8] font-mono">{device.device_id.slice(0, 12)}...</span>
-              </div>
-              {device.model && (
-                <div className="flex justify-between">
-                  <span className="text-[#64748b]">型号</span>
-                  <span className="text-[#94a3b8]">{device.model}</span>
-                </div>
-              )}
+            <div className="flex flex-wrap gap-2 mb-4">
               {device.os_version && (
-                <div className="flex justify-between">
-                  <span className="text-[#64748b]">系统版本</span>
-                  <span className="text-[#94a3b8]">{device.os_version}</span>
-                </div>
+                <span className="px-3 py-1.5 bg-slate-700/50 text-slate-300 text-xs rounded-lg">
+                  {device.os_version}
+                </span>
               )}
               {device.screen_width && device.screen_height && (
-                <div className="flex justify-between">
-                  <span className="text-[#64748b]">分辨率</span>
-                  <span className="text-[#94a3b8]">{device.screen_width}x{device.screen_height}</span>
-                </div>
+                <span className="px-3 py-1.5 bg-slate-700/50 text-slate-300 text-xs rounded-lg">
+                  {device.screen_width}x{device.screen_height}
+                </span>
+              )}
+              {device.connection_type === 'usb' && (
+                <span className="px-3 py-1.5 bg-blue-500/20 text-blue-400 text-xs rounded-lg flex items-center gap-1">
+                  <Wifi className="w-3 h-3" />
+                  USB
+                </span>
+              )}
+              {device.connection_type === 'tcpip' && (
+                <span className="px-3 py-1.5 bg-green-500/20 text-green-400 text-xs rounded-lg flex items-center gap-1">
+                  <Wifi className="w-3 h-3" />
+                  TCP/IP
+                </span>
+              )}
+              {device.ip && (
+                <span className="px-3 py-1.5 bg-slate-700/50 text-slate-400 text-xs rounded-lg font-mono">
+                  {device.ip}
+                </span>
               )}
             </div>
 
@@ -178,10 +198,18 @@ export function DevicePage() {
               {device.status === 'disconnected' ? (
                 <button
                   onClick={() => connectDevice(device.device_id)}
-                  className="flex-1 py-2 bg-green-600 hover:bg-green-500 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                  className="flex-1 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-green-500/20"
                 >
                   <Power className="w-4 h-4" />
                   连接
+                </button>
+              ) : device.status === 'busy' ? (
+                <button
+                  disabled
+                  className="flex-1 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-2 opacity-70"
+                >
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  测试中
                 </button>
               ) : (
                 <>
@@ -189,7 +217,7 @@ export function DevicePage() {
                     <button
                       onClick={() => enableWireless(device.device_id)}
                       disabled={enablingWirelessDeviceId === device.device_id}
-                      className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                      className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-indigo-500/20"
                     >
                       <Wifi className="w-4 h-4" />
                       {enablingWirelessDeviceId === device.device_id ? '开启中...' : '开启无线'}
@@ -198,7 +226,7 @@ export function DevicePage() {
                   {device.connection_type === 'tcpip' && (
                     <button
                       onClick={() => disconnectDevice(device.device_id)}
-                      className="flex-1 py-2 bg-red-600 hover:bg-red-500 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                      className="flex-1 py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-red-500/20"
                     >
                       <Power className="w-4 h-4" />
                       断开
@@ -208,7 +236,7 @@ export function DevicePage() {
               )}
               <button
                 onClick={() => openDrawer(device)}
-                className="flex-1 py-2 bg-[#334155] hover:bg-[#475569] text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                className="flex-1 py-3 bg-slate-700/50 hover:bg-slate-600/50 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-2 transition-all duration-200"
               >
                 <Monitor className="w-4 h-4" />
                 详情

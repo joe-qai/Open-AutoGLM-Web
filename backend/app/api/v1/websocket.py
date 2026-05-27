@@ -1,4 +1,4 @@
-"""WebSocket real-time communication API."""
+"""WebSocket real-time communication API for task updates."""
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from typing import Dict

@@ -160,109 +160,114 @@ export function ReportPage() {
         </div>
       )}
 
-      {/* Report Table */}
-      <div className="bg-[#1e293b] border border-[#334155] rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="text-[#64748b] text-sm border-b border-[#334155]">
-                <th className="text-left py-4 px-4 font-medium w-10">
-                  <button onClick={toggleSelectAll} className="text-[#94a3b8] hover:text-white transition-colors">
-                    {selectedIds.size === reports.length && reports.length > 0 ? (
-                      <CheckSquare className="w-4 h-4" />
-                    ) : (
-                      <Square className="w-4 h-4" />
-                    )}
-                  </button>
-                </th>
-                <th className="text-left py-4 px-6 font-medium">报告名称</th>
-                <th className="text-left py-4 px-6 font-medium">终端系统</th>
-                <th className="text-left py-4 px-6 font-medium">执行时长</th>
-                <th className="text-left py-4 px-6 font-medium">执行状态</th>
-                <th className="text-left py-4 px-6 font-medium">创建时间</th>
-                <th className="text-left py-4 px-6 font-medium">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reports.map((report) => (
-                <tr key={report.report_id} className="border-b border-[#334155] last:border-0 hover:bg-[#334155]/30">
-                  <td className="py-4 px-4">
-                    <button onClick={() => toggleSelect(report.report_id)} className="text-[#94a3b8] hover:text-white transition-colors">
-                      {selectedIds.has(report.report_id) ? (
-                        <CheckSquare className="w-4 h-4 text-indigo-400" />
-                      ) : (
-                        <Square className="w-4 h-4" />
-                      )}
-                    </button>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-[#0f172a] rounded-lg flex items-center justify-center">
-                        <FileText className="w-4 h-4 text-indigo-400" />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">{report.name}</p>
-                        <p className="text-[#64748b] text-sm">任务: {report.task_name}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
-                      {getPlatformIcon(report.platform)}
-                      <span className="text-[#94a3b8]">{getPlatformText(report.platform)}</span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6 text-[#94a3b8]">
-                    {report.duration !== undefined ? formatDuration(report.duration) : '-'}
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(report.status)}
-                      <span className={`text-sm ${getStatusClass(report.status)}`}>
-                        {getStatusText(report.status)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6 text-[#94a3b8] text-sm">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {new Date(report.created_at).toLocaleString()}
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleDownload(report)}
-                        disabled={loadingReportId === report.report_id || report.status !== 'completed'}
-                        className="p-2 text-indigo-400 hover:bg-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
-                        title="下载"
-                      >
-                        {loadingReportId === report.report_id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Download className="w-4 h-4" />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => deleteReport(report.report_id)}
-                        className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                        title="删除"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Select All Header */}
+      {reports.length > 0 && (
+        <div className="flex items-center gap-4 mb-4">
+          <button onClick={toggleSelectAll} className="text-slate-400 hover:text-white transition-colors">
+            {selectedIds.size === reports.length ? (
+              <CheckSquare className="w-5 h-5 text-indigo-400" />
+            ) : (
+              <Square className="w-5 h-5" />
+            )}
+          </button>
+          <span className="text-slate-400 text-sm">全选 ({reports.length})</span>
         </div>
+      )}
+
+      {/* Report Cards */}
+      <div className="space-y-4">
+        {reports.map((report) => (
+          <div
+            key={report.report_id}
+            className="bg-gradient-to-r from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-5 hover:border-slate-600/50 transition-all duration-300"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
+                <button onClick={() => toggleSelect(report.report_id)} className="mt-1 text-slate-400 hover:text-white transition-colors">
+                  {selectedIds.has(report.report_id) ? (
+                    <CheckSquare className="w-5 h-5 text-indigo-400" />
+                  ) : (
+                    <Square className="w-5 h-5" />
+                  )}
+                </button>
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-white font-semibold text-lg">{report.name}</h3>
+                    <span className={`px-3 py-1 text-xs rounded-full ${
+                      report.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                      report.status === 'executing' ? 'bg-blue-500/20 text-blue-400' :
+                      report.status === 'failed' ? 'bg-red-500/20 text-red-400' :
+                      'bg-slate-500/20 text-slate-400'
+                    }`}>
+                      {getStatusText(report.status)}
+                    </span>
+                  </div>
+                  <p className="text-slate-400 text-sm">任务: {report.task_name} · {getPlatformText(report.platform)} · {new Date(report.created_at).toLocaleString()}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {/* Stats */}
+                <div className="flex items-center gap-6">
+                  {report.total_cases !== undefined && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-white">{report.total_cases}</p>
+                      <p className="text-xs text-slate-400">总用例</p>
+                    </div>
+                  )}
+                  {report.passed_cases !== undefined && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-green-400">{report.passed_cases}</p>
+                      <p className="text-xs text-slate-400">通过</p>
+                    </div>
+                  )}
+                  {report.failed_cases !== undefined && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-red-400">{report.failed_cases}</p>
+                      <p className="text-xs text-slate-400">失败</p>
+                    </div>
+                  )}
+                  {report.pass_rate !== undefined && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-blue-400">{report.pass_rate}%</p>
+                      <p className="text-xs text-slate-400">通过率</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2 ml-4 pl-4 border-l border-slate-700">
+                  <button
+                    onClick={() => handleDownload(report)}
+                    disabled={loadingReportId === report.report_id || report.status !== 'completed'}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-all duration-200"
+                    title="下载"
+                  >
+                    {loadingReportId === report.report_id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
+                    下载报告
+                  </button>
+                  <button
+                    onClick={() => deleteReport(report.report_id)}
+                    className="px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-all duration-200"
+                    title="删除"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
 
         {reports.length === 0 && (
-          <div className="text-center py-20">
-            <FileText className="w-16 h-16 text-[#475569] mx-auto mb-4" />
+          <div className="text-center py-20 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/30 rounded-2xl">
+            <FileText className="w-16 h-16 text-slate-500 mx-auto mb-4" />
             <h3 className="text-white text-lg font-medium mb-2">暂无报告</h3>
-            <p className="text-[#64748b]">执行任务后将自动生成报告</p>
+            <p className="text-slate-400">执行任务后将自动生成报告</p>
           </div>
         )}
       </div>

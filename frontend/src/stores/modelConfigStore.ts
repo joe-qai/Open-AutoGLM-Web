@@ -34,7 +34,9 @@ export const useModelConfigStore = create<ModelConfigState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await modelConfigApi.getConfigs();
-      set({ configs: response as ModelConfig[], loading: false });
+      const data = response as unknown;
+      const configs = (data as { configs?: ModelConfig[] }).configs || (data as ModelConfig[]);
+      set({ configs, loading: false });
     } catch (error) {
       set({ error: 'Failed to fetch model configurations', loading: false });
     }

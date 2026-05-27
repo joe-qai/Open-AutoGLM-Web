@@ -109,7 +109,20 @@ class Database:
               updated_at TEXT
             );
         """)
+        
+        # Add missing columns for backward compatibility
+        await self._add_missing_columns()
+        
         await self._conn.commit()
+    
+    async def _add_missing_columns(self):
+        """Add missing columns to existing tables for backward compatibility."""
+        # Check and add model_config_id column to tasks table
+        cursor = await self._conn.execute("PRAGMA table_info(tasks)")
+        columns = [row[1] for row in await cursor.fetchall()]
+        
+        if 'model_config_id' not in columns:
+            await self._conn.execute("ALTER TABLE tasks ADD COLUMN model_config_id TEXT")
 
     async def get_connection(self) -> aiosqlite.Connection:
         if self._conn is None:

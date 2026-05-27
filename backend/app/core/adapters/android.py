@@ -182,3 +182,63 @@ class AndroidAdapter(BaseDeviceAdapter):
                 package_name = match.group(1)
                 apps.append({"package_name": package_name, "name": package_name})
         return apps
+
+    def double_tap(self, x: int, y: int) -> bool:
+        """Double tap at pixel coordinates with 100ms interval."""
+        self._run(f"shell input tap {x} {y}")
+        time.sleep(0.1)
+        self._run(f"shell input tap {x} {y}")
+        return True
+
+    def clear_text(self) -> bool:
+        """Clear text in the active input field."""
+        # Switch to ADB keyboard, select all, and delete
+        self._run("shell ime set com.android.adbkeyboard/.AdbIME")
+        time.sleep(0.05)
+        self._run("shell input keyevent KEYCODE_MOVE_END")
+        self._run("shell input keyevent KEYCODE_FORWARD_DEL")
+        return True
+
+    def dump_ui_tree(self) -> str:
+        """Dump UI hierarchy and return raw XML string."""
+        xml_path = "/data/local/tmp/uidump.xml"
+        local_xml = "uidump_local.xml"
+        self._run(f"shell uiautomator dump {xml_path}")
+        self._run(f"pull {xml_path} {local_xml}")
+        try:
+            with open(local_xml, "r", encoding="utf-8", errors="replace") as f_xml:
+                content = f_xml.read()
+            os.remove(local_xml)
+            return content
+        except FileNotFoundError:
+            return ""
+
+    def list_devices(self) -> List[Dict]:
+        """Parse adb devices output into list of device dicts."""
+        result = self._run("devices")
+        devices = []
+        for line in result.stdout.splitlines():
+            if "\t" in line:
+                parts = line.split("\t")
+                devices.append({"id": parts[0], "state": parts[1]})
+        return devices
+
+    def detect_and_set_adb_keyboard(self) -> str:
+        """Detect current IME, switch to ADB keyboard, return original IME."""
+        result = self._run("shell settings get secure default_input_method")
+        original_ime = result.stdout.strip()
+        self._run("shell ime enable com.android.adbkeyboard/.AdbIME")
+        self._run("shell ime set com.android.adbkeyboard/.AdbIME")
+        return original_ime
+
+    def restore_keyboard(self, original_ime: str) -> bool:
+        """Restore the original input method."""
+        if not original_ime:
+            return False
+        self._run(f"shell ime set {original_ime}")
+        return True
+
+    def _resolve_app_name(self, app_name: str) -> str | None:
+        """Resolve an app display name to its Android package name."""
+        from backend.app.core.config.app_packages import get_package_name
+        return get_package_name(app_name)

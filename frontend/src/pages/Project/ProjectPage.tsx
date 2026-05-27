@@ -70,37 +70,37 @@ export function ProjectPage() {
       </div>
 
       {/* Project Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project) => (
           <div
             key={project.project_id}
-            className="bg-[#1e293b] border border-[#334155] rounded-xl p-5 hover:border-[#475569] transition-colors"
+            className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-5 hover:border-slate-600/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300"
           >
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-[#0f172a] rounded-xl flex items-center justify-center">
-                  <FolderKanban className="w-6 h-6 text-[#64748b]" />
+                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl flex items-center justify-center shrink-0 border border-indigo-500/30">
+                  <FolderKanban className="w-6 h-6 text-indigo-400" />
                 </div>
-                <div>
-                  <h3 className="text-white font-medium">{project.name}</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    {project.task_count !== undefined && (
-                      <span className="text-[#64748b] text-sm">{project.task_count} 个任务</span>
-                    )}
-                  </div>
+                <div className="min-w-0">
+                  <h3 className="text-white font-semibold text-lg truncate">{project.name}</h3>
+                  {project.task_count !== undefined && (
+                    <span className="px-2 py-0.5 bg-slate-700/50 text-slate-300 text-xs rounded-full">
+                      {project.task_count} 个任务
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 shrink-0">
                 <button
                   onClick={() => handleEditProject(project)}
-                  className="p-2 text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors"
+                  className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all duration-200"
                   title="编辑"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => { if (confirm('确定要删除此项目吗？')) { deleteProject(project.project_id); } }}
-                  className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                  className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
                   title="删除"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -108,10 +108,13 @@ export function ProjectPage() {
               </div>
             </div>
 
-            <p className="text-[#94a3b8] text-sm mb-4 line-clamp-2">{project.description}</p>
+            <p className="text-slate-400 text-sm mb-4 line-clamp-2">{project.description || '暂无描述'}</p>
 
-            <div className="flex items-center justify-between text-xs text-[#64748b]">
-              <span>创建于 {new Date(project.created_at).toLocaleDateString()}</span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-500">创建于 {new Date(project.created_at).toLocaleDateString()}</span>
+              {project.updated_at && (
+                <span className="text-xs text-slate-500">更新于 {new Date(project.updated_at).toLocaleDateString()}</span>
+              )}
             </div>
           </div>
         ))}

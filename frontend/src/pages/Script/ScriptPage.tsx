@@ -216,31 +216,31 @@ export function ScriptPage() {
       </div>
 
       {/* Script Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {scripts.map((script) => (
           <div
             key={script.script_id}
-            className="bg-[#1e293b] border border-[#334155] rounded-xl p-5 hover:border-[#475569] transition-colors"
+            className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-5 hover:border-slate-600/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300"
           >
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#0f172a] rounded-lg flex items-center justify-center">
-                  <FileCode className="w-5 h-5 text-indigo-400" />
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500/20 to-amber-500/20 rounded-xl flex items-center justify-center shrink-0 border border-orange-500/30">
+                  <FileCode className="w-6 h-6 text-orange-400" />
                 </div>
                 <div>
-                  <h3 className="text-white font-medium">{script.name}</h3>
+                  <h3 className="text-white font-semibold text-lg">{script.name}</h3>
                   <div className="flex items-center gap-2 mt-1">
                     {getPlatformIcon(script.platform)}
-                    <span className="text-[#94a3b8] text-sm">{getPlatformText(script.platform)}</span>
+                    <span className="text-slate-400 text-sm">{getPlatformText(script.platform)}</span>
                   </div>
                 </div>
               </div>
               {getTypeBadge(script.script_type)}
             </div>
 
-            <p className="text-[#64748b] text-sm mb-4 line-clamp-2">{script.description}</p>
+            <p className="text-slate-400 text-sm mb-4 line-clamp-2">{script.description || '暂无描述'}</p>
 
-            <div className="flex items-center justify-between text-xs text-[#64748b] mb-4">
+            <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
               <span>版本 v{script.version}</span>
               <span>{new Date(script.created_at).toLocaleDateString()}</span>
             </div>
@@ -248,7 +248,7 @@ export function ScriptPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => handleExecute(script)}
-                className="flex-1 py-2 bg-green-600 hover:bg-green-500 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                className="flex-1 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200"
               >
                 <Play className="w-4 h-4" />
                 执行
@@ -256,20 +256,20 @@ export function ScriptPage() {
               <button
                 onClick={() => handleEdit(script)}
                 title="编辑"
-                className="flex-1 py-2 bg-[#334155] hover:bg-[#475569] text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                className="flex-1 py-2.5 bg-slate-700/50 hover:bg-slate-600/50 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200"
               >
                 <Edit className="w-4 h-4" />
               </button>
               <button
                 onClick={() => handleDownload(script)}
-                className="p-2 text-[#94a3b8] hover:text-white hover:bg-[#334155] rounded-lg transition-colors"
+                className="p-2.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-xl transition-all duration-200"
                 title="下载"
               >
                 <Download className="w-4 h-4" />
               </button>
               <button
                 onClick={() => handleDelete(script.script_id)}
-                className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                className="p-2.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-200"
                 title="删除"
               >
                 <Trash2 className="w-4 h-4" />
@@ -280,10 +280,10 @@ export function ScriptPage() {
       </div>
 
       {scripts.length === 0 && (
-        <div className="text-center py-20">
-          <FileCode className="w-16 h-16 text-[#475569] mx-auto mb-4" />
+        <div className="text-center py-20 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/30 rounded-2xl">
+          <FileCode className="w-16 h-16 text-slate-500 mx-auto mb-4" />
           <h3 className="text-white text-lg font-medium mb-2">暂无脚本</h3>
-          <p className="text-[#64748b]">在Agent页面生成您的第一个脚本或上传本地脚本</p>
+          <p className="text-slate-400">在Agent页面生成您的第一个脚本或上传本地脚本</p>
         </div>
       )}
 

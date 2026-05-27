@@ -200,3 +200,57 @@ class IOSAdapter(BaseDeviceAdapter):
         except Exception:
             pass
         return apps
+
+    def double_tap(self, x: int, y: int) -> bool:
+        """Double tap at pixel coordinates via WDA."""
+        try:
+            requests.post(f"{self._wda_url}/touch/doubleclick", json={
+                "x": x, "y": y
+            })
+            return True
+        except Exception:
+            return False
+
+    def clear_text(self) -> bool:
+        """Clear text in the active input field via WDA."""
+        try:
+            requests.post(f"{self._wda_url}/wda/element/clear", json={})
+            return True
+        except Exception:
+            return False
+
+    def hide_keyboard(self) -> bool:
+        """Dismiss the on-screen keyboard via WDA."""
+        try:
+            requests.post(f"{self._wda_url}/wda/keyboard/dismiss", json={})
+            return True
+        except Exception:
+            return False
+
+    def dump_ui_tree(self) -> str:
+        """Get UI hierarchy from WDA /source endpoint, return raw XML."""
+        try:
+            response = requests.get(f"{self._wda_url}/source")
+            if response.status_code == 200:
+                data = response.json()
+                return data.get("value", "")
+            return ""
+        except Exception:
+            return ""
+
+    def list_devices(self) -> List[Dict]:
+        """Get device list from WDA status endpoint."""
+        try:
+            response = requests.get(f"{self._wda_url}/status")
+            if response.status_code == 200:
+                data = response.json().get("value", {})
+                device_info = data.get("device", {})
+                return [{"id": device_info.get("udid", "unknown"), "state": "device"}]
+            return []
+        except Exception:
+            return []
+
+    def _resolve_app_name(self, app_name: str) -> str | None:
+        """Resolve an app display name to its iOS bundle ID."""
+        from backend.app.core.config.app_packages import get_package_name_ios
+        return get_package_name_ios(app_name)

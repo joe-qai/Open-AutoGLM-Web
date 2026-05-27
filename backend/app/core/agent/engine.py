@@ -212,7 +212,7 @@ class AgentEngine:
             self.context.steps_completed = result["total_steps"]
 
             if self.verification:
-                v_result = self.verification.verify(result)
+                v_result = self.verification.verify(self.context.task_description, result.get("history", []))
                 result["verification"] = v_result
 
             replay_path = self.replay.stop_recording()

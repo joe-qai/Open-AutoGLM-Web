@@ -47,7 +47,7 @@ async def get_screenshot(device_id: str):
     screenshot_data = device_service.get_screenshot(device_id)
     if not screenshot_data:
         raise HTTPException(status_code=400, detail="Failed to capture screenshot")
-    return {"screenshot_base64": screenshot_data}
+    return {"screenshot_base64": screenshot_data, "device_id": device_id}
 
 
 @router.post("/{device_id}/launch/{app_name}")

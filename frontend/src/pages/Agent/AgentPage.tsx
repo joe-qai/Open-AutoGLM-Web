@@ -1,31 +1,30 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Bot,
   Play,
   Save,
-  RotateCcw,
   Copy,
   Download,
-  Bug,
-  Edit3,
   Smartphone,
   Terminal,
-  Package,
   Sparkles,
   CheckCircle2,
   AlertCircle,
+  ChevronRight,
+  Wifi,
+  Usb,
 } from 'lucide-react';
 import { useDeviceStore } from '../../stores/deviceStore';
 import { useAgentStore } from '../../stores/agentStore';
-import { useProjectStore } from '../../stores/projectStore';
-import { useApkStore } from '../../stores/apkStore';
 import { useModelConfigStore } from '../../stores/modelConfigStore';
 import { scriptApi, taskApi } from '../../services/api';
+import controlApi from '../../services/controlApi';
 import { Prism as SyntaxHighlighterComponent } from 'react-syntax-highlighter';
 import {
   oneDark as atomOneDark,
 } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import ScrcpyPlayer from '../../components/ScrcpyPlayer/ScrcpyPlayer';
 
 const getLanguage = (platform: string): string => {
   switch (platform) {
@@ -71,20 +70,11 @@ const customDarkStyle = {
   },
 };
 
-const platforms = [
-  { id: 'android', name: 'Android', color: '#22c55e' },
-  { id: 'ios', name: 'iOS', color: '#e5e7eb' },
-  { id: 'harmonyos', name: 'HarmonyOS', color: '#3b82f6' },
-];
-
 export function AgentPage() {
   const [searchParams] = useSearchParams();
   const { devices, fetchDevices } = useDeviceStore();
-  const { projects, fetchProjects } = useProjectStore();
-  const { apks, fetchApks } = useApkStore();
   const { configs: modelConfigs, fetchConfigs: fetchModelConfigs } = useModelConfigStore();
   const {
-    isExecuting,
     logs,
     executeDirect,
     addLog,
@@ -92,34 +82,41 @@ export function AgentPage() {
   } = useAgentStore();
 
   const [taskDescription, setTaskDescription] = useState('');
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['android']);
+  const [selectedPlatforms] = useState<string[]>(['android']);
   const [selectedDevice, setSelectedDevice] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
-  const [selectedProject, setSelectedProject] = useState('');
   const [scriptContent, setScriptContent] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState('android');
-  const [isSaved, setIsSaved] = useState(true);
-  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
   const [executionPhase, setExecutionPhase] = useState<'idle' | 'executing' | 'completed' | 'failed'>('idle');
   const [showScriptResult, setShowScriptResult] = useState(false);
   const [generatedScriptId, setGeneratedScriptId] = useState<string | null>(null);
+  const [activeTab] = useState('android');
 
   useEffect(() => {
     fetchDevices();
-    fetchProjects();
-    fetchApks();
     fetchModelConfigs();
     const scriptId = searchParams.get('script_id');
     if (scriptId) {
       scriptApi.getScript(scriptId).then((res: any) => {
         const script = res.script || res;
         setScriptContent(script.content);
-        setIsSaved(true);
         setGeneratedScriptId(scriptId);
       });
     }
   }, []);
+
+  useEffect(() => {
+    if (devices.length > 0 && !selectedDevice) {
+      const usbDevices = devices.filter(d => d.status === 'connected' && d.connection_type === 'usb');
+      const connectedDevices = devices.filter(d => d.status === 'connected');
+      
+      const deviceToSelect = usbDevices.length > 0 ? usbDevices[0] : connectedDevices[0];
+      
+      if (deviceToSelect) {
+        setSelectedDevice(deviceToSelect.device_id);
+        addLog(`[系统] 自动连接设备: ${deviceToSelect.name}`);
+      }
+    }
+  }, [devices, selectedDevice, addLog]);
 
   useEffect(() => {
     if (modelConfigs.length > 0 && !selectedModel) {
@@ -157,7 +154,6 @@ export function AgentPage() {
     });
 
     if (taskId) {
-      setCurrentTaskId(taskId);
       addLog(`[系统] 任务已启动，任务ID: ${taskId}`);
       addLog('[系统] 智能体正在设备上执行操作...');
 
@@ -183,7 +179,6 @@ export function AgentPage() {
         
         const taskData = (task as any).task || task;
         
-        // Display new logs
         const logs = (logsResponse as any).logs || [];
         const newLogs = logs.slice(lastLogCount);
         newLogs.forEach((log: any) => {
@@ -212,7 +207,6 @@ export function AgentPage() {
           setExecutionPhase('failed');
           return;
         } else if (taskData.status === 'executing' || taskData.status === 'running') {
-          // Don't add generic message if we have detailed logs
           if (newLogs.length === 0) {
             addLog('[系统] 智能体正在执行中...');
           }
@@ -347,8 +341,6 @@ export function AgentPage() {
         setGeneratedScriptId(scriptId);
         addLog('[系统] 脚本保存成功');
       }
-
-      setIsSaved(true);
     } catch (error) {
       addLog('[错误] 脚本保存失败');
     }
@@ -370,330 +362,350 @@ export function AgentPage() {
     addLog('[系统] 脚本已下载');
   };
 
-  const openUiDebugger = () => {
-    window.open('https://uiauto.dev', '_blank', 'width=1200,height=800');
-    addLog('[系统] 已打开UI调试工具');
+  const getConnectedDevices = () => {
+    return devices.filter(d => d.status === 'connected');
   };
 
-  const handleScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setScriptContent(e.target.value);
-    setIsSaved(false);
-  };
-
-  const togglePlatform = (platformId: string) => {
-    setSelectedPlatforms((prev) =>
-      prev.includes(platformId)
-        ? prev.filter((p) => p !== platformId)
-        : [...prev, platformId]
-    );
+  const getSelectedDeviceInfo = () => {
+    return devices.find(d => d.device_id === selectedDevice);
   };
 
   return (
-    <div className="h-[calc(100vh-112px)] flex flex-col animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Bot className="w-6 h-6 text-indigo-400" />
-            智能体
-          </h1>
-          <p className="text-[#94a3b8] mt-1">
-            智能体在真机上执行任务，完成后自动生成脚本
-          </p>
+    <div className="h-[calc(100vh-112px)] flex gap-6 p-6">
+      {/* 左侧：设备列表 */}
+      <div className="w-72 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 flex flex-col rounded-2xl shadow-xl">
+        <div className="p-5 border-b border-slate-700/30">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <Smartphone className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-white font-semibold text-lg">设备列表</h2>
+              <p className="text-slate-400 text-xs mt-0.5">已连接 {getConnectedDevices().length} 台设备</p>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {executionPhase === 'idle' && (
-            <div className="flex items-center gap-2 text-[#64748b]">
-              <div className="w-2 h-2 bg-gray-500 rounded-full" />
-              <span className="text-sm">准备就绪</span>
-            </div>
-          )}
-          {executionPhase === 'executing' && (
-            <div className="flex items-center gap-2 text-blue-400">
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-              <span className="text-sm">智能体执行中...</span>
-            </div>
-          )}
-          {executionPhase === 'completed' && (
-            <div className="flex items-center gap-2 text-green-400">
-              <CheckCircle2 className="w-4 h-4" />
-              <span className="text-sm">执行完成，脚本已生成</span>
-            </div>
-          )}
-          {executionPhase === 'failed' && (
-            <div className="flex items-center gap-2 text-red-400">
-              <AlertCircle className="w-4 h-4" />
-              <span className="text-sm">执行失败</span>
-            </div>
-          )}
+        <div className="flex-1 overflow-y-auto p-3">
+          <div className="space-y-2">
+            {getConnectedDevices().length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-slate-700/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Smartphone className="w-8 h-8 text-slate-500" />
+                </div>
+                <p className="text-slate-400 text-sm">暂无连接的设备</p>
+                <p className="text-slate-500 text-xs mt-1">请连接设备后重试</p>
+              </div>
+            ) : (
+              getConnectedDevices().map((device) => {
+                const isSelected = selectedDevice === device.device_id;
+                const connectionType = device.connection_type === 'usb' ? <Usb className="w-3 h-3" /> : <Wifi className="w-3 h-3" />;
+                
+                return (
+                  <button
+                    key={device.device_id}
+                    onClick={() => setSelectedDevice(device.device_id)}
+                    className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-300 ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/50 shadow-lg shadow-indigo-500/10'
+                        : 'bg-slate-700/30 hover:bg-slate-700/50 border border-transparent hover:border-slate-600/50'
+                    }`}
+                  >
+                    <div className={`w-2.5 h-2.5 rounded-full ${
+                      device.status === 'connected' ? 'bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50' :
+                      device.status === 'busy' ? 'bg-amber-400 animate-pulse shadow-lg shadow-amber-400/50' :
+                      device.status === 'error' ? 'bg-red-400 animate-pulse shadow-lg shadow-red-400/50' :
+                      'bg-slate-500'
+                    }`} />
+                    <div className="flex-1 text-left">
+                      <p className="text-white text-sm font-medium truncate">{device.name}</p>
+                      <p className="text-slate-400 text-xs flex items-center gap-1">
+                        {connectionType}
+                        {device.device_id}
+                      </p>
+                    </div>
+                    <ChevronRight className={`w-4 h-4 transition-all duration-300 ${isSelected ? 'rotate-90 text-indigo-400' : 'text-slate-500'}`} />
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* 模型选择 */}
+        <div className="p-4 border-t border-slate-700/30">
+          <label className="text-slate-400 text-xs mb-2 block">选择模型</label>
+          <select
+            value={selectedModel}
+            onChange={(e) => setSelectedModel(e.target.value)}
+            className="w-full bg-slate-700/50 border border-slate-600/50 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+          >
+            {modelConfigs.map((config) => (
+              <option key={config.config_id} value={config.config_id}>
+                {config.name} {config.is_default && '(默认)'}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      <div className="flex-1 grid grid-cols-12 gap-6 min-h-0">
-        <div className="col-span-4 bg-[#1e293b] border border-[#334155] rounded-xl p-5 flex flex-col">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-            <Terminal className="w-4 h-4" />
-            任务配置
-          </h3>
-
-          <div className="space-y-4 flex-1 overflow-y-auto">
-            <div>
-              <label className="block text-[#94a3b8] text-sm mb-2">项目</label>
-              <select
-                value={selectedProject}
-                onChange={(e) => setSelectedProject(e.target.value)}
-                className="w-full px-3 py-2 bg-[#0f172a] border border-[#334155] rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
-              >
-                <option value="">选择项目</option>
-                {projects.map((project) => (
-                  <option key={project.project_id} value={project.project_id}>
-                    {project.name}
-                  </option>
-                ))}
-              </select>
+      {/* 中间：指令输入区 */}
+      <div className="flex-1 flex flex-col bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-xl">
+        {/* 顶部标题栏 */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/30">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
+              <Terminal className="w-5 h-5 text-white" />
             </div>
-
             <div>
-              <label className="block text-[#94a3b8] text-sm mb-2">目标平台</label>
-              <div className="flex gap-2">
-                {platforms.map((platform) => (
-                  <button
-                    key={platform.id}
-                    onClick={() => togglePlatform(platform.id)}
-                    className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all ${
-                      selectedPlatforms.includes(platform.id)
-                        ? 'border-indigo-500 bg-indigo-500/20 text-white'
-                        : 'border-[#334155] text-[#94a3b8] hover:border-[#475569]'
-                    }`}
-                  >
-                    <span
-                      className="inline-block w-2 h-2 rounded-full mr-2"
-                      style={{ backgroundColor: platform.color }}
-                    />
-                    {platform.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-[#94a3b8] text-sm mb-2">选择设备</label>
-              <select
-                value={selectedDevice}
-                onChange={(e) => setSelectedDevice(e.target.value)}
-                className="w-full px-3 py-2 bg-[#0f172a] border border-[#334155] rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
-              >
-                <option value="">自动选择</option>
-                {devices.map((device) => (
-                  <option key={device.device_id} value={device.device_id}>
-                    {device.name} ({device.platform})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[#94a3b8] text-sm mb-2">选择模型</label>
-              <select
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                className="w-full px-3 py-2 bg-[#0f172a] border border-[#334155] rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
-              >
-                {modelConfigs.map((config) => (
-                  <option key={config.config_id} value={config.config_id}>
-                    {config.name} ({config.provider})
-                  </option>
-                ))}
-                {modelConfigs.length === 0 && (
-                  <option value="">暂无可用配置，请先在设置中添加</option>
-                )}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[#94a3b8] text-sm mb-2">任务描述</label>
-              <textarea
-                value={taskDescription}
-                onChange={(e) => setTaskDescription(e.target.value)}
-                placeholder="例如：打开微信，查看最近消息"
-                className="w-full h-32 px-3 py-2 bg-[#0f172a] border border-[#334155] rounded-lg text-white text-sm resize-none focus:outline-none focus:border-indigo-500"
-              />
+              <h3 className="text-white font-semibold text-lg">指令输入</h3>
+              <p className="text-slate-400 text-xs">
+                {selectedDevice ? `目标设备: ${getSelectedDeviceInfo()?.name}` : '请选择设备'}
+              </p>
             </div>
           </div>
 
-          <button
-            onClick={handleExecute}
-            disabled={isExecuting || !taskDescription.trim() || executionPhase === 'executing'}
-            className={`w-full mt-4 py-3 rounded-lg flex items-center justify-center gap-2 transition-all font-medium ${
-              executionPhase === 'executing'
-                ? 'bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white'
-                : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-white'
-            }`}
-          >
-            {executionPhase === 'executing' ? (
+          <div className="flex items-center gap-3">
+            {executionPhase === 'idle' && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-700/50 rounded-full">
+                <div className="w-2 h-2 bg-slate-400 rounded-full" />
+                <span className="text-slate-300 text-xs">准备就绪</span>
+              </div>
+            )}
+            {executionPhase === 'executing' && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 rounded-full">
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                <span className="text-blue-300 text-xs">智能体执行中...</span>
+              </div>
+            )}
+            {executionPhase === 'completed' && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 rounded-full">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span className="text-emerald-300 text-xs">执行完成</span>
+              </div>
+            )}
+            {executionPhase === 'failed' && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/20 rounded-full">
+                <AlertCircle className="w-4 h-4 text-red-400" />
+                <span className="text-red-300 text-xs">执行失败</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 聊天内容区域 */}
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-3xl mx-auto space-y-4">
+            {logs.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="w-20 h-20 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                  <Sparkles className="w-10 h-10 text-indigo-400" />
+                </div>
+                <h3 className="text-white text-lg font-medium mb-2">智能体就绪</h3>
+                <p className="text-slate-400 text-sm">输入指令，智能体将在设备上执行</p>
+                <div className="mt-6 flex items-center justify-center gap-4">
+                  <span className="px-3 py-1 bg-slate-700/50 rounded-full text-slate-400 text-xs">自动连接</span>
+                  <span className="px-3 py-1 bg-slate-700/50 rounded-full text-slate-400 text-xs">实时预览</span>
+                  <span className="px-3 py-1 bg-slate-700/50 rounded-full text-slate-400 text-xs">脚本生成</span>
+                </div>
+              </div>
+            ) : (
+              logs.map((log, index) => {
+                const isError = log.includes('[错误]');
+                const isSystem = log.includes('[系统]');
+                
+                return (
+                  <div key={index} className={`flex gap-3 ${isSystem ? 'justify-end' : 'justify-start'}`}>
+                    {isSystem ? (
+                      <div className="max-w-[80%]">
+                        <div className="bg-slate-700/50 backdrop-blur-sm rounded-2xl rounded-br-md px-4 py-3 border border-slate-600/30">
+                          <p className="text-slate-300 text-sm whitespace-pre-wrap">{log}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-500/20">
+                          <Bot className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="max-w-[80%]">
+                          <div className={`rounded-2xl rounded-bl-md px-4 py-3 border ${isError ? 'bg-red-500/10 border-red-500/30' : 'bg-slate-700/50 border-slate-600/30'}`}>
+                            <p className={`text-sm whitespace-pre-wrap ${isError ? 'text-red-300' : 'text-slate-300'}`}>
+                              {log}
+                            </p>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* 底部输入区域 */}
+        <div className="p-5 border-t border-slate-700/30 bg-slate-800/50">
+          <div className="max-w-3xl mx-auto">
+            <div className="flex items-end gap-3">
+              <div className="flex-1 bg-slate-700/50 border border-slate-600/50 rounded-2xl p-4 shadow-lg shadow-black/10">
+                <textarea
+                  value={taskDescription}
+                  onChange={(e) => setTaskDescription(e.target.value)}
+                  placeholder="您想做什么？（Enter 发送，Shift+Enter 换行）"
+                  className="w-full bg-transparent text-white text-sm resize-none focus:outline-none placeholder-slate-400"
+                  rows={2}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleExecute();
+                    }
+                  }}
+                />
+              </div>
+              <button
+                onClick={handleExecute}
+                disabled={!taskDescription.trim() || executionPhase === 'executing'}
+                className={`px-6 py-4 rounded-2xl font-medium flex items-center gap-2 transition-all duration-300 shadow-lg ${
+                  executionPhase === 'executing'
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 disabled:opacity-50 text-white shadow-blue-500/30'
+                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white shadow-indigo-500/30'
+                }`}
+              >
+                {executionPhase === 'executing' ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Play className="w-5 h-5" />
+                )}
+                {executionPhase === 'executing' ? '执行中' : '发送'}
+              </button>
+            </div>
+            <p className="text-slate-500 text-xs mt-3 text-right">按 Enter 发送，Shift+Enter 换行</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 右侧：设备实时预览 */}
+      <div className="w-96 flex flex-col bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-xl">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/30">
+          <div className="flex items-center gap-3">
+            {selectedDevice ? (
               <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                智能体执行中...
+                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-lg shadow-green-500/20">
+                  <Smartphone className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <span className="text-white text-sm font-medium">
+                    {getSelectedDeviceInfo()?.name}
+                  </span>
+                  <p className="text-slate-400 text-xs">实时预览</p>
+                </div>
               </>
             ) : (
-              <>
-                <Sparkles className="w-4 h-4" />
-                启动智能体
-              </>
+              <span className="text-slate-400 text-sm">请选择设备</span>
             )}
-          </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+            <span className="text-emerald-400 text-xs font-medium">在线</span>
+          </div>
         </div>
 
-        <div className="col-span-8 flex flex-col gap-4 min-h-0">
-          <div className="bg-[#1e293b] border border-[#334155] rounded-xl p-4 h-64 flex gap-4">
-            <div className="w-1/2 bg-[#0f172a] rounded-lg flex items-center justify-center">
+        <div className="flex-1 p-4">
+          {selectedDevice ? (
+            <div className="relative bg-slate-900 rounded-[2rem] shadow-2xl shadow-black/30 aspect-[9/16] overflow-hidden border-4 border-slate-700">
+              <ScrcpyPlayer
+                deviceId={selectedDevice}
+                enableControl={true}
+                onTapSuccess={() => console.log('Tap success')}
+                onTapError={(error) => console.error('Tap error:', error)}
+                onSwipeSuccess={() => console.log('Swipe success')}
+                onSwipeError={(error) => console.error('Swipe error:', error)}
+              />
+              {/* 设备顶部装饰 */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-900 rounded-b-2xl z-20" />
+              {/* 设备底部装饰 */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-20 h-1.5 bg-slate-700 rounded-full z-20" />
+            </div>
+          ) : (
+            <div className="h-full bg-slate-700/30 rounded-2xl flex items-center justify-center border border-slate-600/30">
               <div className="text-center">
-                <Smartphone className="w-12 h-12 text-[#475569] mx-auto mb-2" />
-                <p className="text-[#64748b] text-sm">设备截图预览</p>
-                <p className="text-[#475569] text-xs mt-1">连接设备后显示</p>
+                <div className="w-16 h-16 bg-slate-600/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Smartphone className="w-8 h-8 text-slate-500" />
+                </div>
+                <p className="text-slate-400 text-sm">选择设备以查看预览</p>
+                <p className="text-slate-500 text-xs mt-1">自动连接 USB 设备</p>
               </div>
             </div>
+          )}
+        </div>
 
-            <div className="w-1/2 flex flex-col">
-              <h4 className="text-white font-medium mb-2 flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-indigo-400" />
-                执行日志
-              </h4>
-              <div className="flex-1 bg-[#0f172a] rounded-lg p-3 overflow-y-auto font-mono text-xs">
-                {logs.length === 0 ? (
-                  <p className="text-[#64748b]">
-                    输入任务描述后点击"启动智能体"
-                  </p>
-                ) : (
-                  logs.map((log, index) => (
-                    <div key={index} className="text-[#94a3b8] mb-1">
-                      <span className="text-[#64748b]">[{new Date().toLocaleTimeString()}]</span>{' '}
-                      {log}
-                    </div>
-                  ))
-                )}
+        {/* 操作提示 */}
+        <div className="px-5 py-3 border-t border-slate-700/30">
+          <div className="flex items-center gap-4 text-xs text-slate-400">
+            <div className="flex items-center gap-1.5">
+              <div className="w-5 h-5 bg-slate-700/50 rounded-md flex items-center justify-center">
+                <span className="text-white text-[10px] font-medium">T</span>
               </div>
+              <span>点击</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-5 h-5 bg-slate-700/50 rounded-md flex items-center justify-center">
+                <span className="text-white text-[10px] font-medium">S</span>
+              </div>
+              <span>滑动</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-5 h-5 bg-slate-700/50 rounded-md flex items-center justify-center">
+                <span className="text-white text-[10px] font-medium">W</span>
+              </div>
+              <span>缩放</span>
             </div>
           </div>
-
-          {showScriptResult && (
-            <div className="flex-1 bg-[#1e293b] border border-[#334155] rounded-xl flex flex-col min-h-0">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[#334155]">
-                <div className="flex items-center gap-4">
-                  <h3 className="text-white font-medium flex items-center gap-2">
-                    <Bug className="w-4 h-4 text-amber-400" />
-                    生成的脚本
-                  </h3>
-                  <div className="flex gap-1">
-                    {selectedPlatforms.map((platform) => {
-                      const platformInfo = platforms.find((p) => p.id === platform);
-                      const isActive = activeTab === platform;
-                      return (
-                        <button
-                          key={platform}
-                          onClick={() => setActiveTab(platform)}
-                          className={`px-3 py-1 rounded text-sm font-medium transition-all ${
-                            isActive
-                              ? 'text-white shadow-lg'
-                              : 'text-[#94a3b8] hover:text-white hover:bg-[#334155]'
-                          }`}
-                          style={
-                            isActive && platformInfo
-                              ? {
-                                  backgroundColor: platformInfo.color,
-                                  boxShadow: `0 0 12px ${platformInfo.color}40`,
-                                  color: platform === 'ios' ? '#1e293b' : 'white',
-                                }
-                              : {}
-                          }
-                        >
-                          {platformInfo?.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {!isSaved && (
-                    <span className="text-orange-400 text-xs flex items-center gap-1">
-                      <div className="w-2 h-2 bg-orange-400 rounded-full" />
-                      未保存
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={openUiDebugger}
-                    className="px-3 py-1.5 text-sm text-[#94a3b8] hover:text-white bg-[#334155] hover:bg-[#475569] rounded-lg flex items-center gap-1.5 transition-colors"
-                  >
-                    <Bug className="w-4 h-4" />
-                    UI调试
-                  </button>
-                  <button
-                    onClick={() => setIsEditing(!isEditing)}
-                    title={isEditing ? '完成' : '编辑'}
-                    className="px-3 py-1.5 text-sm text-[#94a3b8] hover:text-white bg-[#334155] hover:bg-[#475569] rounded-lg flex items-center gap-1.5 transition-colors"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={handleCopy}
-                    className="px-3 py-1.5 text-sm text-[#94a3b8] hover:text-white bg-[#334155] hover:bg-[#475569] rounded-lg flex items-center gap-1.5 transition-colors"
-                  >
-                    <Copy className="w-4 h-4" />
-                    复制
-                  </button>
-                  <button
-                    onClick={handleSaveScript}
-                    disabled={isSaved}
-                    className="px-3 py-1.5 text-sm bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg flex items-center gap-1.5 transition-colors"
-                  >
-                    <Save className="w-4 h-4" />
-                    保存
-                  </button>
-                  <button
-                    onClick={handleDownload}
-                    title="下载"
-                    className="px-3 py-1.5 text-sm text-[#94a3b8] hover:text-white bg-[#334155] hover:bg-[#475569] rounded-lg flex items-center gap-1.5 transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex-1 overflow-hidden">
-                {isEditing ? (
-                  <textarea
-                    value={scriptContent}
-                    onChange={handleScriptChange}
-                    className="w-full h-full bg-[#0f172a] text-[#e2e8f0] p-4 font-mono text-sm resize-none focus:outline-none"
-                    placeholder="脚本内容..."
-                  />
-                ) : (
-                  <SyntaxHighlighterComponent
-                    language={getLanguage(activeTab)}
-                    style={customDarkStyle}
-                    customStyle={{ height: '100%', margin: 0 }}
-                  >
-                    {scriptContent || '# No script generated yet'}
-                  </SyntaxHighlighterComponent>
-                )}
-              </div>
-            </div>
-          )}
-
-          {!showScriptResult && (
-            <div className="flex-1 bg-[#1e293b] border border-[#334155] rounded-xl flex items-center justify-center">
-              <div className="text-center">
-                <Sparkles className="w-16 h-16 text-[#475569] mx-auto mb-4" />
-                <h3 className="text-white text-lg font-medium mb-2">智能体将在这里执行任务</h3>
-                <p className="text-[#64748b] text-sm max-w-md">
-                  输入任务描述后，智能体将在真机上自动执行操作，
-                  完成后自动生成可复用的脚本
-                </p>
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* 脚本结果区域 */}
+        {showScriptResult && (
+          <div className="border-t border-slate-700/30 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-white text-sm font-medium flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-amber-400" />
+                生成的脚本
+              </h4>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={handleCopy}
+                  className="p-2 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg transition-all duration-200"
+                  title="复制"
+                >
+                  <Copy className="w-4 h-4 text-slate-300" />
+                </button>
+                <button
+                  onClick={handleSaveScript}
+                  className="p-2 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg transition-all duration-200"
+                  title="保存"
+                >
+                  <Save className="w-4 h-4 text-slate-300" />
+                </button>
+                <button
+                  onClick={handleDownload}
+                  className="p-2 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg transition-all duration-200"
+                  title="下载"
+                >
+                  <Download className="w-4 h-4 text-slate-300" />
+                </button>
+              </div>
+            </div>
+            <div className="bg-slate-900/80 rounded-xl overflow-hidden max-h-48 overflow-y-auto border border-slate-700/50">
+              <SyntaxHighlighterComponent
+                language={getLanguage(activeTab)}
+                style={customDarkStyle}
+                customStyle={{ height: '100%', margin: 0, maxHeight: '192px' }}
+              >
+                {scriptContent || '# No script generated yet'}
+              </SyntaxHighlighterComponent>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

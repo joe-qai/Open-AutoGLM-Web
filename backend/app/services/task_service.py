@@ -1,9 +1,8 @@
-"""Task service for managing tasks — SQLite persistence + subprocess executor."""
+"""Task service for managing tasks — SQLite persistence + ScriptExecutor."""
 
 from typing import List, Optional, Dict
 import asyncio
 import time
-import tempfile
 import datetime
 import os
 import sys
@@ -13,6 +12,7 @@ from fastapi import BackgroundTasks
 from app.config import settings
 from app.db import db
 from app.schemas.task import TaskResponse, TaskStatus, TaskType
+from app.core.executors import ScriptExecutor, TaskDispatcher
 
 
 
@@ -165,7 +165,7 @@ class TaskService:
              time.strftime("%Y-%m-%dT%H:%M:%S"), task_id)
         )
         await conn.commit()
-        await self._log(task_id, "INFO", "Starting task execution via subprocess")
+        await self._log(task_id, "INFO", "Starting task execution via ScriptExecutor")
 
         if not task.script_id:
             await self._update_task_status(task_id, TaskStatus.FAILED)
@@ -178,21 +178,10 @@ class TaskService:
             await self._log(task_id, "ERROR", "Script not found")
             return
 
-        temp_script_path = None
         try:
-            # 创建临时脚本文件
-            with tempfile.NamedTemporaryFile(
-                suffix='.py', delete=False, prefix=f'task_{task_id}_', mode='w', encoding='utf-8'
-            ) as temp_script:
-                temp_script.write(script_content)
-                temp_script_path = temp_script.name
+            # Build environment variables for ScriptExecutor
+            env_vars = {}
             
-            await self._log(task_id, "INFO", f"Created temp script file: {temp_script_path}")
-
-            # 构建环境变量
-            env_vars = os.environ.copy()
-            
-            # Use selected model config or default
             from app.services.model_config_service import ModelConfigService
             model_service = ModelConfigService()
             model_config = None
@@ -207,52 +196,53 @@ class TaskService:
                 env_vars['PHONE_AGENT_API_KEY'] = model_config.api_key
                 env_vars['PHONE_AGENT_PROVIDER'] = model_config.provider.value
             else:
-                # Fallback to hardcoded defaults if no config exists
                 env_vars['PHONE_AGENT_BASE_URL'] = "http://localhost:8000/v1"
                 env_vars['PHONE_AGENT_MODEL'] = "AutoPhone-phone-9b"
                 env_vars['PHONE_AGENT_API_KEY'] = "EMPTY"
             
             if task.device_id:
                 env_vars['PHONE_AGENT_DEVICE_ID'] = task.device_id
-            
-            # Compute project root (Open-AutoGLM directory)
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            # backend/app/services -> backend/app -> backend -> Open-AutoGLM
-            project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
-            
-            # Ensure project root is in PYTHONPATH so script can import phone_agent
-            if 'PYTHONPATH' in env_vars:
-                env_vars['PYTHONPATH'] = f"{project_root}{os.pathsep}{env_vars['PYTHONPATH']}"
-            else:
-                env_vars['PYTHONPATH'] = project_root
 
-            # Add diagnostic logging before subprocess launch
+            # Add diagnostic logging before execution
             await self._log(task_id, "INFO", f"Python executable: {sys.executable}")
             await self._log(task_id, "INFO", f"Device ID: {task.device_id}")
             await self._log(task_id, "INFO", f"Script content length: {len(script_content)} chars")
             await self._log(task_id, "INFO", f"Script first 3 lines: {chr(10).join(script_content.split(chr(10))[:3])}")
 
-            # Use the venv Python that's already running the backend
-            python_executable = sys.executable
-
-            # 使用 asyncio 启动子进程执行脚本
-            process = await asyncio.create_subprocess_exec(
-                python_executable, temp_script_path,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-                env=env_vars,
-                cwd=project_root
+            # Create ScriptExecutor instance
+            executor = ScriptExecutor()
+            
+            # Start execution (non-blocking)
+            process = executor.start(
+                script_content=script_content,
+                env_vars=env_vars
             )
             self.task_processes[task_id] = process
             
             await self._log(task_id, "INFO", f"Subprocess started with PID: {process.pid}")
 
-            # 等待进程完成并获取输出
-            stdout_data, stderr_data = await process.communicate()
-            stdout = stdout_data.decode('utf-8', errors='replace')
-            stderr = stderr_data.decode('utf-8', errors='replace')
+            # Store event loop reference for cancel check
+            loop = asyncio.get_running_loop()
+            
+            # Define cancel check callback
+            def cancel_check():
+                try:
+                    future = asyncio.run_coroutine_threadsafe(
+                        self.get_task(task_id), loop
+                    )
+                    current_task = future.result(timeout=1.0)
+                    return current_task and current_task.status == TaskStatus.STOPPED
+                except Exception:
+                    return False
 
-            await self._log(task_id, "INFO", f"Subprocess completed with return code: {process.returncode}")
+            # Wait for completion with cancel support
+            result = executor.wait(cancel_check=cancel_check)
+
+            await self._log(task_id, "INFO", f"Execution completed with status: {result.status}")
+
+            # Log executor logs
+            for log_entry in result.logs:
+                await self._log(task_id, log_entry.level, log_entry.message)
 
             # Re-fetch task to check if it was stopped by user
             updated_task = await self.get_task(task_id)
@@ -261,19 +251,17 @@ class TaskService:
 
             if updated_task.status == TaskStatus.STOPPED:
                 await self._log(task_id, "INFO", "Task was stopped by user, keeping STOPPED status")
-            elif process.returncode == 0:
+            elif result.status == "success":
                 await self._update_task_status(task_id, TaskStatus.COMPLETED, progress=100)
                 await self._log(task_id, "INFO", "Task completed successfully")
-                if stdout:
-                    # Log stdout in chunks to avoid single huge entry
-                    for i in range(0, len(stdout), 2000):
-                        chunk = stdout[i:i+2000]
+                if result.stdout:
+                    for i in range(0, len(result.stdout), 2000):
+                        chunk = result.stdout[i:i+2000]
                         await self._log(task_id, "INFO", f"Output: {chunk}")
             else:
                 await self._update_task_status(task_id, TaskStatus.FAILED, progress=100)
-                error_msg = stderr[:2000] if stderr else "Unknown error"
+                error_msg = result.error_message or (result.stderr[:2000] if result.stderr else "Unknown error")
                 self.task_errors[task_id] = error_msg
-                # Log full error — split into chunks if very long
                 if len(error_msg) > 2000:
                     for i in range(0, len(error_msg), 2000):
                         chunk = error_msg[i:i+2000]
@@ -286,7 +274,6 @@ class TaskService:
             if not final_task:
                 return
 
-            # Skip report generation for STOPPED tasks or non-AI script failures
             should_generate_report = True
             if final_task.status == TaskStatus.STOPPED:
                 should_generate_report = False
@@ -300,22 +287,17 @@ class TaskService:
             if should_generate_report:
                 await self._generate_report(
                     task_id,
-                    stdout if stdout else "",
-                    stderr if stderr else ""
+                    result.stdout if result.stdout else "",
+                    result.stderr if result.stderr else ""
                 )
         except Exception as e:
             full_tb = traceback.format_exc()
-            error_msg = f"Subprocess error: {str(e)}\n{full_tb}"
-            self.task_errors[task_id] = f"Subprocess error: {str(e)}"
+            error_msg = f"ScriptExecutor error: {str(e)}\n{full_tb}"
+            self.task_errors[task_id] = f"ScriptExecutor error: {str(e)}"
             await self._update_task_status(task_id, TaskStatus.FAILED)
-            # Log traceback in chunks
             for i in range(0, len(error_msg), 2000):
                 await self._log(task_id, "ERROR", error_msg[i:i+2000])
         finally:
-            # 清理临时脚本文件
-            if temp_script_path and os.path.exists(temp_script_path):
-                os.unlink(temp_script_path)
-            # 移除任务进程记录
             self.task_processes.pop(task_id, None)
 
     async def _generate_report(self, task_id: str, stdout: str, stderr: str):
@@ -589,6 +571,22 @@ th {{ background: #1e293b; color: #94a3b8; }}
             if device_id:
                 device_kwargs["device_id"] = device_id
             engine.set_device(adapter_platform, **device_kwargs)
+
+            # Inject model config from DB into engine's DecisionLayer
+            from app.services.model_config_service import ModelConfigService
+            from app.core.layers.decision import ModelConfig as DecisionModelConfig, OpenAIModelClient
+            model_svc = ModelConfigService()
+            db_config = await model_svc.get_default_config()
+            if db_config:
+                cfg = DecisionModelConfig(
+                    base_url=db_config.base_url or "",
+                    model_name=db_config.model_name,
+                    api_key=db_config.api_key,
+                )
+                engine.decision.model_client = OpenAIModelClient(cfg)
+                await self._log(task_id, "INFO", f"Loaded model config: {db_config.name} ({db_config.model_name})")
+            else:
+                await self._log(task_id, "WARNING", "No model config in DB, using defaults (may fail)")
             
             await self._log(task_id, "INFO", f"AgentEngine initialized, starting execution (mode: {mode})")
             await self._log(task_id, "INFO", f"Task: {task_description}")
@@ -607,7 +605,7 @@ th {{ background: #1e293b; color: #94a3b8; }}
                 execution_history.append(step_info)
                 await self._log(
                     task_id, "INFO",
-                    f"[{data.get('event', '?')}] Step {data.get('step', 0)}: {data.get('action', '')}"
+                    f"[{data.get('event', '?')}] Step {data.get('step', 0)}: {data.get('action') or data.get('proposed_action', '')}"
                 )
                 if task_id:
                     await ws_manager.send_task_update(task_id, data)

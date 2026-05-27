@@ -1,68 +1,81 @@
-# AGENTS.md — Open-AutoGLM Web Platform
+# AGENTS.md — Open-AutoGLM (LOCKIN Agent Platform)
 
-This repo is a fork of Open-AutoGLM with a frontend+backend web platform on top of the `phone_agent` core library.
+Multi-platform mobile agent testing platform. VLM-driven phone automation via ADB (Android), HDC (HarmonyOS), XCTest (iOS).
 
-## Subsystems & Toolchains
-
-| Subsystem | Location | Tech | Install | Run |
-|-----------|----------|------|---------|-----|
-| Core lib | `phone_agent/` | Python, OpenAI+Anthropic SDK | `pip install -e .` | `python main.py` |
-| Backend | `backend/` | FastAPI, SQLAlchemy, aiosqlite | `pip install -r backend/requirements.txt` | `python run.py` (port 8000) |
-| Frontend | `frontend/` | React 18, Vite, Tailwind, TS, zustand, react-query, recharts | `cd frontend && npm install` | `npm run dev` (port 3000) |
-| Launcher | `start_all.bat` | Windows batch | — | Start backend + frontend together |
-
-## Dev Commands
+## Quick start
 
 ```bash
-# Full setup
-pip install -r requirements.txt
-pip install -e .
-pip install -r backend/requirements.txt
-cd frontend && npm install
+# Backend (port 8005)
+cd backend && pip install -r requirements.txt && python run.py
 
-# Run backend (FastAPI)
-cd backend && python run.py
+# Frontend (port 3000, proxies API to :8005)
+cd frontend && npm install && npm run dev
 
-# Run frontend (Vite, proxies /api to :8000)
-cd frontend && npm run dev
+# CLI mode
+python main.py --base-url <URL> --model <NAME> "task description"
 
-# Standalone phone_agent CLI (no web platform needed)
-python main.py --base-url <URL> --model <NAME> "task"
-python main.py --device-type hdc ...
-python ios.py --wda-url http://localhost:8100 ...
-
-# Tests
-pytest                      # phone_agent core
-cd backend && pytest        # backend (asyncio_mode=auto)
-
-# Lint (from root)
-ruff check --fix . && ruff format .
-pre-commit run --all-files  # ruff, typos, pymarkdown (excludes config/apps.py)
+# Batch start
+start_all.bat
+# Kill ports 8005 + 3000
+kill_ports.bat
 ```
 
-## Web Platform Architecture
+## Testing
 
-**Backend layers** (`backend/app/core/layers/`): Perception → Decision → Action → Memory → Verification
-**Backend agents** (`backend/app/core/agent/`): Manager, Executor, Reflector, Finder — coordinated by `AgentEngine`
-**Backend API** (`backend/app/api/v1/`): tasks, devices, reports, scripts, apks, projects, settings, model_configs, logs. WebSocket at `/ws`. Audit log middleware on all requests.
-**Backend config**: `backend/app/config.py` uses `pydantic-settings` with `env_prefix="PHONE_AGENT_"` (reads `.env`).
+```bash
+# Backend only (asyncio_mode=auto)
+cd backend && pytest
 
-**Frontend structure** (`frontend/src/`): `pages/` (route pages), `components/` (reusable), `services/api.ts` (axios), `services/ws.ts` (websocket), `stores/` (zustand).
+# Manual integration test
+cd backend && python test_agent_engine.py
+```
 
-**Database**: `backend/app.db` (aiosqlite, auto-created on first run).
+## Key paths
 
-## phone_agent Core (for agents)
+| Purpose | Path |
+|---|---|
+| CLI entry | `main.py` (imports `backend.app.core.*`) |
+| FastAPI app | `backend/app/main.py` (port 8005) |
+| API routes | `backend/app/api/v1/` (11 routers) |
+| Agent engine | `backend/app/core/agent/engine.py` — coordinates ReActLoop |
+| Platform adapters | `backend/app/core/adapters/{android,ios,harmonyos}.py` |
+| Agent layers | `backend/app/core/layers/{perception,decision,action,memory,verification}.py` |
+| Device drivers | `backend/app/core/devices/{adb,hdc,xctest}/` |
+| Services | `backend/app/services/` (task, device, script, etc.) |
+| DB schema | `backend/app/db/database.py` — SQLite via aiosqlite (no migrations) |
+| App package map | `backend/app/core/config/app_packages.py` (50+ apps) |
+| Prompts | `backend/app/core/config/i18n.py` |
+| Frontend root | `frontend/src/App.tsx` — React + Vite + Tailwind |
+| Tests | `backend/tests/` |
+| Env template | `backend/.env.example` |
 
-Core loop in `PhoneAgent._execute_step()`: screenshot → detect app → build multimodal message → call VLM → `parse_action()` → `ActionHandler.execute()` → repeat. Format auto-detected: `{` prefix = JSON, `do`/`finish` prefix = pseudo-code.
+## Backend architecture
 
-JSON markers in `model/client.py`: XML tags `<json_answer>`/`<json_think>` (constants `JSON_ANSWER_OPEN`, `JSON_THINK_OPEN`). Imported by prompt files.
+```
+AgentEngine
+├─ ReActLoop (Observe → Think → Act → Reflect)
+├─ Layers: Perception → Decision → Action → Memory → Verification → Replay
+├─ Sub-agents: Manager, Executor, Reflector, Finder
+├─ Adapter per platform: Android(ADB), iOS(WDA), HarmonyOS(HDC)
+└─ DeviceModelAdapter → DeviceDriver → ADB/HDC/XCTest binary
+```
 
-Device abstraction: `DeviceFactory` → `adb/` (Android) / `hdc/` (HarmonyOS) / `xctest/` (iOS). Set via `set_device_type(DeviceType.ADB|HDC|IOS)`.
+## Environment variables (all prefixed `PHONE_AGENT_`)
 
-## Gotchas
+| Key | Default | Note |
+|---|---|---|
+| `MODEL_API_URL` | `http://localhost:8000/v1` | OpenAI-compatible VLM |
+| `MODEL_NAME` | `lockin-phone-9b` | Model served |
+| `API_KEY` | `EMPTY` | |
+| `API_HOST` / `API_PORT` | `0.0.0.0:8005` | FastAPI host:port |
+| `DATABASE_URL` | `./app.db` | SQLite |
 
-- JSON markers in `CLAUDE.md` line 78 used to claim Bengali numerals — they are now XML tags. Source of truth: `phone_agent/model/client.py`.
-- `config/apps.py` is a very large app mapping file, excluded from pre-commit.
-- Backend and `phone_agent` have separate `requirements.txt` files — both must be installed.
-- Frontend dev server requires the backend to be running (proxies `/api` to port 8000).
-- Python 3.10+ only, uses `str | None` syntax (not `Optional`).
+## Important conventions
+
+- **Windows encoding**: prefix with `PYTHONIOENCODING=utf-8` if garbled output
+- **Format**: `pseudo` (default) or `json` — affects action output format
+- **Schema**: SQLite tables auto-created at startup; use `db.get_connection()` for raw SQL
+- **Model API**: must be OpenAI-compatible; supports both local (vLLM/SGLang) and cloud (BigModel/ModelScope)
+- **Lint**: Ruff in pre-commit; run manually: `ruff check backend/`
+- **Pre-commit**: installed but may be skipped locally
+- **App packages**: centralized in `app_packages.py` — add new app entries there

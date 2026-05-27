@@ -171,8 +171,10 @@ class HarmonyOSAdapter(BaseDeviceAdapter):
         return True
     
     def launch_app(self, package_name: str) -> bool:
-        """Launch an application."""
-        self._run(f"shell aa start -a com.huawei.hiai.MainAbility -p {package_name}")
+        """Launch an application using the correct ability name."""
+        from backend.app.core.config.app_packages import get_harmonyos_ability
+        ability = get_harmonyos_ability(package_name)
+        self._run(f"shell aa start -a {ability} -p {package_name}")
         return True
     
     def get_current_app(self) -> str:
@@ -200,3 +202,49 @@ class HarmonyOSAdapter(BaseDeviceAdapter):
         except Exception:
             pass
         return apps
+
+    def double_tap(self, x: int, y: int) -> bool:
+        """Double tap at pixel coordinates with 100ms interval."""
+        self._run(f"shell input tap {x} {y}")
+        time.sleep(0.1)
+        self._run(f"shell input tap {x} {y}")
+        return True
+
+    def clear_text(self) -> bool:
+        """Clear text in the active input field."""
+        # Select all and delete
+        self._run("shell input keyevent 123")  # KEYCODE_MOVE_END
+        self._run("shell input keyevent 124")  # KEYCODE_FORWARD_DEL
+        return True
+
+    def dump_ui_tree(self) -> str:
+        """Dump UI hierarchy via HDC and return raw XML string."""
+        xml_path = "/data/local/tmp/uidump.xml"
+        local_xml = "uidump_local.xml"
+        self._run(f"shell uiautomator dump {xml_path}")
+        self._run(f"file recv {xml_path} {local_xml}")
+        try:
+            with open(local_xml, "r", encoding="utf-8", errors="replace") as f_xml:
+                content = f_xml.read()
+            os.remove(local_xml)
+            return content
+        except FileNotFoundError:
+            return ""
+
+    def list_devices(self) -> List[Dict]:
+        """Parse hdc list targets output into list of device dicts."""
+        result = self._run("list targets")
+        devices = []
+        for line in result.stdout.splitlines():
+            stripped = line.strip()
+            if stripped and not stripped.startswith("["):
+                parts = stripped.split()
+                if len(parts) >= 1:
+                    state = "device" if len(parts) >= 2 else "unknown"
+                    devices.append({"id": parts[0], "state": state})
+        return devices
+
+    def _resolve_app_name(self, app_name: str) -> str | None:
+        """Resolve an app display name to its HarmonyOS bundle name."""
+        from backend.app.core.config.app_packages import get_package_name_harmonyos
+        return get_package_name_harmonyos(app_name)

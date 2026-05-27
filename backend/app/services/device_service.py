@@ -284,30 +284,164 @@ class DeviceService:
         if device_id in self.devices:
             del self.devices[device_id]
     
+    def _get_display_ids(self, device_id: str) -> list:
+        """Get valid display IDs for the device."""
+        display_ids = []
+        try:
+            # Method 1: Try SurfaceFlinger
+            cmd = f"adb -s {device_id} shell dumpsys SurfaceFlinger --display-id"
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=15)
+            if result.returncode == 0 and result.stdout:
+                for line in result.stdout.split('\n'):
+                    line = line.strip()
+                    if line.startswith('Display'):
+                        parts = line.split()
+                        if len(parts) > 1:
+                            try:
+                                # Try to parse display ID from "Display 123456789"
+                                display_id = int(parts[1])
+                                display_ids.append(str(display_id))
+                            except ValueError:
+                                # Try to find display ID in parentheses like "(HWC display 0)"
+                                import re
+                                match = re.search(r'HWC display (\d+)', line)
+                                if match:
+                                    display_ids.append(match.group(1))
+            
+            # Method 2: Fallback to display manager
+            if not display_ids:
+                cmd = f"adb -s {device_id} shell dumpsys display | grep 'DisplayDeviceInfo'"
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=15)
+                if result.returncode == 0 and result.stdout:
+                    for line in result.stdout.split('\n'):
+                        match = re.search(r'displayId=(\d+)', line)
+                        if match:
+                            display_ids.append(match.group(1))
+            
+            # Remove duplicates and return unique IDs
+            return list(set(display_ids))[:2]
+        except Exception:
+            return []
+    
     def get_screenshot(self, device_id: str) -> Optional[str]:
         """Get screenshot from device."""
         device = self.get_device(device_id)
-        if device:
-            import base64
-            import tempfile
-            import os
+        if not device:
+            return None
             
-            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
-                save_path = f.name
-            
-            try:
-                if device.platform == PlatformType.ANDROID:
-                    cmd = f"adb -s {device_id} exec-out screencap -p > {save_path}"
-                    subprocess.run(cmd, shell=True, capture_output=True)
+        import base64
+        import tempfile
+        import os
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+            save_path = f.name
+        
+        try:
+            if device.platform == PlatformType.ANDROID:
+                png_data = None
+                
+                # Method 1: Try exec-out screencap with display IDs
+                display_ids = self._get_display_ids(device_id)
+                if not display_ids:
+                    display_ids = ["0", "1"]
+                
+                for display_id in display_ids:
+                    cmd = f"adb -s {device_id} exec-out screencap -d {display_id} -p"
+                    try:
+                        result = subprocess.run(cmd, shell=True, capture_output=True, timeout=30)
+                        
+                        if result.returncode == 0 and result.stdout:
+                            png_magic = b'\x89PNG\r\n\x1a\n'
+                            if result.stdout.startswith(png_magic):
+                                png_data = result.stdout
+                                break
+                            png_start = result.stdout.find(png_magic)
+                            if png_start != -1:
+                                png_data = result.stdout[png_start:]
+                                break
+                    except Exception as e:
+                        logger.debug(f"Screencap with display {display_id} failed: {e}")
+                        continue
+                
+                # Method 2: Fallback to screencap without display ID
+                if not png_data:
+                    cmd = f"adb -s {device_id} exec-out screencap -p"
+                    try:
+                        result = subprocess.run(cmd, shell=True, capture_output=True, timeout=30)
+                        if result.returncode == 0 and result.stdout:
+                            png_magic = b'\x89PNG\r\n\x1a\n'
+                            if result.stdout.startswith(png_magic):
+                                png_data = result.stdout
+                            else:
+                                png_start = result.stdout.find(png_magic)
+                                if png_start != -1:
+                                    png_data = result.stdout[png_start:]
+                    except Exception as e:
+                        logger.debug(f"Screencap without display ID failed: {e}")
+                
+                # Method 3: Fallback to old screenshot method via shell
+                if not png_data:
+                    cmd = f"adb -s {device_id} shell screencap -p /sdcard/screenshot.png"
+                    try:
+                        subprocess.run(cmd, shell=True, capture_output=True, timeout=30)
+                        cmd = f"adb -s {device_id} pull /sdcard/screenshot.png {save_path}"
+                        result = subprocess.run(cmd, shell=True, capture_output=True, timeout=30)
+                        if result.returncode == 0 and os.path.exists(save_path) and os.path.getsize(save_path) > 0:
+                            with open(save_path, "rb") as f:
+                                png_data = f.read()
+                    except Exception as e:
+                        logger.debug(f"Shell screencap method failed: {e}")
+                
+                if png_data:
+                    with open(save_path, "wb") as f:
+                        f.write(png_data)
+                
+                if os.path.exists(save_path) and os.path.getsize(save_path) > 0:
+                    with open(save_path, "rb") as f:
+                        return base64.b64encode(f.read()).decode()
+                
+                logger.warning(f"Failed to capture screenshot for device {device_id}")
+                return None
+                
+            elif device.platform == PlatformType.HARMONYOS:
+                # HarmonyOS screenshot via HDC
+                png_data = None
+                try:
+                    cmd = f"hdc -t {device_id} shell screencap -p"
+                    result = subprocess.run(cmd, shell=True, capture_output=True, timeout=30)
+                    
+                    if result.returncode == 0 and result.stdout:
+                        png_magic = b'\x89PNG\r\n\x1a\n'
+                        if result.stdout.startswith(png_magic):
+                            png_data = result.stdout
+                        else:
+                            png_start = result.stdout.find(png_magic)
+                            if png_start != -1:
+                                png_data = result.stdout[png_start:]
+                    
+                    if png_data:
+                        with open(save_path, "wb") as f:
+                            f.write(png_data)
                     
                     if os.path.exists(save_path) and os.path.getsize(save_path) > 0:
                         with open(save_path, "rb") as f:
                             return base64.b64encode(f.read()).decode()
-            finally:
-                if os.path.exists(save_path):
-                    os.unlink(save_path)
+                    else:
+                        logger.warning(f"Failed to capture screenshot for device {device_id}")
+                        return None
+                finally:
+                    if os.path.exists(save_path):
+                        os.unlink(save_path)
         
-        return None
+        except Exception as e:
+            logger.error(f"Screenshot error: {e}")
+            return None
+        finally:
+            if os.path.exists(save_path):
+                os.unlink(save_path)
     
     def launch_app(self, device_id: str, app_name: str) -> bool:
         """Launch an app on device."""
@@ -340,10 +474,15 @@ class DeviceService:
     def connect_tcpip(self, ip_port: str) -> bool:
         """Connect to an Android device via TCP/IP (e.g., 192.168.1.100:5555)."""
         try:
-            result = self._run_adb_command(f"connect {ip_port}")
-            time.sleep(1)
-            return "connected" in result.lower()
-        except Exception:
+            # Retry up to 3 times with delay
+            for attempt in range(3):
+                result = self._run_adb_command(f"connect {ip_port}")
+                if "connected" in result.lower():
+                    return True
+                # Wait for device to be ready
+                time.sleep(2)
+            return False
+        except Exception as e:
             return False
     
     def disconnect_tcpip(self, ip_port: str):

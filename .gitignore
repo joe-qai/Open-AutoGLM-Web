@@ -60,4 +60,27 @@ call_model.py
 app_package_name.py
 
 .claude/
+
+# Databases
+*.db
+
+# Environment
+.env
+backend/.env
+
+# Backups
+*.bak
+
+# Uploads
+backend/app/uploads/
+
+# Replay files
+backend/replays/
 .venv
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/node_modules/.vite/
+*.map
+package-lock.json

@@ -1,215 +1,239 @@
-"""Socket.IO Server for real-time video streaming with full scrcpy protocol support."""
+"""Socket.IO server for Scrcpy video streaming."""
+
+from __future__ import annotations
 
 import asyncio
-import logging
-import traceback
-from typing import Dict
+import base64
+import time
+from typing import Any
 
-from app.services.scrcpy_streamer import ScrcpyStreamer, VideoPacket
+from typing_extensions import TypedDict, NotRequired
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+import socketio
 
-# Active streamers and their tasks
-_streamers: Dict[str, ScrcpyStreamer] = {}
-_socket_streamers: Dict[str, str] = {}  # sid -> device_id
-_device_locks: Dict[str, asyncio.Lock] = {}
-_stream_tasks: Dict[str, asyncio.Task] = {}  # sid -> streaming task
+from app.logger import logger
+from app.services.scrcpy_protocol import ScrcpyMediaStreamPacket
+from app.services.scrcpy_streamer import ScrcpyStreamer
 
 
-async def _stream_packets(sid: str, streamer: ScrcpyStreamer, sio):
-    """Stream video packets to client with proper metadata."""
-    logger.info(f"Starting packet stream for {sid}")
-    
-    try:
-        while streamer.running:
-            packet: VideoPacket = await streamer.read_packet()
-            if not packet:
-                break
-            
-            # Send video data to client with frame metadata
-            await sio.emit("video-data", {
-                "data": packet.data.hex(),
-                "pts": packet.pts,
-                "isKeyframe": packet.is_keyframe,
-                "isConfig": packet.is_config,
-            }, to=sid)
-            
-            # Throttle to prevent overwhelming client
-            await asyncio.sleep(0.005)
-            
-    except asyncio.CancelledError:
-        logger.info(f"Packet stream cancelled for {sid}")
-    except Exception as e:
-        logger.error(f"Error streaming to {sid}: {e}", exc_info=True)
-        await sio.emit("error", {"message": f"视频流传输错误: {str(e)}", "type": "stream_error"}, to=sid)
-    finally:
-        logger.info(f"Stopped packet stream for {sid}")
+class VideoPacketPayload(TypedDict):
+    type: str
+    data: str  # Hex encoded
+    timestamp: int
+    isConfig: bool
+    isKeyframe: NotRequired[bool | None]
+    pts: NotRequired[int | None]
 
 
-async def connect_device(sio, sid: str, data: dict):
-    """Handle device connection request with concurrency control."""
-    device_id = data.get("device_id")
-    max_size = int(data.get("maxSize") or 1280)
-    bit_rate = int(data.get("bitRate") or 4_000_000)
-    
-    logger.info(f"Received connect-device for device {device_id} from {sid}")
-    
-    if not device_id:
-        logger.error("device_id is required but not provided")
-        await sio.emit("error", {
-            "message": "请提供设备ID",
-            "type": "missing_device_id"
-        }, to=sid)
-        return
-    
-    # Get device lock to prevent concurrent connections
-    device_lock = _device_locks.setdefault(device_id, asyncio.Lock())
-    
-    async with device_lock:
-        # Stop existing streamers for this device (except current client)
-        sids_to_stop = [s for s, did in _socket_streamers.items() 
-                        if s != sid and did == device_id]
-        for s in sids_to_stop:
-            await _stop_stream_for_sid(s, sio)
-        
-        # Create and start streamer
-        try:
-            logger.info(f"Creating ScrcpyStreamer for device {device_id} with max_size={max_size}, bit_rate={bit_rate}")
-            streamer = ScrcpyStreamer(
-                device_id=device_id,
-                max_size=max_size,
-                bit_rate=bit_rate,
-            )
-            
-            logger.info(f"Starting streamer for device {device_id}")
-            metadata = await streamer.start()
-            
-            _streamers[device_id] = streamer
-            _socket_streamers[sid] = device_id
-            
-            # Send metadata
-            logger.info(f"Sending video-metadata for device {device_id}: {metadata.device_name} ({metadata.width}x{metadata.height})")
-            await sio.emit("video-metadata", {
-                "deviceName": metadata.device_name,
-                "width": metadata.width,
-                "height": metadata.height,
-                "codec": metadata.codec,
-            }, to=sid)
-            
-            # Start streaming task
-            logger.info(f"Starting packet streaming task for {sid}")
-            task = asyncio.create_task(_stream_packets(sid, streamer, sio))
-            _stream_tasks[sid] = task
-            
-            # Add callback for task completion
-            def task_done_callback(fut):
-                try:
-                    fut.result()
-                except Exception as e:
-                    logger.error(f"Streaming task failed for {sid}: {e}")
-                finally:
-                    _stream_tasks.pop(sid, None)
-            
-            task.add_done_callback(task_done_callback)
-            
-        except Exception as e:
-            err_type_name = type(e).__name__
-            err_msg = str(e) or f"{err_type_name} (no detail message)"
-            tb = traceback.format_exc()
-            logger.error(f"Failed to start stream for {device_id}:\n{tb}")
-            
-            # Categorize error for user-friendly message
-            error_type = "connection_failed"
-            error_message = err_msg
-            
-            full_detail = f"[{err_type_name}] {err_msg}\n{tb}"
-            
-            if err_type_name == "NotImplementedError":
-                error_type = "not_implemented"
-                error_message = "该操作在Windows平台暂不支持，请确认ADB和设备连接后重试"
-            if "device offline" in err_msg.lower() or "no devices/emulators found" in err_msg.lower():
-                error_type = "device_offline"
-                error_message = "设备无响应，请检查USB/WiFi连接"
-            elif "port" in err_msg.lower() or "address already in use" in err_msg.lower():
-                error_type = "port_conflict"
-                error_message = "端口冲突，视频流端口仍被占用"
-            elif "timeout" in err_msg.lower():
-                error_type = "timeout"
-                error_message = "连接超时，请检查设备连接后重试"
-            elif err_type_name == "FileNotFoundError":
-                error_message = f"ADB 未找到，请检查 ADB 安装"
-            
-            await sio.emit("error", {
-                "message": error_message,
-                "type": error_type,
-                "technical_details": full_detail
-            }, to=sid)
+sio = socketio.AsyncServer(
+    async_mode="asgi",
+    cors_allowed_origins="*",
+    transports=["websocket", "polling"],
+    allow_upgrades=True,
+    ping_timeout=60,
+    ping_interval=25,
+    max_http_buffer_size=10 * 1024 * 1024,
+    server_kwargs={"socketio_path": "/socket.io"},
+)
 
 
-async def _stop_stream_for_sid(sid: str, sio):
-    """Stop stream for a specific client."""
-    device_id = _socket_streamers.get(sid)
-    if device_id:
-        # Cancel streaming task
+async def initialize_socketio(app: Any) -> None:
+    """Initialize Socket.IO server and attach to FastAPI app."""
+    from socketio import ASGIApp
+
+    socketio_app = ASGIApp(sio)
+    app.mount("/socket.io", socketio_app)
+
+_socket_streamers: dict[str, ScrcpyStreamer] = {}
+_stream_tasks: dict[str, asyncio.Task[None]] = {}
+_device_locks: dict[
+    str, asyncio.Lock
+] = {}  # Lock per device to prevent concurrent connections
+
+
+async def _stop_stream_for_sid(sid: str) -> None:
+    task = _stream_tasks.pop(sid, None)
+    if task:
+        task.cancel()
+
+    streamer = _socket_streamers.pop(sid, None)
+    if streamer:
+        streamer.stop()
+
+
+def _classify_error(exc: Exception) -> dict[str, Any]:
+    """Classify error and return user-friendly message."""
+    error_str = str(exc)
+
+    if "Address already in use" in error_str or (
+        "Port" in error_str and "occupied" in error_str
+    ):
+        return {
+            "message": "端口冲突，视频流端口仍被占用。通常会自动解决，如果持续出现请重启应用。",
+            "type": "port_conflict",
+            "technical_details": error_str,
+        }
+    elif "Device" in error_str and (
+        "not available" in error_str or "not found" in error_str
+    ):
+        return {
+            "message": "设备无响应，请检查 USB/WiFi 连接。",
+            "type": "device_offline",
+            "technical_details": error_str,
+        }
+    elif "timeout" in error_str.lower() or "timed out" in error_str.lower():
+        return {
+            "message": "连接超时，请检查设备连接后重试。",
+            "type": "timeout",
+            "technical_details": error_str,
+        }
+    elif "Failed to connect" in error_str:
+        return {
+            "message": "无法连接到 scrcpy 服务器，请检查设备连接。",
+            "type": "connection_failed",
+            "technical_details": error_str,
+        }
+    else:
+        return {
+            "message": error_str,
+            "type": "unknown",
+            "technical_details": error_str,
+        }
+
+
+def stop_streamers(device_id: str | None = None) -> None:
+    """Stop active scrcpy streamers (all or by device)."""
+    sids = list(_socket_streamers.keys())
+    for sid in sids:
+        streamer = _socket_streamers.get(sid)
+        if not streamer:
+            continue
+        if device_id and streamer.device_id != device_id:
+            continue
         task = _stream_tasks.pop(sid, None)
         if task:
             task.cancel()
-            try:
-                await task
-            except asyncio.CancelledError:
-                pass
-        
-        # Stop streamer
-        streamer = _streamers.pop(device_id, None)
-        if streamer:
-            await streamer.stop()
-        
-        del _socket_streamers[sid]
-        logger.info(f"Stream stopped for sid {sid}, device {device_id}")
+        streamer.stop()
+        _socket_streamers.pop(sid, None)
 
 
-async def disconnect_device(sio, sid: str):
-    """Handle client disconnection."""
-    logger.info(f"Client disconnecting: {sid}")
-    await _stop_stream_for_sid(sid, sio)
+async def _stream_packets(sid: str, streamer: ScrcpyStreamer) -> None:
+    try:
+        logger.info(f"Starting video packet streaming for sid: {sid}")
+        packet_count = 0
+        async for packet in streamer.iter_packets():
+            payload = _packet_to_payload(packet)
+            await sio.emit("video-data", payload, to=sid)
+            packet_count += 1
+            if packet_count % 30 == 0:
+                logger.debug(f"Sent {packet_count} video packets to sid: {sid}")
+            if packet.type == "configuration":
+                logger.debug(f"Sent configuration packet (size: {len(packet.data)})")
+            elif packet.type == "data" and packet.keyframe:
+                logger.debug(f"Sent keyframe packet (size: {len(packet.data)})")
+    except asyncio.CancelledError:
+        logger.info(f"Video streaming cancelled for sid: {sid}")
+        raise
+    except Exception as exc:
+        logger.exception("Video streaming failed: %s", exc)
+        try:
+            await sio.emit("error", {"message": str(exc)}, to=sid)
+        except Exception as emit_exc:
+            logger.debug(
+                "Failed to emit Socket.IO stream error to %s: %s", sid, emit_exc
+            )
+    finally:
+        logger.info(f"Stopping video streaming for sid: {sid}")
+        await _stop_stream_for_sid(sid)
 
 
-async def initialize_socketio(app):
-    """Initialize Socket.IO server with proper CORS and event handlers."""
-    from socketio import AsyncServer
-    
-    # Configure CORS for Socket.IO - handles both Socket.IO and HTTP requests
-    allowed_origins = ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001", "null"]
-    
-    sio = AsyncServer(
-        async_mode="asgi",
-        cors_allowed_origins=allowed_origins,
-        logger=True,
-        engineio_logger=True,
-        max_http_buffer_size=10 * 1024 * 1024  # 10MB for video frames
-    )
-    
-    @sio.event
-    async def connect(sid, environ):
-        logger.info(f"Client connected: {sid}")
-    
-    @sio.event
-    async def disconnect(sid):
-        logger.info(f"Client disconnected: {sid}")
-        await disconnect_device(sio, sid)
-    
-    @sio.event
-    async def connect_device(sid, data):
-        await connect_device(sio, sid, data)
+def _bytes_to_hex(data: bytes) -> str:
+    """Convert bytes to hex string for WebSocket transmission."""
+    return data.hex()
 
-    @sio.event
-    async def disconnect_device(sid):
-        await disconnect_device(sio, sid)
-    
-    # Mount Socket.IO to app
-    from socketio import ASGIApp
-    app.mount("/socket.io", ASGIApp(sio))
-    
-    return sio
+def _packet_to_payload(packet: ScrcpyMediaStreamPacket) -> VideoPacketPayload:
+    payload: VideoPacketPayload = {
+        "type": packet.type,
+        "data": _bytes_to_hex(packet.data),
+        "timestamp": int(time.time() * 1000),
+        "isConfig": packet.type == "configuration",
+        "isKeyframe": packet.keyframe if packet.type == "data" else None,
+        "pts": packet.pts if packet.type == "data" else None,
+    }
+    return payload
+
+
+@sio.event
+async def connect(sid: str, environ: dict[str, Any]) -> None:
+    logger.info("Socket.IO client connected: %s", sid)
+
+
+@sio.event
+async def disconnect(sid: str) -> None:
+    logger.info("Socket.IO client disconnected: %s", sid)
+    await _stop_stream_for_sid(sid)
+
+
+@sio.on("connect-device")
+async def connect_device(sid: str, data: dict[str, Any] | None) -> None:
+    payload = data or {}
+    device_id = payload.get("device_id") or payload.get("deviceId")
+    if not device_id:
+        await sio.emit(
+            "error",
+            {"message": "Device ID is required", "type": "invalid_request"},
+            to=sid,
+        )
+        return
+
+    max_size = int(payload.get("maxSize") or payload.get("max_size") or 1280)
+    bit_rate = int(payload.get("bitRate") or payload.get("bit_rate") or 4_000_000)
+
+    await _stop_stream_for_sid(sid)
+
+    if device_id not in _device_locks:
+        _device_locks[device_id] = asyncio.Lock()
+
+    device_lock = _device_locks[device_id]
+
+    async with device_lock:
+        logger.debug(f"Acquired device lock for {device_id}, sid: {sid}")
+
+        sids_to_stop = [
+            s
+            for s, streamer in _socket_streamers.items()
+            if s != sid and streamer.device_id == device_id
+        ]
+        for s in sids_to_stop:
+            logger.info(f"Stopping existing stream for device {device_id} from sid {s}")
+            await _stop_stream_for_sid(s)
+
+        streamer = ScrcpyStreamer(
+            device_id=device_id,
+            max_size=max_size,
+            bit_rate=bit_rate,
+        )
+
+        try:
+            await streamer.start()
+            metadata = await streamer.read_video_metadata()
+            
+            await sio.emit(
+                "video-metadata",
+                {
+                    "deviceName": metadata.device_name,
+                    "width": metadata.width,
+                    "height": metadata.height,
+                    "codec": metadata.codec,
+                },
+                to=sid,
+            )
+
+            _socket_streamers[sid] = streamer
+            _stream_tasks[sid] = asyncio.create_task(_stream_packets(sid, streamer))
+
+        except Exception as exc:
+            streamer.stop()
+            logger.exception("Failed to start scrcpy stream: %s", exc)
+            error_info = _classify_error(exc)
+            await sio.emit("error", error_info, to=sid)

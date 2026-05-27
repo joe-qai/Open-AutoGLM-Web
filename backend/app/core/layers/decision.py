@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 try:
-    from openai import OpenAI
+    import httpx
 
     has_openai = True
 except ImportError:
@@ -40,9 +40,9 @@ class ModelConfig:
     """Model configuration."""
 
     base_url: str = os.environ.get(
-        "PHONE_AGENT_MODEL_API_URL", "http://localhost:8000/v1"
+        "PHONE_AGENT_BASE_URL", "http://localhost:8000/v1"
     )
-    model_name: str = os.environ.get("PHONE_AGENT_MODEL_NAME", "autoglm-phone-9b")
+    model_name: str = os.environ.get("PHONE_AGENT_MODEL", "autoglm-phone-9b")
     api_key: str = os.environ.get("PHONE_AGENT_API_KEY", "EMPTY")
     mode: DecisionMode = DecisionMode.LLM
 
@@ -64,42 +64,67 @@ class MockModelClient:
 
 
 class OpenAIModelClient:
-    """OpenAI-compatible model client."""
+    """OpenAI-compatible model client.
+    
+    Uses raw httpx with SSE parsing because some APIs (e.g. Lockin) always
+    return text/event-stream even for non-streaming requests.
+    """
 
     def __init__(self, config: ModelConfig):
         self.config = config
-        # 配置客户端，允许无API key（用于本地模型）
-        client_kwargs = {"base_url": config.base_url}
-        if config.api_key and config.api_key != "EMPTY":
-            client_kwargs["api_key"] = config.api_key
-        else:
-            # 本地模型可能不需要API key，设置一个空字符串
-            client_kwargs["api_key"] = "sk-no-key-required"
-        self.client = OpenAI(**client_kwargs)
 
     def request(self, messages: List[Dict]) -> Any:
-        """Make request to LLM."""
-        try:
-            response = self.client.chat.completions.create(
-                model=self.config.model_name,
-                messages=messages,
-                max_tokens=1024,
-                temperature=0.7,
-            )
+        """Make request to LLM via httpx with SSE auto-detection."""
+        import httpx
+        import json
 
-            content = response.choices[0].message.content
+        url = self.config.base_url.rstrip("/") + "/chat/completions"
+        body = {
+            "model": self.config.model_name,
+            "messages": messages,
+            "max_tokens": 1024,
+            "temperature": 0.7,
+            "stream": False,
+        }
+        headers = {
+            "Authorization": f"Bearer {self.config.api_key}",
+            "Content-Type": "application/json",
+        }
+
+        try:
+            resp = httpx.post(url, json=body, headers=headers, timeout=60)
+            ct = resp.headers.get("content-type", "")
+
+            content = ""
+            if "text/event-stream" in ct or resp.text.startswith("data:"):
+                for line in resp.text.splitlines():
+                    line = line.strip()
+                    if line.startswith("data:") and "[DONE]" not in line:
+                        try:
+                            chunk = json.loads(line[5:])
+                            delta = chunk.get("choices", [{}])[0].get("delta", {})
+                            if delta.get("content"):
+                                content += delta["content"]
+                        except (json.JSONDecodeError, IndexError, KeyError):
+                            pass
+            else:
+                data = resp.json()
+                content = (
+                    data.get("choices", [{}])[0]
+                    .get("message", {})
+                    .get("content", "")
+                )
 
             class Response:
                 thinking = ""
-                action = content
+                action = content or ""
 
             return Response()
-        except Exception as e:
 
+        except Exception as e:
             class Response:
                 thinking = ""
                 action = f'{{"action": "wait", "parameters": {{"duration": 2000}}, "reasoning": "Model request failed: {str(e)}"}}'
-
             return Response()
 
 
@@ -115,6 +140,44 @@ class ActionPlan:
 
 
 class DecisionLayer:
+    @staticmethod
+    def _extract_json(text: str) -> Optional[Dict[str, Any]]:
+        """Extract JSON object from LLM response text.
+        
+        Tries: full parse → find {…} in text → markdown code block → fail gracefully.
+        """
+        if not text:
+            return None
+        # 1. Try direct parse
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            pass
+        # 2. Try code block ```json ... ```
+        import re
+        m = re.search(r"```(?:json)?\s*\n?(.*?)\n?```", text, re.DOTALL)
+        if m:
+            try:
+                return json.loads(m.group(1).strip())
+            except json.JSONDecodeError:
+                pass
+        # 3. Try first { ... } block
+        start = text.find("{")
+        if start != -1:
+            depth = 0
+            for i in range(start, len(text)):
+                if text[i] == "{":
+                    depth += 1
+                elif text[i] == "}":
+                    depth -= 1
+                    if depth == 0:
+                        try:
+                            return json.loads(text[start:i+1])
+                        except json.JSONDecodeError:
+                            break
+        return None
+    
+
     """Decision layer - makes decisions based on perception data."""
 
     # 元素定位优先的 LLM Action Schema
@@ -419,34 +482,35 @@ class DecisionLayer:
         try:
             response = self.model_client.request(messages)
 
-            try:
-                plan = json.loads(response.action)
-                locator = plan.get("locator", {})
-                return ActionPlan(
-                    action=plan.get("action", "wait"),
-                    target=locator.get("value", ""),
-                    parameters={
-                        "locator_type": locator.get("type"),
-                        "locator_value": locator.get("value"),
-                        "locator_index": locator.get("index", 0),
-                        "fallback_coords": plan.get("fallback_coords"),
-                        "text": plan.get("text"),
-                        "app": plan.get("app"),
-                        "duration": plan.get("duration"),
-                        "start_x": plan.get("start_x"),
-                        "start_y": plan.get("start_y"),
-                        "end_x": plan.get("end_x"),
-                        "end_y": plan.get("end_y"),
-                        "message": plan.get("message"),
-                    },
-                    confidence=plan.get("confidence", 0.8),
-                    reasoning=plan.get("reasoning", ""),
-                )
-            except json.JSONDecodeError:
+            plan_dict = self._extract_json(response.action)
+            if plan_dict is None:
                 return ActionPlan(
                     action="wait",
-                    reasoning=f"无法解析响应: {getattr(response, 'action', str(response))[:150]}",
+                    reasoning=f"响应无法解析为JSON: {response.action[:150]}",
                 )
+
+            plan = plan_dict
+            locator = plan.get("locator", {})
+            return ActionPlan(
+                action=plan.get("action", "wait"),
+                target=locator.get("value", ""),
+                parameters={
+                    "locator_type": locator.get("type"),
+                    "locator_value": locator.get("value"),
+                    "locator_index": locator.get("index", 0),
+                    "fallback_coords": plan.get("fallback_coords"),
+                    "text": plan.get("text"),
+                    "app": plan.get("app"),
+                    "duration": plan.get("duration"),
+                    "start_x": plan.get("start_x"),
+                    "start_y": plan.get("start_y"),
+                    "end_x": plan.get("end_x"),
+                    "end_y": plan.get("end_y"),
+                    "message": plan.get("message"),
+                },
+                confidence=plan.get("confidence", 0.8),
+                reasoning=plan.get("reasoning", ""),
+            )
         except Exception as e:
             return ActionPlan(
                 action="wait",

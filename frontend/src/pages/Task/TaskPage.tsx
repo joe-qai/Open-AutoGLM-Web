@@ -1,19 +1,24 @@
 import { useEffect, useState, Fragment } from 'react';
-import { ListTodo, Play, Square, CheckSquare, Trash2, Clock, CheckCircle2, XCircle, Loader2, Plus, X, Bot, Upload, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { ListTodo, Play, Square, CheckSquare, Trash2, Clock, CheckCircle2, XCircle, Loader2, Plus, X, Bot, Upload, ChevronDown, ChevronUp, FileText, AlertTriangle } from 'lucide-react';
 import { useTaskStore } from '../../stores/taskStore';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { ToastManager, ToastType } from '../../components/Toast';
 import { useAgentStore } from '../../stores/agentStore';
 import { useDeviceStore } from '../../stores/deviceStore';
 import { useApkStore } from '../../stores/apkStore';
-import { useModelConfigStore } from '../../stores/modelConfigStore';
 import type { Script } from '../../stores/agentStore';
+
+interface ToastItem {
+  id: string;
+  message: string;
+  type: ToastType;
+}
 
 export function TaskPage() {
   const { tasks, fetchTasks, executeTask, stopTask, createTask, deleteTask } = useTaskStore();
   const { scripts, fetchScripts } = useAgentStore();
   const { devices, fetchDevices } = useDeviceStore();
   const { apks, fetchApks } = useApkStore();
-  const { configs: modelConfigs, fetchConfigs: fetchModelConfigs } = useModelConfigStore();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taskName, setTaskName] = useState('');
@@ -24,6 +29,10 @@ export function TaskPage() {
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [batchDeleting, setBatchDeleting] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [stoppingTaskId, setStoppingTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTasks();
@@ -53,11 +62,24 @@ export function TaskPage() {
       : <Upload className="w-3 h-3 text-[#94a3b8]" />;
   };
 
+  const addToast = (message: string, type: ToastType = 'info') => {
+    const id = Date.now().toString();
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3000);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
   const handleCreateTask = async () => {
     if (!taskName || !selectedScriptId || selectedDeviceIds.length === 0) return;
 
     const taskId = await createTask({
       name: taskName,
+      description: '',
       script_id: selectedScriptId,
       device_id: selectedDeviceIds[0],
       apk_id: selectedApkId || undefined,
@@ -69,6 +91,7 @@ export function TaskPage() {
       setSelectedScriptId('');
       setSelectedDeviceIds([]);
       setSelectedApkId('');
+      addToast('任务创建成功', 'success');
     }
   };
 
@@ -151,14 +174,48 @@ export function TaskPage() {
     setConfirmOpen(true);
   };
 
+  const handleStopTask = async (taskId: string) => {
+    setStoppingTaskId(taskId);
+    try {
+      await stopTask(taskId);
+      addToast('任务已中止', 'info');
+    } catch (error) {
+      console.error('Failed to stop task:', error);
+      addToast('中止任务失败', 'error');
+    } finally {
+      setStoppingTaskId(null);
+    }
+  };
+
+  const handleDeleteClick = (taskId: string) => {
+    setTaskToDelete(taskId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!taskToDelete) return;
+    setDeleteConfirmOpen(false);
+    try {
+      await deleteTask(taskToDelete);
+      addToast('任务删除成功', 'success');
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+      addToast('删除任务失败', 'error');
+    } finally {
+      setTaskToDelete(null);
+    }
+  };
+
   const handleConfirmBatchDelete = async () => {
     setConfirmOpen(false);
     setBatchDeleting(true);
     try {
       await useTaskStore.getState().batchDeleteTasks(Array.from(selectedTaskIds));
       setSelectedTaskIds(new Set());
+      addToast(`成功删除 ${selectedTaskIds.size} 个任务`, 'success');
     } catch (error) {
       console.error('Batch delete failed:', error);
+      addToast('批量删除失败', 'error');
     } finally {
       setBatchDeleting(false);
     }
@@ -207,172 +264,164 @@ export function TaskPage() {
         </div>
       )}
 
-      {/* Task Table */}
-      <div className="bg-[#1e293b] border border-[#334155] rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="text-[#64748b] text-sm border-b border-[#334155]">
-                <th className="text-left py-4 px-4 font-medium w-10">
-                  <button onClick={toggleSelectAllTasks} className="text-[#94a3b8] hover:text-white transition-colors">
-                    {selectedTaskIds.size === tasks.length && tasks.length > 0 ? (
-                      <CheckSquare className="w-4 h-4" />
-                    ) : (
-                      <Square className="w-4 h-4" />
-                    )}
-                  </button>
-                </th>
-                <th className="text-left py-4 px-6 font-medium">任务名称</th>
-                <th className="text-left py-4 px-6 font-medium">类型</th>
-                <th className="text-left py-4 px-6 font-medium">执行设备</th>
-                <th className="text-left py-4 px-6 font-medium">状态</th>
-                <th className="text-left py-4 px-6 font-medium">创建时间</th>
-                <th className="text-left py-4 px-6 font-medium">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tasks.map((task) => {
-                const script = getScriptById(task.script_id);
-                const primaryDevice = getDeviceInfo(task.device_id);
-                const isExpanded = expandedDevices[task.task_id];
-                
-                return (
-                  <Fragment key={task.task_id}>
-                    <tr className="border-b border-[#334155] last:border-0 hover:bg-[#334155]/30">
-                      <td className="py-4 px-4">
-                        <button onClick={() => toggleTaskSelect(task.task_id)} className="text-[#94a3b8] hover:text-white transition-colors">
-                          {selectedTaskIds.has(task.task_id) ? (
-                            <CheckSquare className="w-4 h-4 text-indigo-400" />
-                          ) : (
-                            <Square className="w-4 h-4" />
-                          )}
-                        </button>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div>
-                          <p className="text-white font-medium">{task.name}</p>
-                          <p className="text-[#64748b] text-sm">{task.description}</p>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        {script ? (
-                          <span className="px-2 py-1 bg-[#334155] text-[#94a3b8] text-xs rounded flex items-center gap-1.5">
+      {/* Select All Header */}
+      {tasks.length > 0 && (
+        <div className="flex items-center gap-4 mb-4">
+          <button onClick={toggleSelectAllTasks} className="text-slate-400 hover:text-white transition-colors">
+            {selectedTaskIds.size === tasks.length ? (
+              <CheckSquare className="w-5 h-5 text-indigo-400" />
+            ) : (
+              <Square className="w-5 h-5" />
+            )}
+          </button>
+          <span className="text-slate-400 text-sm">全选 ({tasks.length})</span>
+        </div>
+      )}
+
+      {/* Task Cards */}
+      <div className="space-y-4">
+        {tasks.map((task) => {
+          const script = getScriptById(task.script_id);
+          const primaryDevice = getDeviceInfo(task.device_id);
+          const isExpanded = expandedDevices[task.task_id];
+          
+          return (
+            <Fragment key={task.task_id}>
+              <div
+                className="bg-gradient-to-r from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-5 hover:border-slate-600/50 transition-all duration-300"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4">
+                    <button onClick={() => toggleTaskSelect(task.task_id)} className="mt-1 text-slate-400 hover:text-white transition-colors">
+                      {selectedTaskIds.has(task.task_id) ? (
+                        <CheckSquare className="w-5 h-5 text-indigo-400" />
+                      ) : (
+                        <Square className="w-5 h-5" />
+                      )}
+                    </button>
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-white font-semibold text-lg">{task.name}</h3>
+                        <span className={`px-3 py-1 text-xs rounded-full ${
+                          task.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                          task.status === 'executing' ? 'bg-blue-500/20 text-blue-400' :
+                          task.status === 'failed' ? 'bg-red-500/20 text-red-400' :
+                          'bg-slate-500/20 text-slate-400'
+                        }`}>
+                          {getStatusText(task.status)}
+                        </span>
+                        {script && (
+                          <span className="px-3 py-1 bg-slate-700/50 text-slate-300 text-xs rounded-full flex items-center gap-1.5">
                             {getScriptTypeIcon(script)}
                             {script.name}
                           </span>
-                        ) : (
-                          <span className="px-2 py-1 bg-[#334155] text-[#94a3b8] text-xs rounded">
-                            {task.task_type}
-                          </span>
                         )}
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[#94a3b8]">
-                            {primaryDevice?.name || task.device_id || '-'}
-                          </span>
-                          <button
-                            onClick={() => toggleDeviceExpand(task.task_id)}
-                            className="text-[#64748b] hover:text-white transition-colors"
-                          >
-                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                          </button>
+                      </div>
+                      <p className="text-slate-400 text-sm">
+                        {task.description || '暂无描述'} · {primaryDevice?.name || task.device_id || '-'} · {new Date(task.created_at).toLocaleString()}
+                      </p>
+                      {task.status === 'failed' && task.error_message && (
+                        <p className="text-red-400 text-xs mt-2 truncate" title={task.error_message}>
+                          {task.error_message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    {/* Progress bar if executing */}
+                    {task.status === 'executing' && (
+                      <div className="mr-4">
+                        <div className="flex items-center gap-2 text-sm text-slate-400 mb-1">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>执行中</span>
                         </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(task.status)}
-                          <span className={`text-sm ${getStatusClass(task.status)}`}>
-                            {getStatusText(task.status)}
-                          </span>
+                        <div className="w-48 h-2 bg-slate-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full animate-pulse" style={{ width: task.progress ? `${task.progress}%` : '50%' }} />
                         </div>
-                        {task.status === 'failed' && task.error_message && (
-                          <div className="mt-1 text-xs text-red-400/80 max-w-xs truncate" title={task.error_message}>
-                            {task.error_message}
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-4 px-6 text-[#94a3b8] text-sm">
-                        {new Date(task.created_at).toLocaleString()}
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-2">
-                          {task.status === 'executing' ? (
-                            <button
-                              onClick={() => stopTask(task.task_id)}
-                              className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                              title="中止"
-                            >
-                              <Square className="w-4 h-4" />
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => executeTask(task.task_id)}
-                              className="p-2 text-green-400 hover:bg-green-500/20 rounded-lg transition-colors"
-                              title="执行"
-                            >
-                              <Play className="w-4 h-4" />
-                            </button>
-                          )}
-                          {task.status === 'completed' && (
-                            <button
-                              onClick={() => handlePreviewReport(task.task_id)}
-                              className="p-2 text-indigo-400 hover:bg-indigo-500/20 rounded-lg transition-colors"
-                              title="查看报告"
-                            >
-                              <FileText className="w-4 h-4" />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => {
-                              if (confirm('确定要删除此任务吗？')) {
-                                deleteTask(task.task_id);
-                              }
-                            }}
-                            className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                            title="删除"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    {isExpanded && (
-                      <tr className="border-b border-[#334155] bg-[#0f172a]/30">
-                        <td colSpan={7} className="py-3 px-6">
-                          <div className="flex flex-wrap gap-2">
-                            {primaryDevice && (
-                              <span className="px-3 py-1.5 bg-[#334155] text-[#94a3b8] text-xs rounded-full">
-                                {primaryDevice.name} ({primaryDevice.platform})
-                              </span>
-                            )}
-                            {task.devices && task.devices.length > 0 && task.devices.map(deviceId => {
-                              const device = getDeviceInfo(deviceId);
-                              if (device && device.device_id !== task.device_id) {
-                                return (
-                                  <span key={deviceId} className="px-3 py-1.5 bg-[#334155] text-[#94a3b8] text-xs rounded-full">
-                                    {device.name} ({device.platform})
-                                  </span>
-                                );
-                              }
-                              return null;
-                            })}
-                          </div>
-                        </td>
-                      </tr>
+                      </div>
                     )}
-                  </Fragment>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2">
+                      {task.status === 'executing' ? (
+                        <button
+                          onClick={() => handleStopTask(task.task_id)}
+                          disabled={stoppingTaskId === task.task_id}
+                          className="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-all duration-200"
+                          title="中止"
+                        >
+                          {stoppingTaskId === task.task_id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Square className="w-4 h-4" />
+                          )}
+                          {stoppingTaskId === task.task_id ? '中止中...' : '中止'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => executeTask(task.task_id)}
+                          className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-all duration-200"
+                          title="执行"
+                        >
+                          <Play className="w-4 h-4" />
+                          执行
+                        </button>
+                      )}
+                      {task.status === 'completed' && (
+                        <button
+                          onClick={() => handlePreviewReport(task.task_id)}
+                          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-all duration-200"
+                          title="查看报告"
+                        >
+                          <FileText className="w-4 h-4" />
+                          报告
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteClick(task.task_id)}
+                        className="px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-all duration-200"
+                        title="删除"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Expanded devices */}
+                {isExpanded && (
+                  <div className="mt-4 pt-4 border-t border-slate-700/50">
+                    <div className="flex flex-wrap gap-2">
+                      {primaryDevice && (
+                        <span className="px-3 py-1.5 bg-slate-700/50 text-slate-300 text-xs rounded-full">
+                          {primaryDevice.name} ({primaryDevice.platform})
+                        </span>
+                      )}
+                      {task.devices && task.devices.length > 0 && task.devices.map(deviceId => {
+                        const device = getDeviceInfo(deviceId);
+                        if (device && device.device_id !== task.device_id) {
+                          return (
+                            <span key={deviceId} className="px-3 py-1.5 bg-slate-700/50 text-slate-300 text-xs rounded-full">
+                              {device.name} ({device.platform})
+                            </span>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Fragment>
+          );
+        })}
 
         {tasks.length === 0 && (
-          <div className="text-center py-20">
-            <ListTodo className="w-16 h-16 text-[#475569] mx-auto mb-4" />
+          <div className="text-center py-20 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/30 rounded-2xl">
+            <ListTodo className="w-16 h-16 text-slate-500 mx-auto mb-4" />
             <h3 className="text-white text-lg font-medium mb-2">暂无任务</h3>
-            <p className="text-[#64748b]">点击"新增任务"创建您的第一个任务</p>
+            <p className="text-slate-400">点击"新增任务"创建您的第一个任务</p>
           </div>
         )}
       </div>
@@ -495,6 +544,18 @@ export function TaskPage() {
         onConfirm={handleConfirmBatchDelete}
         onCancel={() => setConfirmOpen(false)}
       />
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title="删除任务"
+        message="确定要删除此任务吗？关联的报告也将被删除，此操作不可撤销。"
+        confirmLabel="删除"
+        variant="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirmOpen(false)}
+      />
+
+      <ToastManager toasts={toasts} removeToast={removeToast} />
     </div>
   );
 }

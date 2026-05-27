@@ -62,9 +62,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   createTask: async (data) => {
     try {
       const response = await taskApi.createTask(data as any);
-      const newTask = response as Task;
-      set((state) => ({ tasks: [newTask, ...state.tasks] }));
-      return newTask.task_id;
+      const result = response as unknown as { task_id: string };
+      await get().fetchTasks();
+      return result.task_id;
     } catch (error) {
       set({ error: 'Failed to create task' });
       return null;

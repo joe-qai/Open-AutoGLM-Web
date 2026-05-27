@@ -61,6 +61,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   isUploading: false,
   logs: [],
   error: null,
+  currentTaskId: null,
+  executionMode: 'direct',
 
   fetchScripts: async () => {
     try {
