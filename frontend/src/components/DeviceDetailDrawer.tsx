@@ -174,9 +174,9 @@ export function DeviceDetailDrawer() {
                     onClick={() => enableWireless(selectedDevice.device_id)}
                     disabled={enablingWirelessDeviceId === selectedDevice.device_id}
                     className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                    title={enablingWirelessDeviceId === selectedDevice.device_id ? '开启中...' : '开启无线'}
                   >
                     <Wifi className="w-4 h-4" />
-                    {enablingWirelessDeviceId === selectedDevice.device_id ? '开启中...' : '开启无线'}
                   </button>
                 )}
                 {selectedDevice.connection_type === 'tcpip' && (
