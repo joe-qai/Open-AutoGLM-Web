@@ -82,6 +82,7 @@ export const taskApi = {
     platform?: string;
     max_steps?: number;
     mode?: string;
+    save_task?: boolean;
   }) => api.post('/api/v1/tasks/natural-language', data),
 };
 

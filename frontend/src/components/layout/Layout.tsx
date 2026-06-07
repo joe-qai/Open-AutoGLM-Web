@@ -4,7 +4,7 @@ import { Header } from './Header';
 
 export function Layout() {
   return (
-    <div className="min-h-screen bg-[#0f172a]">
+    <div className="min-h-screen bg-[#f8fafc]">
       {/* Sidebar */}
       <Sidebar />
 
@@ -12,8 +12,8 @@ export function Layout() {
       <Header />
 
       {/* Main Content */}
-      <main className="ml-60 pt-16 min-h-screen">
-        <div className="p-6">
+      <main className="ml-56 pt-14 min-h-screen">
+        <div className="p-5">
           <Outlet />
         </div>
       </main>

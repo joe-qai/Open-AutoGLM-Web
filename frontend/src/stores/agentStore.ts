@@ -46,6 +46,7 @@ interface AgentState {
     platform?: string;
     max_steps?: number;
     mode?: string;
+    save_task?: boolean;
   }) => Promise<string | null>;
   setCurrentScript: (script: Script | null) => void;
   setExecutionMode: (mode: 'script' | 'direct') => void;
@@ -130,9 +131,10 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   executeDirect: async (data) => {
     set({ isExecuting: true, error: null });
     try {
-      const response = await taskApi.executeNaturalLanguageTask(data) as unknown as { task_id: string };
-      set({ isExecuting: false, currentTaskId: response.task_id });
-      return response.task_id;
+      const response = await taskApi.executeNaturalLanguageTask(data);
+      const taskId = response.data?.task_id;
+      set({ isExecuting: false, currentTaskId: taskId });
+      return taskId || null;
     } catch (error) {
       set({ error: 'Failed to execute task', isExecuting: false });
       return null;

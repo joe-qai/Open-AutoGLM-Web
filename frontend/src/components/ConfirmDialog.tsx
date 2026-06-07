@@ -25,29 +25,29 @@ export function ConfirmDialog({
 
   const confirmClass =
     variant === 'danger'
-      ? 'bg-red-600 hover:bg-red-500'
-      : 'bg-indigo-600 hover:bg-indigo-500';
+      ? 'bg-[#ef4444] hover:bg-[#dc2626]'
+      : 'bg-[#165DFF] hover:bg-[#0f4cdb]';
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-[#1e293b] border border-[#334155] rounded-2xl p-6 w-full max-w-md mx-4">
+      <div className="bg-white border border-[#e2e8f0] rounded-lg p-5 w-full max-w-md mx-4 shadow-lg">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">{title}</h2>
-          <button onClick={onCancel} className="p-2 hover:bg-[#334155] rounded-lg transition-colors">
-            <X className="w-5 h-5 text-[#94a3b8]" />
+          <h2 className="text-base font-semibold text-[#0f172a]">{title}</h2>
+          <button onClick={onCancel} className="p-1.5 hover:bg-[#f1f5f9] rounded-lg transition-all duration-200">
+            <X className="w-4 h-4 text-[#64748b]" />
           </button>
         </div>
-        <p className="text-[#94a3b8] mb-6">{message}</p>
-        <div className="flex gap-3">
+        <p className="text-[#64748b] text-sm mb-4">{message}</p>
+        <div className="flex gap-2">
           <button
             onClick={onCancel}
-            className="flex-1 px-4 py-2.5 bg-[#334155] hover:bg-[#475569] text-white rounded-lg transition-colors"
+            className="flex-1 px-4 py-2 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] text-sm font-medium rounded-lg transition-all duration-200"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className={`flex-1 px-4 py-2.5 text-white rounded-lg transition-colors ${confirmClass}`}
+            className={`flex-1 px-4 py-2 text-white text-sm font-medium rounded-lg transition-all duration-200 ${confirmClass}`}
           >
             {confirmLabel}
           </button>

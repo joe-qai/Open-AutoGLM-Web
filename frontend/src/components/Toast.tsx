@@ -18,17 +18,17 @@ const iconMap = {
 };
 
 const colorMap = {
-  success: 'bg-green-500/10 border-green-500/30 text-green-400',
-  error: 'bg-red-500/10 border-red-500/30 text-red-400',
-  warning: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
-  info: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
+  success: 'bg-[#dcfce7] border-[#bbf7d0] text-[#166534]',
+  error: 'bg-[#fee2e2] border-[#fecaca] text-[#991b1b]',
+  warning: 'bg-[#fefce8] border-[#fef08a] text-[#854d0e]',
+  info: 'bg-[#e8f0fe] border-[#bfdbfe] text-[#1e40af]',
 };
 
 const iconColorMap = {
-  success: 'text-green-400',
-  error: 'text-red-400',
-  warning: 'text-yellow-400',
-  info: 'text-blue-400',
+  success: 'text-[#22c55e]',
+  error: 'text-[#ef4444]',
+  warning: 'text-[#f59e0b]',
+  info: 'text-[#165DFF]',
 };
 
 export function Toast({ message, type = 'info', duration = 3000, onClose }: ToastProps) {
@@ -49,25 +49,24 @@ export function Toast({ message, type = 'info', duration = 3000, onClose }: Toas
     <div
       className={`
         fixed top-4 right-4 z-50 
-        flex items-center gap-3 px-4 py-3 
-        bg-[#1e293b] border rounded-xl 
-        shadow-lg backdrop-blur-sm
-        transform transition-all duration-300
+        flex items-center gap-3 px-4 py-2.5 
+        bg-white border rounded-lg 
+        shadow-md
+        transform transition-all duration-200
         ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
         ${colorMap[type]}
-        border-[#334155]
       `}
     >
-      <Icon className={`w-5 h-5 ${iconColorMap[type]}`} />
-      <span className="text-white text-sm font-medium">{message}</span>
+      <Icon className={`w-4 h-4 ${iconColorMap[type]}`} />
+      <span className="text-sm font-medium">{message}</span>
       <button
         onClick={() => {
           setIsVisible(false);
           onClose?.();
         }}
-        className="ml-2 p-1 hover:bg-white/10 rounded-lg transition-colors"
+        className="ml-2 p-1 hover:bg-black/5 rounded-lg transition-all duration-200"
       >
-        <X className="w-4 h-4 text-[#94a3b8]" />
+        <X className="w-3.5 h-3.5" />
       </button>
     </div>
   );

@@ -17,6 +17,7 @@ class NaturalLanguageTaskRequest(BaseModel):
     platform: Optional[str] = "android"
     max_steps: Optional[int] = 100
     mode: Optional[str] = "llm"  # "llm", "vlm", or "auto"
+    save_task: Optional[bool] = True  # Whether to save task record
 
 
 @router.post("/", response_model=TaskResponse)
@@ -105,6 +106,7 @@ async def execute_natural_language_task(request: NaturalLanguageTaskRequest, bac
         platform=request.platform,
         max_steps=request.max_steps,
         mode=request.mode,
+        save_task=request.save_task,
         background_tasks=background_tasks,
     )
     return {"task_id": task_id, "status": "executing"}

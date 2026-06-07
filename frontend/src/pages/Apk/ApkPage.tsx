@@ -1,6 +1,7 @@
 import { Package, Upload, Trash2, FolderOpen, AlertCircle, CheckCircle, Loader2, X } from 'lucide-react';
 import { useRef, useEffect, useState } from 'react';
 import { useApkStore } from '../../stores/apkStore';
+import { getAppName } from '../../config/apps';
 
 export function ApkPage() {
   const { apks, loading, uploading, error, success, fetchApks, uploadApk, deleteApk, batchDeleteApks, clearMessages } = useApkStore();
@@ -72,29 +73,29 @@ export function ApkPage() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Package className="w-6 h-6 text-indigo-400" />
+          <h1 className="text-xl font-semibold text-[#0f172a] flex items-center gap-2">
+            <Package className="w-5 h-5 text-[#165DFF]" />
             APK管理
           </h1>
-          <p className="text-[#94a3b8] mt-1">管理您的测试APK文件</p>
+          <p className="text-[#64748b] text-sm mt-1">管理您的测试APK文件</p>
         </div>
         <div className="flex items-center gap-2">
           {batchMode ? (
             <>
-              <span className="text-[#94a3b8] text-sm">{selectedIds.size} 已选择</span>
+              <span className="text-[#64748b] text-sm">{selectedIds.size} 已选择</span>
               <button
                 onClick={handleBatchDelete}
                 disabled={selectedIds.size === 0}
                 title="批量删除"
-                className="px-4 py-2 bg-red-600 hover:bg-red-500 disabled:bg-red-800 text-white rounded-lg flex items-center gap-2 transition-colors"
+                className="px-4 py-2 bg-[#ef4444] hover:bg-[#dc2626] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg flex items-center gap-2 transition-all duration-200"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => { setBatchMode(false); setSelectedIds(new Set()); }}
-                className="px-4 py-2 bg-[#334155] hover:bg-[#475569] text-white rounded-lg flex items-center gap-2 transition-colors"
+                className="px-4 py-2 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] rounded-lg flex items-center gap-2 transition-all duration-200"
               >
                 <X className="w-4 h-4" />
                 取消
@@ -105,14 +106,14 @@ export function ApkPage() {
               <button
                 onClick={() => setBatchMode(true)}
                 title="批量删除"
-                className="px-4 py-2 bg-[#334155] hover:bg-[#475569] text-white rounded-lg flex items-center gap-2 transition-colors"
+                className="px-4 py-2 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] rounded-lg flex items-center gap-2 transition-all duration-200"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 text-white rounded-lg flex items-center gap-2 transition-colors"
+                className="px-4 py-2 bg-[#165DFF] hover:bg-[#0f4cdb] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg flex items-center gap-2 transition-all duration-200"
               >
                 {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                 {uploading ? '上传中...' : '上传APK'}
@@ -131,13 +132,13 @@ export function ApkPage() {
 
       {/* Messages */}
       {error && (
-        <div className="mb-4 p-3 bg-red-900/30 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-300">
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-[#dc2626]">
           <AlertCircle className="w-4 h-4" />
           {error}
         </div>
       )}
       {success && (
-        <div className="mb-4 p-3 bg-green-900/30 border border-green-500/30 rounded-lg flex items-center gap-2 text-green-300">
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-[#16a34a]">
           <CheckCircle className="w-4 h-4" />
           {success}
         </div>
@@ -145,71 +146,69 @@ export function ApkPage() {
 
       {/* Select All Header */}
       {!loading && apks.length > 0 && batchMode && (
-        <div className="flex items-center gap-4 mb-4">
-          <button onClick={toggleSelectAll} className="text-slate-400 hover:text-white transition-colors">
+        <div className="flex items-center gap-3 mb-3">
+          <button onClick={toggleSelectAll} className="text-[#94a3b8] hover:text-[#165DFF] transition-colors duration-200">
             {selectedIds.size === apks.length ? (
-              <div className="w-5 h-5 rounded border-2 border-indigo-400 bg-indigo-400 flex items-center justify-center">
-                <CheckCircle className="w-3 h-3 text-white" />
-              </div>
+              <CheckCircle className="w-4 h-4 text-[#165DFF]" />
             ) : (
-              <div className="w-5 h-5 rounded border-2 border-slate-500" />
+              <div className="w-4 h-4 rounded border-2 border-[#cbd5e1]" />
             )}
           </button>
-          <span className="text-slate-400 text-sm">全选 ({apks.length})</span>
+          <span className="text-[#64748b] text-xs">全选 ({apks.length})</span>
         </div>
       )}
 
       {/* APK Cards */}
       {loading ? (
-        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/30 rounded-2xl p-8 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 text-indigo-400 animate-spin mr-2" />
-          <span className="text-slate-400">加载中...</span>
+        <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-lg p-8 flex items-center justify-center">
+          <Loader2 className="w-6 h-6 text-[#165DFF] animate-spin mr-2" />
+          <span className="text-[#64748b]">加载中...</span>
         </div>
       ) : apks.length === 0 ? (
-        <div className="text-center py-20 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/30 rounded-2xl">
-          <FolderOpen className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-          <h3 className="text-white text-lg font-medium mb-2">暂无APK文件</h3>
-          <p className="text-slate-400">上传您的第一个APK文件开始测试</p>
+        <div className="text-center py-16 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg">
+          <FolderOpen className="w-12 h-12 text-[#94a3b8] mx-auto mb-3" />
+          <h3 className="text-[#0f172a] text-base font-medium mb-1.5">暂无APK文件</h3>
+          <p className="text-[#64748b] text-sm">上传您的第一个APK文件开始测试</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {apks.map((apk) => (
             <div
               key={apk.id}
-              className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-5 hover:border-slate-600/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300"
+              className="bg-white border border-[#e2e8f0] rounded-lg p-4 hover:border-[#165DFF] hover:shadow-md transition-all duration-200"
             >
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start justify-between mb-3">
                 <div className="flex items-start gap-3">
                   {batchMode && (
                     <button
                       onClick={() => toggleSelect(apk.id)}
-                      className="mt-1 text-slate-400 hover:text-white transition-colors"
+                      className="mt-1 text-[#94a3b8] hover:text-[#165DFF] transition-colors duration-200"
                     >
                       {selectedIds.has(apk.id) ? (
-                        <div className="w-5 h-5 rounded border-2 border-indigo-400 bg-indigo-400 flex items-center justify-center">
-                          <CheckCircle className="w-3 h-3 text-white" />
-                        </div>
+                        <CheckCircle className="w-4 h-4 text-[#165DFF]" />
                       ) : (
-                        <div className="w-5 h-5 rounded border-2 border-slate-500" />
+                        <div className="w-4 h-4 rounded border-2 border-[#cbd5e1]" />
                       )}
                     </button>
                   )}
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center shrink-0 border border-green-500/30">
-                    <Package className="w-6 h-6 text-green-400" />
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center shrink-0 border border-blue-200">
+                    <Package className="w-5 h-5 text-[#165DFF]" />
                   </div>
-                  <div>
-                    <h3 className="text-white font-semibold text-lg truncate max-w-xs">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[#0f172a] font-medium text-sm truncate">
                       {apk.original_filename || apk.name}
                     </h3>
                     {apk.package_name && (
-                      <p className="text-slate-400 text-xs font-mono truncate">{apk.package_name}</p>
+                      <p className="text-[#64748b] text-xs font-mono truncate mt-0.5">
+                        {getAppName(apk.package_name) || apk.package_name}
+                      </p>
                     )}
                   </div>
                 </div>
                 {!batchMode && (
                   <button
                     onClick={() => deleteApk(apk.id)}
-                    className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                    className="p-1.5 text-[#94a3b8] hover:text-[#ef4444] hover:bg-red-50 rounded-lg transition-all duration-200"
                     title="删除"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -217,18 +216,18 @@ export function ApkPage() {
                 )}
               </div>
 
-              <div className="space-y-2 text-sm">
+              <div className="space-y-1.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">版本号</span>
-                  <span className="text-slate-300">{apk.version || '-'}</span>
+                  <span className="text-[#94a3b8]">版本号</span>
+                  <span className="text-[#64748b]">{apk.version || '-'}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">文件大小</span>
-                  <span className="text-slate-300">{formatFileSize(apk.file_size)}</span>
+                  <span className="text-[#94a3b8]">文件大小</span>
+                  <span className="text-[#64748b]">{formatFileSize(apk.file_size)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">上传时间</span>
-                  <span className="text-slate-300">{formatDate(apk.upload_time)}</span>
+                  <span className="text-[#94a3b8]">上传时间</span>
+                  <span className="text-[#64748b]">{formatDate(apk.upload_time)}</span>
                 </div>
               </div>
             </div>

@@ -5,13 +5,12 @@ import {
   Package,
   Bot,
   FileCode,
-  Smartphone,
   ListTodo,
-  Settings,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
   FileText,
+  Settings,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -32,30 +31,28 @@ interface NavSingle {
 type NavEntry = NavSingle | NavGroup;
 
 const navEntries: NavEntry[] = [
-  { type: 'single', path: '/', label: '仪表盘', icon: <LayoutDashboard size={20} /> },
+  { type: 'single', path: '/', label: '仪表盘', icon: <LayoutDashboard size={18} /> },
   {
     type: 'group',
     label: '资源管理',
-    icon: <FolderKanban size={20} />,
+    icon: <FolderKanban size={18} />,
     children: [
-      { path: '/projects', label: '项目管理', icon: <FolderKanban size={20} /> },
-      { path: '/apk', label: 'APK管理', icon: <Package size={20} /> },
-      { path: '/devices', label: '设备管理', icon: <Smartphone size={20} /> },
+      { path: '/projects', label: '项目管理', icon: <FolderKanban size={16} /> },
+      { path: '/apk', label: 'APK管理', icon: <Package size={16} /> },
     ],
   },
-  { type: 'single', path: '/agent', label: '智能体', icon: <Bot size={20} /> },
-  { type: 'single', path: '/scripts', label: '脚本管理', icon: <FileCode size={20} /> },
+  { type: 'single', path: '/agent', label: 'AI Agent', icon: <Bot size={18} /> },
+  { type: 'single', path: '/scripts', label: '脚本管理', icon: <FileCode size={18} /> },
   {
     type: 'group',
     label: '执行中心',
-    icon: <ListTodo size={20} />,
+    icon: <ListTodo size={18} />,
     children: [
-      { path: '/tasks', label: '任务管理', icon: <ListTodo size={20} /> },
-      { path: '/reports', label: '报告管理', icon: <FileText size={20} /> },
+      { path: '/tasks', label: '任务管理', icon: <ListTodo size={16} /> },
+      { path: '/reports', label: '报告管理', icon: <FileText size={16} /> },
     ],
   },
-  { type: 'single', path: '/logs', label: '日志中心', icon: <FileText size={20} /> },
-  { type: 'single', path: '/settings', label: '设置', icon: <Settings size={20} /> },
+  { type: 'single', path: '/settings', label: '模型配置', icon: <Settings size={18} /> },
 ];
 
 export function Sidebar() {
@@ -73,38 +70,31 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-full bg-[#1e293b] border-r border-[#334155] transition-all duration-300 z-50 ${
-        collapsed ? 'w-16' : 'w-60'
+      className={`fixed left-0 top-0 h-full bg-white border-r border-[#e2e8f0] transition-all duration-200 z-50 ${
+        collapsed ? 'w-14' : 'w-56'
       }`}
     >
       {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-[#334155]">
+      <div className="h-14 flex items-center justify-between px-3 border-b border-[#e2e8f0]">
         {!collapsed && (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#165DFF] flex items-center justify-center">
               <Bot size={18} className="text-white" />
             </div>
-            <span className="font-semibold text-white">LOCKIN</span>
+            <div>
+              <span className="font-semibold text-[#0f172a] text-sm">Mobile Agent</span>
+            </div>
           </div>
         )}
         {collapsed && (
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto">
+          <div className="w-8 h-8 rounded-lg bg-[#165DFF] flex items-center justify-center mx-auto">
             <Bot size={18} className="text-white" />
           </div>
         )}
       </div>
 
-      {/* Toggle Button */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        aria-label={collapsed ? '展开侧边栏' : '收起侧边栏'}
-        className="absolute -right-3 top-20 w-6 h-6 bg-[#334155] rounded-full flex items-center justify-center text-[#94a3b8] hover:text-white transition-colors border border-[#475569]"
-      >
-        {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-      </button>
-
       {/* Navigation */}
-      <nav className="p-3 space-y-1">
+      <nav className="p-2 space-y-0.5">
         {navEntries.map((entry) => {
           if (entry.type === 'single') {
             return (
@@ -112,10 +102,10 @@ export function Sidebar() {
                 key={entry.path}
                 to={entry.path}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${
+                  `flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition-all duration-200 ${
                     isActive
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-[#94a3b8] hover:bg-[#334155] hover:text-white'
+                      ? 'bg-[#e8f0fe] text-[#165DFF]'
+                      : 'text-[#475569] hover:bg-[#f1f5f9] hover:text-[#0f172a]'
                   } ${collapsed ? 'justify-center' : ''}`
                 }
                 title={collapsed ? entry.label : undefined}
@@ -131,9 +121,9 @@ export function Sidebar() {
             <div key={entry.label}>
               <button
                 onClick={() => toggleGroup(entry.label)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition-all duration-200 ${
                   collapsed ? 'justify-center' : ''
-                } text-[#94a3b8] hover:bg-[#334155] hover:text-white`}
+                } text-[#475569] hover:bg-[#f1f5f9] hover:text-[#0f172a]`}
                 title={collapsed ? entry.label : undefined}
               >
                 <span className="flex-shrink-0">{entry.icon}</span>
@@ -145,16 +135,16 @@ export function Sidebar() {
                 )}
               </button>
               {!collapsed && isExpanded && (
-                <div className="ml-2 mt-1 space-y-1 border-l border-[#334155] pl-2">
+                <div className="ml-1.5 mt-0.5 space-y-0.5 pl-4 border-l border-[#e2e8f0]">
                   {entry.children.map((child) => (
                     <NavLink
                       key={child.path}
                       to={child.path}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
+                        `flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-200 ${
                           isActive
-                            ? 'bg-indigo-600/50 text-white'
-                            : 'text-[#94a3b8] hover:bg-[#334155] hover:text-white'
+                            ? 'bg-[#e8f0fe] text-[#165DFF]'
+                            : 'text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#0f172a]'
                         }`
                       }
                     >
@@ -169,9 +159,18 @@ export function Sidebar() {
         })}
       </nav>
 
+      {/* Toggle Button */}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        aria-label={collapsed ? '展开侧边栏' : '收起侧边栏'}
+        className="absolute -right-3 top-16 w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#94a3b8] hover:text-[#165DFF] transition-colors border border-[#e2e8f0]"
+      >
+        {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+      </button>
+
       {/* Version */}
       {!collapsed && (
-        <div className="absolute bottom-4 left-4 right-4 text-xs text-[#64748b] text-center">
+        <div className="absolute bottom-4 left-4 right-4 text-xs text-[#94a3b8] text-center">
           v1.0.0
         </div>
       )}

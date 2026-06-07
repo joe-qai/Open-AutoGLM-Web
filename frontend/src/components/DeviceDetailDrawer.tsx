@@ -162,7 +162,7 @@ export function DeviceDetailDrawer() {
             {selectedDevice.status === 'disconnected' ? (
               <button
                 onClick={() => connectDevice(selectedDevice.device_id)}
-                className="flex-1 py-2 bg-green-600 hover:bg-green-500 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                className="flex-1 py-2 bg-[#165DFF] hover:bg-[#0f4cdb] text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-all duration-200"
               >
                 <Power className="w-4 h-4" />
                 连接
@@ -173,7 +173,7 @@ export function DeviceDetailDrawer() {
                   <button
                     onClick={() => enableWireless(selectedDevice.device_id)}
                     disabled={enablingWirelessDeviceId === selectedDevice.device_id}
-                    className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                    className="flex-1 py-2 bg-[#165DFF] hover:bg-[#0f4cdb] disabled:opacity-50 text-white text-sm rounded-lg flex items-center justify-center gap-1.5 transition-all duration-200"
                     title={enablingWirelessDeviceId === selectedDevice.device_id ? '开启中...' : '开启无线'}
                   >
                     <Wifi className="w-4 h-4" />

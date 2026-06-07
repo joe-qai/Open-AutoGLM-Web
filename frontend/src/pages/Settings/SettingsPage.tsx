@@ -8,7 +8,6 @@ export function SettingsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingConfig, setEditingConfig] = useState<ModelConfig | null>(null);
   
-  // Form State
   const [name, setName] = useState('');
   const [provider, setProvider] = useState<'openai' | 'anthropic'>('openai');
   const [baseUrl, setBaseUrl] = useState('');
@@ -141,65 +140,75 @@ export function SettingsPage() {
 
   return (
     <div className="animate-fade-in">
-      {/* Page Toast (for card testing) */}
       {pageToast && (
         <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm ${
           pageToast.type === 'success'
-            ? 'bg-green-900/30 border border-green-500/30 text-green-300'
-            : 'bg-red-900/30 border border-red-500/30 text-red-300'
+            ? 'bg-green-50 border border-green-200 text-green-700'
+            : 'bg-red-50 border border-red-200 text-red-700'
         }`}>
           {pageToast.type === 'success' ? <Check className="w-4 h-4 shrink-0" /> : <X className="w-4 h-4 shrink-0" />}
           {pageToast.text}
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Settings className="w-6 h-6 text-indigo-400" />
-            系统设置
+          <h1 className="text-xl font-semibold text-[#0f172a] flex items-center gap-2">
+            <Settings className="w-5 h-5 text-[#165DFF]" />
+            模型配置
           </h1>
-          <p className="text-[#94a3b8] mt-1">配置模型参数和多模型管理</p>
+          <p className="text-[#64748b] text-sm mt-1">配置VLM视觉模型参数</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg flex items-center gap-2 transition-colors"
+          className="px-4 py-2 bg-[#165DFF] hover:bg-[#0f4cdb] text-white rounded-lg flex items-center gap-2 transition-all duration-200"
         >
           <Plus className="w-4 h-4" />
           新增模型配置
         </button>
       </div>
 
-      {/* Model Config List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="mb-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl flex items-start gap-3">
+        <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+          <Zap className="w-4 h-4 text-amber-600" />
+        </div>
+        <div>
+          <h3 className="font-medium text-amber-800 mb-1">重要提示</h3>
+          <p className="text-amber-700 text-sm">
+            当前项目基于 <span className="font-semibold">VLM 视觉大模型</span> 驱动的 Phone Agent。
+            请确保配置支持视觉能力的模型（如 GPT-4V、Claude 3.5 Sonnet 等），否则将无法正常使用智能体功能。
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {configs.map((config) => (
           <div
             key={config.config_id}
-            className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-5 hover:border-slate-600/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 relative"
+            className="bg-white border border-[#e2e8f0] rounded-lg p-4 hover:border-[#165DFF] hover:shadow-md transition-all duration-200 relative"
           >
             {config.is_default && (
-              <div className="absolute top-3 right-3 px-3 py-1 bg-indigo-500/20 text-indigo-400 text-xs font-semibold rounded-full flex items-center gap-1">
+              <div className="absolute top-2 right-2 px-2 py-0.5 bg-[#165DFF] text-white text-xs font-medium rounded flex items-center gap-1">
                 <Check className="w-3 h-3" />
                 默认
               </div>
             )}
             
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 ${config.provider === 'openai' ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30' : 'bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30'} rounded-xl flex items-center justify-center shrink-0`}>
-                  {config.provider === 'openai' ? <Bot className="w-6 h-6 text-green-400" /> : <Zap className="w-6 h-6 text-orange-400" />}
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className={`w-10 h-10 ${config.provider === 'openai' ? 'bg-[#e8f0fe]' : 'bg-[#fff3e0]'} rounded-lg flex items-center justify-center shrink-0`}>
+                  {config.provider === 'openai' ? <Bot className="w-5 h-5 text-[#165DFF]" /> : <Zap className="w-5 h-5 text-[#f59e0b]" />}
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold text-lg">{config.name}</h3>
-                  <p className="text-slate-400 text-sm uppercase tracking-wider">{config.provider}</p>
+                  <h3 className="text-[#0f172a] font-medium text-sm">{config.name}</h3>
+                  <p className="text-[#94a3b8] text-xs uppercase">{config.provider}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => handleCardTestConnection(config)}
                   disabled={cardTestId !== null}
-                  className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
+                  className="p-1.5 text-[#22c55e] hover:bg-[#dcfce7] rounded-lg transition-all duration-200 disabled:opacity-50"
                   title="测试连接"
                 >
                   {cardTestId === config.config_id ? (
@@ -213,7 +222,7 @@ export function SettingsPage() {
                 </button>
                 <button
                   onClick={() => handleOpenModal(config)}
-                  className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all duration-200"
+                  className="p-1.5 text-[#94a3b8] hover:text-[#165DFF] hover:bg-[#e8f0fe] rounded-lg transition-all duration-200"
                   title="编辑"
                 >
                   <Edit2 className="w-4 h-4" />
@@ -224,7 +233,7 @@ export function SettingsPage() {
                       deleteConfig(config.config_id);
                     }
                   }}
-                  className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                  className="p-1.5 text-[#94a3b8] hover:text-[#ef4444] hover:bg-[#fef2f2] rounded-lg transition-all duration-200"
                   title="删除"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -232,79 +241,70 @@ export function SettingsPage() {
               </div>
             </div>
 
-            <div className="space-y-2 text-sm">
+            <div className="space-y-1.5 text-xs">
               <div className="flex items-center gap-2">
-                <Server className="w-4 h-4 text-slate-500 shrink-0" />
-                <span className="text-slate-500 shrink-0 w-12">模型:</span>
-                <span className="text-slate-300 truncate">{config.model_name}</span>
+                <Server className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
+                <span className="text-[#94a3b8] shrink-0 w-10">模型:</span>
+                <span className="text-[#0f172a] truncate">{config.model_name}</span>
               </div>
               {config.base_url && (
                 <div className="flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-slate-500 shrink-0" />
-                  <span className="text-slate-500 shrink-0 w-12">地址:</span>
-                  <span className="text-slate-300 truncate">{config.base_url}</span>
+                  <Globe className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
+                  <span className="text-[#94a3b8] shrink-0 w-10">地址:</span>
+                  <span className="text-[#0f172a] truncate">{config.base_url}</span>
                 </div>
               )}
               <div className="flex items-center gap-2">
-                <Key className="w-4 h-4 text-slate-500 shrink-0" />
-                <span className="text-slate-500 shrink-0 w-12">API Key:</span>
-                <span className="text-slate-300">••••••••••••</span>
+                <Key className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
+                <span className="text-[#94a3b8] shrink-0 w-10">API Key:</span>
+                <span className="text-[#64748b] font-mono">••••••••</span>
               </div>
             </div>
           </div>
         ))}
 
         {configs.length === 0 && (
-          <div className="col-span-full bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/30 rounded-2xl py-12 flex flex-col items-center justify-center text-center">
-            <Server className="w-16 h-16 text-slate-500 mb-4" />
-            <h3 className="text-white font-medium text-lg mb-2">暂无模型配置</h3>
-            <p className="text-slate-400 text-sm mb-6">创建一个模型配置以开始使用 Agent</p>
-            <button
-              onClick={() => handleOpenModal()}
-              title="新增"
-              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl flex items-center gap-2 transition-all duration-200"
-            >
-              <Plus className="w-4 h-4" />
-              新增模型配置
-            </button>
+          <div className="col-span-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg py-16 flex flex-col items-center justify-center text-center">
+            <Server className="w-12 h-12 text-[#94a3b8] mb-3" />
+            <h3 className="text-[#0f172a] text-base font-medium mb-1.5">暂无模型配置</h3>
+            <p className="text-[#64748b] text-sm">创建一个模型配置以开始使用 Agent</p>
           </div>
         )}
       </div>
 
-      {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1e293b] border border-[#334155] rounded-2xl w-full max-w-lg shadow-2xl animate-in zoom-in duration-200">
-            <div className="flex items-center justify-between p-6 border-b border-[#334155]">
-              <h2 className="text-xl font-bold text-white">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white border border-[#e2e8f0] rounded-lg w-full max-w-lg shadow-lg">
+            <div className="flex items-center justify-between p-5 border-b border-[#f1f5f9]">
+              <h2 className="text-base font-semibold text-[#0f172a]">
                 {editingConfig ? '编辑模型配置' : '新增模型配置'}
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 hover:bg-[#334155] rounded-lg transition-colors"
+                className="p-1.5 hover:bg-[#f1f5f9] rounded-lg transition-all duration-200"
               >
-                <X className="w-5 h-5 text-[#94a3b8]" />
+                <X className="w-4 h-4 text-[#64748b]" />
               </button>
             </div>
 
-            <div className="p-6 space-y-5">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#94a3b8] text-sm mb-2">配置名称</label>
+                  <label className="block text-[#64748b] text-sm mb-2">配置名称</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-[#0f172a] border border-[#334155] rounded-lg py-2.5 px-4 text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg py-2.5 px-3 text-[#0f172a] text-sm placeholder-[#94a3b8] focus:outline-none focus:border-[#165DFF] focus:ring-1 focus:ring-[#165DFF] transition-all duration-200"
                     placeholder="例如: GPT-4o"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#94a3b8] text-sm mb-2">Provider</label>
+                  <label className="block text-[#64748b] text-sm mb-2">Provider</label>
                   <select
                     value={provider}
                     onChange={(e) => setProvider(e.target.value as any)}
-                    className="w-full bg-[#0f172a] border border-[#334155] rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg py-2.5 px-3 text-[#0f172a] text-sm focus:outline-none focus:border-[#165DFF] focus:ring-1 focus:ring-[#165DFF] transition-all duration-200"
                   >
                     <option value="openai">OpenAI</option>
                     <option value="anthropic">Anthropic</option>
@@ -313,45 +313,45 @@ export function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-[#94a3b8] text-sm mb-2">模型名称</label>
+                <label className="block text-[#64748b] text-sm mb-2">模型名称</label>
                 <input
                   type="text"
                   value={modelName}
                   onChange={(e) => setModelName(e.target.value)}
-                  className="w-full bg-[#0f172a] border border-[#334155] rounded-lg py-2.5 px-4 text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
-                  placeholder="例如: gpt-4o 或 claude-3-5-sonnet-20240620"
+                  className="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg py-2.5 px-3 text-[#0f172a] text-sm placeholder-[#94a3b8] focus:outline-none focus:border-[#165DFF] focus:ring-1 focus:ring-[#165DFF] transition-all duration-200"
+                  placeholder="例如: gpt-4o"
                 />
               </div>
 
               <div>
-                <label className="block text-[#94a3b8] text-sm mb-2">
-                  API Base URL <span className="text-red-400">*</span>
+                <label className="block text-[#64748b] text-sm mb-2">
+                  API Base URL <span className="text-[#ef4444]">*</span>
                 </label>
                 <input
                   type="text"
                   value={baseUrl}
                   onChange={(e) => setBaseUrl(e.target.value)}
-                  className="w-full bg-[#0f172a] border border-[#334155] rounded-lg py-2.5 px-4 text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg py-2.5 px-3 text-[#0f172a] text-sm placeholder-[#94a3b8] focus:outline-none focus:border-[#165DFF] focus:ring-1 focus:ring-[#165DFF] transition-all duration-200"
                   placeholder="例如: https://api.openai.com/v1"
                 />
               </div>
 
               <div>
-                <label className="block text-[#94a3b8] text-sm mb-2">
-                  API Key <span className="text-red-400">*</span>
+                <label className="block text-[#64748b] text-sm mb-2">
+                  API Key <span className="text-[#ef4444]">*</span>
                 </label>
                 <div className="relative">
                   <input
                     type={showApiKey ? 'text' : 'password'}
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
-                    className="w-full bg-[#0f172a] border border-[#334155] rounded-lg py-2.5 pl-4 pr-10 text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg py-2.5 pl-3 pr-10 text-[#0f172a] text-sm placeholder-[#94a3b8] focus:outline-none focus:border-[#165DFF] focus:ring-1 focus:ring-[#165DFF] transition-all duration-200"
                     placeholder="输入您的 API Key"
                   />
                   <button
                     type="button"
                     onClick={() => setShowApiKey(!showApiKey)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#64748b] hover:text-[#94a3b8] transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#94a3b8] hover:text-[#0f172a] transition-all duration-200"
                   >
                     {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -361,29 +361,29 @@ export function SettingsPage() {
               <div className="flex items-center gap-3 py-2">
                 <button
                   onClick={() => setIsDefault(!isDefault)}
-                  className={`w-10 h-5 rounded-full transition-colors relative ${isDefault ? 'bg-indigo-600' : 'bg-[#334155]'}`}
+                  className={`w-10 h-5 rounded-full transition-all duration-200 relative ${isDefault ? 'bg-[#165DFF]' : 'bg-[#e2e8f0]'}`}
                 >
-                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${isDefault ? 'left-6' : 'left-1'}`} />
+                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all duration-200 ${isDefault ? 'left-6' : 'left-1'}`} />
                 </button>
-                <span className="text-[#e2e8f0] text-sm">设置为默认配置</span>
+                <span className="text-[#0f172a] text-sm">设置为默认配置</span>
               </div>
             </div>
 
             {toast && (
-              <div className={`mx-6 mb-2 p-3 rounded-lg flex items-center gap-2 text-sm ${
+              <div className={`mx-5 mb-3 p-2.5 rounded-lg flex items-center gap-2 text-sm ${
                 toast.type === 'success'
-                  ? 'bg-green-900/30 border border-green-500/30 text-green-300'
-                  : 'bg-red-900/30 border border-red-500/30 text-red-300'
+                  ? 'bg-[#dcfce7] border border-[#bbf7d0] text-[#166534]'
+                  : 'bg-[#fee2e2] border border-[#fecaca] text-[#991b1b]'
               }`}>
                 {toast.type === 'success' ? <Check className="w-4 h-4 shrink-0" /> : <X className="w-4 h-4 shrink-0" />}
                 {toast.text}
               </div>
             )}
-            <div className="flex gap-3 p-6 pt-0">
+            <div className="flex gap-2 p-5 pt-0">
               <button
                 onClick={handleTestConnection}
                 disabled={!name || !baseUrl || !apiKey || !modelName || testLoading}
-                className="px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm bg-[#1e293b] border border-[#334155] text-[#94a3b8] hover:bg-[#334155] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-2 rounded-lg flex items-center justify-center gap-2 text-sm bg-[#f1f5f9] border border-[#e2e8f0] text-[#64748b] hover:bg-[#e2e8f0] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
                 {testLoading ? (
                   <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -395,14 +395,14 @@ export function SettingsPage() {
               </button>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="flex-1 px-4 py-2.5 bg-[#334155] hover:bg-[#475569] text-white rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] rounded-lg text-sm font-medium transition-all duration-200"
               >
                 取消
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={!name || !baseUrl || !apiKey || !modelName}
-                className="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg flex items-center justify-center gap-2 transition-colors"
+                className="flex-1 px-4 py-2 bg-[#165DFF] hover:bg-[#0f4cdb] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all duration-200"
               >
                 <Save className="w-4 h-4" />
                 保存

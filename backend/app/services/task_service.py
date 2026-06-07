@@ -504,32 +504,40 @@ th {{ background: #1e293b; color: #94a3b8; }}
         platform: Optional[str],
         max_steps: int,
         mode: str,
-        background_tasks: BackgroundTasks,
+        save_task: bool = True,
+        background_tasks: BackgroundTasks = None,
     ) -> str:
-        """Execute a task using natural language via AgentEngine."""
-        task_id = f"task_{int(time.time_ns())}"
-        conn = await db.get_connection()
-        await conn.execute(
-            """INSERT INTO tasks (task_id, name, task_type, platform, status, device_id, description, progress, created_at, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)""",
-            (task_id, task_description[:100] + "...", "natural_language", platform or "android",
-             TaskStatus.EXECUTING.value, device_id, task_description,
-             time.strftime("%Y-%m-%dT%H:%M:%S"), time.strftime("%Y-%m-%dT%H:%M:%S"))
-        )
-        await conn.commit()
+        """Execute a task using natural language via AgentEngine.
         
-        await self._log(task_id, "INFO", f"Starting natural language task: {task_description}")
+        Args:
+            save_task: If True, save task record to database. If False, skip recording.
+        """
+        task_id = f"task_{int(time.time_ns())}"
+        
+        if save_task:
+            conn = await db.get_connection()
+            await conn.execute(
+                """INSERT INTO tasks (task_id, name, task_type, platform, status, device_id, description, progress, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)""",
+                (task_id, task_description[:100] + "...", "natural_language", platform or "android",
+                 TaskStatus.EXECUTING.value, device_id, task_description,
+                 time.strftime("%Y-%m-%dT%H:%M:%S"), time.strftime("%Y-%m-%dT%H:%M:%S"))
+            )
+            await conn.commit()
+            await self._log(task_id, "INFO", f"Starting natural language task: {task_description}")
         
         # Run in background to avoid blocking the API response
-        background_tasks.add_task(
-            self._execute_natural_language_task_bg,
-            task_id,
-            task_description,
-            device_id,
-            platform,
-            max_steps,
-            mode,
-        )
+        if background_tasks:
+            background_tasks.add_task(
+                self._execute_natural_language_task_bg,
+                task_id,
+                task_description,
+                device_id,
+                platform,
+                max_steps,
+                mode,
+                save_task,
+            )
         
         return task_id
     
@@ -541,15 +549,17 @@ th {{ background: #1e293b; color: #94a3b8; }}
         platform: Optional[str],
         max_steps: int,
         mode: str,
+        save_task: bool = True,
     ):
         """Background execution of natural language task using AgentEngine."""
         try:
-            await self._log(task_id, "INFO", "Initializing AgentEngine")
-            
             from app.core.agent.engine import AgentEngine
             from app.core.layers.decision import DecisionMode
             from app.core.adapters.base import Platform as AdapterPlatform
             from app.api.v1.websocket import manager as ws_manager
+            
+            if save_task:
+                await self._log(task_id, "INFO", "Initializing AgentEngine")
             
             platform_enum_map = {
                 "android": AdapterPlatform.ANDROID,
@@ -584,12 +594,15 @@ th {{ background: #1e293b; color: #94a3b8; }}
                     api_key=db_config.api_key,
                 )
                 engine.decision.model_client = OpenAIModelClient(cfg)
-                await self._log(task_id, "INFO", f"Loaded model config: {db_config.name} ({db_config.model_name})")
+                if save_task:
+                    await self._log(task_id, "INFO", f"Loaded model config: {db_config.name} ({db_config.model_name})")
             else:
-                await self._log(task_id, "WARNING", "No model config in DB, using defaults (may fail)")
+                if save_task:
+                    await self._log(task_id, "WARNING", "No model config in DB, using defaults (may fail)")
             
-            await self._log(task_id, "INFO", f"AgentEngine initialized, starting execution (mode: {mode})")
-            await self._log(task_id, "INFO", f"Task: {task_description}")
+            if save_task:
+                await self._log(task_id, "INFO", f"AgentEngine initialized, starting execution (mode: {mode})")
+                await self._log(task_id, "INFO", f"Task: {task_description}")
             
             execution_history = []
             
@@ -603,12 +616,12 @@ th {{ background: #1e293b; color: #94a3b8; }}
                     "message": data.get("result", ""),
                 }
                 execution_history.append(step_info)
-                await self._log(
-                    task_id, "INFO",
-                    f"[{data.get('event', '?')}] Step {data.get('step', 0)}: {data.get('action') or data.get('proposed_action', '')}"
-                )
-                if task_id:
-                    await ws_manager.send_task_update(task_id, data)
+                if save_task:
+                    await self._log(
+                        task_id, "INFO",
+                        f"[{data.get('event', '?')}] Step {data.get('step', 0)}: {data.get('action') or data.get('proposed_action', '')}"
+                    )
+                await ws_manager.send_task_update(task_id, data)
             
             result = await engine.execute_task(
                 task_description=task_description,
@@ -616,28 +629,51 @@ th {{ background: #1e293b; color: #94a3b8; }}
                 step_callback=step_callback,
             )
             
-            import json
-            history_path = f"replays/replay_task_{task_id.replace('task_', '')}_{int(time.time())}.json"
-            os.makedirs("replays", exist_ok=True)
-            with open(history_path, 'w', encoding='utf-8') as f:
-                json.dump(execution_history, f, ensure_ascii=False, indent=2)
-            
+            # 发送任务完成/失败 WebSocket 消息
             total_steps = result.get("total_steps", 0)
-            await self._log(task_id, "INFO", f"任务执行完成，共执行 {total_steps} 步")
+            completion_data = {
+                "event": "completed" if result.get("success") else "failed",
+                "step": total_steps,
+                "success": result.get("success", False),
+                "result": result.get("final_message", "") if not result.get("success") else "任务执行完成",
+            }
+            await ws_manager.send_task_update(task_id, completion_data)
             
-            if result.get("success"):
-                await self._update_task_status(task_id, TaskStatus.COMPLETED, progress=100)
-            else:
-                await self._update_task_status(task_id, TaskStatus.FAILED, progress=100)
-                final_msg = result.get("final_message", "")
-                if final_msg:
-                    self.task_errors[task_id] = str(final_msg)
-                    await self._log(task_id, "ERROR", f"任务错误: {final_msg}")
-            
-            await self._generate_report(task_id, "", "")
+            if save_task:
+                import json
+                history_path = f"replays/replay_task_{task_id.replace('task_', '')}_{int(time.time())}.json"
+                os.makedirs("replays", exist_ok=True)
+                with open(history_path, 'w', encoding='utf-8') as f:
+                    json.dump(execution_history, f, ensure_ascii=False, indent=2)
+                
+                total_steps = result.get("total_steps", 0)
+                await self._log(task_id, "INFO", f"任务执行完成，共执行 {total_steps} 步")
+                
+                if result.get("success"):
+                    await self._update_task_status(task_id, TaskStatus.COMPLETED, progress=100)
+                else:
+                    await self._update_task_status(task_id, TaskStatus.FAILED, progress=100)
+                    final_msg = result.get("final_message", "")
+                    if final_msg:
+                        self.task_errors[task_id] = str(final_msg)
+                        await self._log(task_id, "ERROR", f"任务错误: {final_msg}")
+                
+                await self._generate_report(task_id, "", "")
             
         except Exception as e:
             full_tb = traceback.format_exc()
-            await self._log(task_id, "ERROR", f"自然语言任务执行失败: {str(e)}\n{full_tb}")
-            self.task_errors[task_id] = str(e)
-            await self._update_task_status(task_id, TaskStatus.FAILED, progress=100)
+            if save_task:
+                await self._log(task_id, "ERROR", f"自然语言任务执行失败: {str(e)}\n{full_tb}")
+                self.task_errors[task_id] = str(e)
+                await self._update_task_status(task_id, TaskStatus.FAILED, progress=100)
+            else:
+                print(f"Agent execution failed: {str(e)}\n{full_tb}")
+            
+            # 发送 WebSocket 失败消息
+            error_data = {
+                "event": "error",
+                "step": 0,
+                "success": False,
+                "result": f"执行失败: {str(e)}",
+            }
+            await ws_manager.send_task_update(task_id, error_data)
