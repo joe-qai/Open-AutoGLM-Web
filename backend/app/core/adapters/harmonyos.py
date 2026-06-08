@@ -172,7 +172,7 @@ class HarmonyOSAdapter(BaseDeviceAdapter):
     
     def launch_app(self, package_name: str) -> bool:
         """Launch an application using the correct ability name."""
-        from backend.app.core.config.app_packages import get_harmonyos_ability
+        from app.core.config.app_packages import get_harmonyos_ability
         ability = get_harmonyos_ability(package_name)
         self._run(f"shell aa start -a {ability} -p {package_name}")
         return True
@@ -246,5 +246,5 @@ class HarmonyOSAdapter(BaseDeviceAdapter):
 
     def _resolve_app_name(self, app_name: str) -> str | None:
         """Resolve an app display name to its HarmonyOS bundle name."""
-        from backend.app.core.config.app_packages import get_package_name_harmonyos
+        from app.core.config.app_packages import get_package_name_harmonyos
         return get_package_name_harmonyos(app_name)

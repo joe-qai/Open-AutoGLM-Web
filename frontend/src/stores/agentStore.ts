@@ -14,13 +14,23 @@ export interface Script {
   version: number;
 }
 
+export interface LogEntry {
+  id: string;
+  step: number;
+  type: 'system' | 'think' | 'action' | 'success' | 'error' | 'warning';
+  action?: string;
+  thinking?: string;
+  result?: string;
+  timestamp: Date;
+}
+
 interface AgentState {
   scripts: Script[];
   currentScript: Script | null;
   isGenerating: boolean;
   isExecuting: boolean;
   isUploading: boolean;
-  logs: string[];
+  logs: LogEntry[];
   error: string | null;
   currentTaskId: string | null;
   executionMode: 'script' | 'direct'; // 脚本模式 vs 直接执行模式
@@ -51,6 +61,7 @@ interface AgentState {
   setCurrentScript: (script: Script | null) => void;
   setExecutionMode: (mode: 'script' | 'direct') => void;
   addLog: (log: string) => void;
+  addStructuredLog: (log: Omit<LogEntry, 'id' | 'timestamp'>) => void;
   clearLogs: () => void;
 }
 
@@ -131,12 +142,19 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   executeDirect: async (data) => {
     set({ isExecuting: true, error: null });
     try {
+      console.log('[AgentStore] executeDirect called with:', data);
       const response = await taskApi.executeNaturalLanguageTask(data);
-      const taskId = response.data?.task_id;
+      console.log('[AgentStore] API response:', response);
+      const taskId = response?.data?.task_id;
+      console.log('[AgentStore] taskId:', taskId);
       set({ isExecuting: false, currentTaskId: taskId });
       return taskId || null;
-    } catch (error) {
-      set({ error: 'Failed to execute task', isExecuting: false });
+    } catch (error: any) {
+      console.error('[AgentStore] executeDirect error:', error);
+      console.error('[AgentStore] error response:', error.response);
+      console.error('[AgentStore] error message:', error.message);
+      console.error('[AgentStore] error code:', error.code);
+      set({ error: error.message || 'Failed to execute task', isExecuting: false });
       return null;
     }
   },
@@ -150,7 +168,25 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   addLog: (log) => {
-    set((state) => ({ logs: [...state.logs, log] }));
+    set((state) => ({ 
+      logs: [...state.logs, {
+        id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        step: 0,
+        type: 'system' as const,
+        result: log,
+        timestamp: new Date(),
+      }] 
+    }));
+  },
+
+  addStructuredLog: (log) => {
+    set((state) => ({ 
+      logs: [...state.logs, {
+        ...log,
+        id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        timestamp: new Date(),
+      }] 
+    }));
   },
 
   clearLogs: () => {

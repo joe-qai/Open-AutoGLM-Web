@@ -240,5 +240,5 @@ class AndroidAdapter(BaseDeviceAdapter):
 
     def _resolve_app_name(self, app_name: str) -> str | None:
         """Resolve an app display name to its Android package name."""
-        from backend.app.core.config.app_packages import get_package_name
+        from app.core.config.app_packages import get_package_name
         return get_package_name(app_name)

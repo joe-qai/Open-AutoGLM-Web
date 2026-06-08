@@ -551,15 +551,16 @@ th {{ background: #1e293b; color: #94a3b8; }}
         mode: str,
         save_task: bool = True,
     ):
-        """Background execution of natural language task using AgentEngine."""
+        """Background execution of natural language task using PhoneAgent (VLM-based)."""
+        from app.api.v1.websocket import manager as ws_manager
+        
         try:
-            from app.core.agent.engine import AgentEngine
-            from app.core.layers.decision import DecisionMode
+            from app.core.agent.phone_agent import PhoneAgent, AgentConfig
+            from app.core.adapters.factory import DeviceAdapterFactory
             from app.core.adapters.base import Platform as AdapterPlatform
-            from app.api.v1.websocket import manager as ws_manager
             
             if save_task:
-                await self._log(task_id, "INFO", "Initializing AgentEngine")
+                await self._log(task_id, "INFO", "Initializing PhoneAgent (VLM-based)")
             
             platform_enum_map = {
                 "android": AdapterPlatform.ANDROID,
@@ -568,74 +569,126 @@ th {{ background: #1e293b; color: #94a3b8; }}
             }
             adapter_platform = platform_enum_map.get(platform or "android", AdapterPlatform.ANDROID)
             
-            mode_enum_map = {
-                "llm": DecisionMode.LLM,
-                "vlm": DecisionMode.VLM,
-                "auto": DecisionMode.AUTO,
-            }
-            decision_mode = mode_enum_map.get(mode or "llm", DecisionMode.LLM)
-            
-            engine = AgentEngine(mode=decision_mode)
-            
+            # Create device adapter
             device_kwargs = {}
             if device_id:
                 device_kwargs["device_id"] = device_id
-            engine.set_device(adapter_platform, **device_kwargs)
-
-            # Inject model config from DB into engine's DecisionLayer
+            device_adapter = DeviceAdapterFactory.create_adapter(adapter_platform, **device_kwargs)
+            
+            # Load model config from DB
             from app.services.model_config_service import ModelConfigService
-            from app.core.layers.decision import ModelConfig as DecisionModelConfig, OpenAIModelClient
+            from app.core.model.client import ModelConfig as PhoneModelConfig
             model_svc = ModelConfigService()
             db_config = await model_svc.get_default_config()
+            
+            model_config = None
             if db_config:
-                cfg = DecisionModelConfig(
+                model_config = PhoneModelConfig(
                     base_url=db_config.base_url or "",
                     model_name=db_config.model_name,
                     api_key=db_config.api_key,
                 )
-                engine.decision.model_client = OpenAIModelClient(cfg)
                 if save_task:
                     await self._log(task_id, "INFO", f"Loaded model config: {db_config.name} ({db_config.model_name})")
             else:
                 if save_task:
                     await self._log(task_id, "WARNING", "No model config in DB, using defaults (may fail)")
             
-            if save_task:
-                await self._log(task_id, "INFO", f"AgentEngine initialized, starting execution (mode: {mode})")
-                await self._log(task_id, "INFO", f"Task: {task_description}")
+            # Create PhoneAgent instance with VLM mode
+            agent_config = AgentConfig(
+                max_steps=max_steps,
+                device_id=device_id,
+                lang="cn",
+                format="pseudo",  # Use pseudo format for AutoPhone models
+                verbose=True,
+            )
             
             execution_history = []
+            step_count = 0
+            log_queue = []
             
-            async def step_callback(data: dict):
-                step_info = {
-                    "step": data.get("step", 0),
-                    "action": data.get("proposed_action", data.get("action", "")),
-                    "parameters": data.get("params", {}),
-                    "reasoning": data.get("thought", ""),
-                    "success": data.get("success", False),
-                    "message": data.get("result", ""),
-                }
-                execution_history.append(step_info)
+            async def async_step_callback(step_info):
+                nonlocal step_count
+                
+                event_type = step_info.get("event", "act")
+                action = step_info.get("action", "") or step_info.get("proposed_action", "")
+                thinking = step_info.get("thinking", "")
+                message = step_info.get("message", "")
+                success = step_info.get("success", True)
+                full_response = step_info.get("full_response", "")
+                
+                # For think event, don't increment step count
+                if event_type != "think":
+                    step_count += 1
+                
+                # Queue for async processing
                 if save_task:
-                    await self._log(
-                        task_id, "INFO",
-                        f"[{data.get('event', '?')}] Step {data.get('step', 0)}: {data.get('action') or data.get('proposed_action', '')}"
-                    )
-                await ws_manager.send_task_update(task_id, data)
+                    if event_type == "think":
+                        log_queue.append((task_id, "INFO", f"[Step {step_count}] 思考: {thinking}"))
+                        log_queue.append((task_id, "INFO", f"[Step {step_count}] 完整思考过程: {full_response}"))
+                    else:
+                        log_queue.append((task_id, "INFO", f"[Step {step_count}] {action}: {message or '执行中'}"))
+                
+                # Send real-time WebSocket update
+                ws_data = {
+                    "task_id": task_id,
+                    "event": event_type,
+                    "step": step_count,
+                    "action": action,
+                    "result": message,
+                    "success": success,
+                    "thought": thinking,
+                    "full_response": full_response,
+                }
+                try:
+                    await ws_manager.send_task_update(task_id, ws_data)
+                except Exception as ws_e:
+                    if save_task:
+                        await self._log(task_id, "WARNING", f"Failed to send WebSocket update: {ws_e}")
+                
+                # Only add to execution history for action events
+                if event_type != "think":
+                    execution_history.append({
+                        "step": step_count,
+                        "action": action,
+                        "thinking": thinking,
+                        "message": message,
+                        "success": success,
+                    })
             
-            result = await engine.execute_task(
-                task_description=task_description,
-                max_steps=max_steps,
+            # Get the current event loop for thread-safe callback
+            loop = asyncio.get_running_loop()
+            
+            def step_callback(step_info):
+                # Run async callback in main event loop from background thread
+                asyncio.run_coroutine_threadsafe(async_step_callback(step_info), loop)
+            
+            # Create PhoneAgent with callback
+            phone_agent = PhoneAgent(
+                device=device_adapter,
+                model_config=model_config,
+                agent_config=agent_config,
                 step_callback=step_callback,
             )
             
-            # 发送任务完成/失败 WebSocket 消息
-            total_steps = result.get("total_steps", 0)
+            if save_task:
+                await self._log(task_id, "INFO", f"PhoneAgent initialized, starting execution")
+                await self._log(task_id, "INFO", f"Task: {task_description}")
+            
+            # Execute task using PhoneAgent's run method in a separate thread
+            # to avoid blocking the event loop (which would stop video streaming)
+            result_message = await asyncio.to_thread(phone_agent.run, task_description)
+            
+            # Process queued async operations after synchronous run completes
+            for log_args in log_queue:
+                await self._log(*log_args)
+            
+            # Send completion message
             completion_data = {
-                "event": "completed" if result.get("success") else "failed",
-                "step": total_steps,
-                "success": result.get("success", False),
-                "result": result.get("final_message", "") if not result.get("success") else "任务执行完成",
+                "event": "completed",
+                "step": step_count,
+                "success": True,
+                "result": result_message,
             }
             await ws_manager.send_task_update(task_id, completion_data)
             
@@ -646,18 +699,8 @@ th {{ background: #1e293b; color: #94a3b8; }}
                 with open(history_path, 'w', encoding='utf-8') as f:
                     json.dump(execution_history, f, ensure_ascii=False, indent=2)
                 
-                total_steps = result.get("total_steps", 0)
-                await self._log(task_id, "INFO", f"任务执行完成，共执行 {total_steps} 步")
-                
-                if result.get("success"):
-                    await self._update_task_status(task_id, TaskStatus.COMPLETED, progress=100)
-                else:
-                    await self._update_task_status(task_id, TaskStatus.FAILED, progress=100)
-                    final_msg = result.get("final_message", "")
-                    if final_msg:
-                        self.task_errors[task_id] = str(final_msg)
-                        await self._log(task_id, "ERROR", f"任务错误: {final_msg}")
-                
+                await self._log(task_id, "INFO", f"任务执行完成，共执行 {step_count} 步")
+                await self._update_task_status(task_id, TaskStatus.COMPLETED, progress=100)
                 await self._generate_report(task_id, "", "")
             
         except Exception as e:

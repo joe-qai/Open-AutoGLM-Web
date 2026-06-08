@@ -8,9 +8,9 @@ import time
 from dataclasses import dataclass
 from typing import Any, Callable
 
-from backend.app.core.config.timing import TIMING_CONFIG
-from backend.app.core.adapters.ios import IOSAdapter
-from backend.app.core.config.app_packages import get_package_name_ios
+from app.core.config.timing import TIMING_CONFIG
+from app.core.adapters.ios import IOSAdapter
+from app.core.config.app_packages import get_package_name_ios
 
 
 @dataclass

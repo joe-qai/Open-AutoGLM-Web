@@ -7,9 +7,13 @@ from dataclasses import dataclass, field
 from typing import Any, Optional
 
 from openai import OpenAI
-import anthropic
 
-from backend.app.core.config.i18n import get_message
+try:
+    import anthropic
+except ImportError:
+    anthropic = None
+
+from app.core.config.i18n import get_message
 
 # Marker strings for JSON format (used in both streaming and parsing)
 # Using standard XML-style tags that all cloud models recognize and follow reliably
@@ -59,12 +63,21 @@ class ModelClient:
     def __init__(self, config: ModelConfig | None = None):
         self.config = config or ModelConfig()
         if self.config.provider == "anthropic":
+            if anthropic is None:
+                raise ImportError("Anthropic module not installed. Install with: pip install anthropic")
             self.client = anthropic.Anthropic(
                 api_key=self.config.api_key,
                 base_url=self.config.base_url if self.config.base_url else None
             )
         else:
-            self.client = OpenAI(base_url=self.config.base_url, api_key=self.config.api_key)
+            # Configure OpenAI client with proper timeout and SSL settings
+            from httpx import Timeout
+            timeout = Timeout(connect=30.0, read=120.0, write=60.0, pool=5.0)
+            self.client = OpenAI(
+                base_url=self.config.base_url, 
+                api_key=self.config.api_key,
+                timeout=timeout,
+            )
 
     def request(self, messages: list[dict[str, Any]]) -> ModelResponse:
         """

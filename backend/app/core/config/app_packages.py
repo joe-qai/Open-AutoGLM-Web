@@ -146,6 +146,7 @@ APP_PACKAGES: dict[str, str] = {
     "duolingo": "com.duolingo",
     "Reddit": "com.reddit.frontpage",
     "reddit": "com.reddit.frontpage",
+    "鹿客管家": "com.lockin.loock"
 }
 
 

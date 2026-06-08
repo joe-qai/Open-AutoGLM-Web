@@ -10,12 +10,12 @@ import traceback
 from dataclasses import dataclass
 from typing import Any, Callable
 
-from backend.app.core.actions.handler_ios import IOSActionHandler
-from backend.app.core.adapters.ios import IOSAdapter
-from backend.app.core.model.client import ModelClient, ModelConfig, MessageBuilder
-from backend.app.core.config.app_packages import get_package_name_ios
-from backend.app.core.config.i18n import get_messages, get_message
-from backend.app.core.actions.handler import do, finish, parse_action
+from app.core.actions.handler_ios import IOSActionHandler
+from app.core.adapters.ios import IOSAdapter
+from app.core.model.client import ModelClient, ModelConfig, MessageBuilder
+from app.core.config.app_packages import get_package_name_ios
+from app.core.config.i18n import get_messages, get_message
+from app.core.actions.handler import do, finish, parse_action
 
 
 

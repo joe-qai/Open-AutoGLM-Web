@@ -1,6 +1,6 @@
 """Model client module for VLM inference with streaming support."""
 
-from backend.app.core.model.client import (
+from app.core.model.client import (
     ModelClient,
     ModelConfig,
     ModelResponse,

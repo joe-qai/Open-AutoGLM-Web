@@ -252,5 +252,5 @@ class IOSAdapter(BaseDeviceAdapter):
 
     def _resolve_app_name(self, app_name: str) -> str | None:
         """Resolve an app display name to its iOS bundle ID."""
-        from backend.app.core.config.app_packages import get_package_name_ios
+        from app.core.config.app_packages import get_package_name_ios
         return get_package_name_ios(app_name)

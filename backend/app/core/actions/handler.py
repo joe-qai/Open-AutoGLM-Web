@@ -12,8 +12,8 @@ import time
 from dataclasses import dataclass
 from typing import Any, Callable
 
-from backend.app.core.config.timing import TIMING_CONFIG
-from backend.app.core.adapters.base import BaseDeviceAdapter
+from app.core.config.timing import TIMING_CONFIG
+from app.core.adapters.base import BaseDeviceAdapter
 
 
 @dataclass
@@ -150,11 +150,11 @@ class ActionHandler:
 
     def _resolve_app_name(self, app_name: str) -> str | None:
         """Resolve app name to package/bundle ID based on device platform."""
-        from backend.app.core.config.app_packages import get_package_name_for_platform
+        from app.core.config.app_packages import get_package_name_for_platform
 
         platform = "android"
         if hasattr(self.device, 'platform'):
-            from backend.app.core.adapters.base import Platform
+            from app.core.adapters.base import Platform
             if self.device.platform == Platform.HARMONYOS:
                 platform = "harmonyos"
             elif self.device.platform == Platform.IOS:
@@ -289,7 +289,7 @@ class ActionHandler:
 
     def _send_keyevent(self, keycode: str) -> None:
         """Send a keyevent to the device."""
-        from backend.app.core.adapters.base import Platform
+        from app.core.adapters.base import Platform
 
         if hasattr(self.device, 'platform') and self.device.platform == Platform.HARMONYOS:
             hdc_prefix = ["hdc"]
@@ -358,6 +358,44 @@ def parse_action(response: str) -> dict[str, Any]:
     """
     try:
         response = response.strip()
+        
+        # --- Extract action from various formats ---
+        
+        # First, try to extract content between <action>...</action> tags
+        action_match = re.search(r'<action>(.*?)</action>', response, re.DOTALL)
+        if action_match:
+            response = action_match.group(1).strip()
+        
+        # If no XML tags found, try to extract do() or finish() function call
+        if not (response.startswith("{") or response.startswith("do(") or response.startswith("finish(")):
+            # Look for do(...) pattern
+            do_match = re.search(r'(do\([^)]+\))', response)
+            if do_match:
+                response = do_match.group(1)
+            else:
+                # Look for finish(...) pattern
+                finish_match = re.search(r'(finish\([^)]+\))', response)
+                if finish_match:
+                    response = finish_match.group(1)
+                else:
+                    # Look for JSON object pattern
+                    json_match = re.search(r'(\{[\s\S]*\})', response)
+                    if json_match:
+                        response = json_match.group(1)
+        
+        # Clean up any remaining XML tags or trailing garbage
+        response = re.sub(r'</?action>', '', response)
+        response = re.sub(r'</?answer>', '', response)
+        response = re.sub(r'<thinking>.*?</thinking>', '', response, flags=re.DOTALL)
+        response = re.sub(r'<answer>.*?</answer>', '', response, flags=re.DOTALL)
+        
+        # Remove backticks that wrap the action but keep content inside
+        response = re.sub(r'^`\s*', '', response)  # Remove leading backtick
+        response = re.sub(r'\s*`$', '', response)  # Remove trailing backtick
+        
+        # Replace problematic characters that break AST parsing
+        response = response.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
+        response = re.sub(r'\s+', ' ', response).strip()
 
         # --- JSON format ---
         if response.startswith("{"):
@@ -403,6 +441,18 @@ def parse_action(response: str) -> dict[str, Any]:
             action = {
                 "_metadata": "finish",
                 "message": response.replace("finish(message=", "")[1:-2],
+            }
+        elif response.strip() == "Wait":
+            # Handle simple Wait action
+            action = {
+                "_metadata": "do",
+                "action": "Wait",
+            }
+        elif response.strip() in ["Swipe", "Back", "Home", "Lock", "Unlock", "VolumeUp", "VolumeDown", "Power"]:
+            # Handle simple action commands without arguments
+            action = {
+                "_metadata": "do",
+                "action": response.strip(),
             }
         else:
             raise ValueError(f"Failed to parse action: {response}")

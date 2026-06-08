@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Bot,
   Play,
   Save,
   Copy,
@@ -18,16 +17,16 @@ import {
 import { useDeviceStore } from '../../stores/deviceStore';
 import { useAgentStore } from '../../stores/agentStore';
 import { useModelConfigStore } from '../../stores/modelConfigStore';
-import { scriptApi } from '../../services/api';
+import { scriptApi, taskApi } from '../../services/api';
 import { Prism as SyntaxHighlighterComponent } from 'react-syntax-highlighter';
 import {
   oneDark as atomOneDark,
 } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import ScrcpyPlayer from '../../components/ScrcpyPlayer/ScrcpyPlayer';
+import { LogCard, LogEntry } from '../../components/LogCard/LogCard';
 
 // WebSocket 配置
 const WS_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8005').replace('http', 'ws');
-const RECONNECT_INTERVAL = 3000;
 
 const getLanguage = (platform: string): string => {
   switch (platform) {
@@ -78,6 +77,7 @@ export function AgentPage() {
     logs,
     executeDirect,
     addLog,
+    addStructuredLog,
     clearLogs,
   } = useAgentStore();
 
@@ -91,7 +91,6 @@ export function AgentPage() {
   const [showScriptResult, setShowScriptResult] = useState(false);
   const [generatedScriptId, setGeneratedScriptId] = useState<string | null>(null);
   const [activeTab] = useState('android');
-  const [simulateMode, setSimulateMode] = useState(false); // 模拟模式开关，默认关闭
   
   // 日志滚动 ref
   const logsContainerRef = useRef<HTMLDivElement>(null);
@@ -99,20 +98,11 @@ export function AgentPage() {
   // WebSocket 状态
   const wsRef = useRef<WebSocket | null>(null);
   const currentTaskIdRef = useRef<string | null>(null);
-  
-  // 模拟执行步骤
-  const simulateSteps = [
-    { action: '观察屏幕', result: '当前屏幕显示手机主界面，包含多个应用图标' },
-    { action: '识别目标应用', result: '成功识别到微信应用图标位于屏幕底部' },
-    { action: '执行点击操作', result: '点击微信图标，应用正在启动...' },
-    { action: '等待应用加载', result: '微信应用已成功打开' },
-    { action: '任务完成', result: '成功启动微信应用' },
-  ];
 
   // 初始化 WebSocket 连接
   useEffect(() => {
     const clientId = `agent_${Date.now()}`;
-    const socket = new WebSocket(`${WS_URL}/api/v1/ws/${clientId}`);
+    const socket = new WebSocket(`${WS_URL}/ws/${clientId}`);
     
     socket.onopen = () => {
       console.log('WebSocket connected');
@@ -121,25 +111,75 @@ export function AgentPage() {
     socket.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
+        console.log('[WebSocket] Received message:', message);
+        
         // 处理 WebSocket 消息
         if (message.type === 'agent_step' && message.task_id === currentTaskIdRef.current) {
           const data = message.data;
           const step = data.step || 0;
-          const action = data.action || data.proposed_action || '';
-          const result = data.result || '';
           const eventType = data.event || '';
           
-          if (eventType === 'completed') {
-            addLog(`[系统] 任务执行完成！共执行 ${step} 步`);
+          // 处理不同阶段的消息
+          if (eventType === 'observe') {
+            addStructuredLog({ step, type: 'system', result: '正在观察屏幕...' });
+          } else if (eventType === 'think') {
+            const thought = data.thought || '';
+            const proposedAction = data.proposed_action || '';
+            const fullResponse = data.full_response || '';
+            
+            // 清理思考过程中的HTML标签
+            const cleanThinking = (fullResponse || thought)
+              .replace(/<thinking>|<\/thinking>|<action>|<\/action>|<answer>|<\/answer>/g, '')
+              .replace(/<json_think>|<\/json_think>|<json_answer>|<\/json_answer>/g, '')
+              .trim();
+            
+            addStructuredLog({ 
+              step, 
+              type: 'think', 
+              action: proposedAction,
+              thinking: cleanThinking 
+            });
+          } else if (eventType === 'act') {
+            const action = data.action || '';
+            const result = data.result || '';
+            const success = data.success;
+            
+            if (action === 'finish') {
+              addStructuredLog({ step: 0, type: 'success', result: result || '任务完成' });
+              setExecutionPhase('completed');
+              currentTaskIdRef.current = null;
+            } else {
+              addStructuredLog({ 
+                step, 
+                type: success ? 'action' : 'warning', 
+                action, 
+                result 
+              });
+            }
+          } else if (eventType === 'reflect') {
+            const reflection = data.reflection || '';
+            const historySummary = data.history_summary || '';
+            if (reflection) {
+              console.log('[WebSocket] Reflection:', reflection);
+            }
+            if (historySummary) {
+              addStructuredLog({ step: 0, type: 'system', result: historySummary });
+            }
+          } else if (eventType === 'completed') {
+            addStructuredLog({ step: 0, type: 'success', result: `任务执行完成！共执行 ${step} 步` });
             setExecutionPhase('completed');
             currentTaskIdRef.current = null;
           } else if (eventType === 'error' || eventType === 'failed') {
-            addLog(`[错误] ${result || '执行失败'}`);
+            addStructuredLog({ step: 0, type: 'error', result: data.result || '执行失败' });
             setExecutionPhase('failed');
             currentTaskIdRef.current = null;
-          } else if (action || result) {
-            const logMsg = `[Step ${step}] ${action}${result ? ': ' + result : ''}`;
-            addLog(logMsg);
+          } else {
+            // 通用日志显示
+            const action = data.action || data.proposed_action || '';
+            const result = data.result || '';
+            if (action || result) {
+              addStructuredLog({ step, type: 'system', action, result });
+            }
           }
         } else if (message.type === 'subscribed') {
           console.log('Subscribed to task:', message.task_id);
@@ -215,8 +255,8 @@ export function AgentPage() {
       return;
     }
 
-    // 模拟模式：跳过设备检查，使用虚拟设备
-    if (!simulateMode && !selectedDevice) {
+    // 检查设备是否选择
+    if (!selectedDevice) {
       addLog('[错误] 请先选择一个设备');
       addLog('[提示] 您可以在左侧设备列表中选择已连接的设备');
       return;
@@ -227,46 +267,19 @@ export function AgentPage() {
     setShowScriptResult(false);
     setScriptContent('');
     setGeneratedScriptId(null);
+    
+    // 发送任务后清空任务描述
+    const taskDesc = taskDescription;
+    setTaskDescription('');
 
     addLog('[系统] 智能体开始执行任务...');
-    addLog(`[系统] 任务描述: ${taskDescription}`);
+    addLog(`[系统] 任务描述: ${taskDesc}`);
     addLog(`[系统] 目标平台: ${selectedPlatforms.join(', ')}`);
     addLog(`[系统] 最大步骤: ${maxSteps}`);
-    
-    if (simulateMode) {
-      addLog('[系统] 【模拟模式】已启用虚拟设备和VLM模型');
-      addLog('[系统] 目标设备: 虚拟设备 (模拟模式)');
-      addLog('[系统] VLM模型: 模拟视觉识别引擎 v1.0');
-    } else {
-      addLog(`[系统] 目标设备: ${selectedDevice}`);
-      addLog('[系统] 正在连接后端服务...');
-    }
+    addLog(`[系统] 目标设备: ${selectedDevice}`);
+    addLog('[系统] 正在通过 VLM 视觉模型驱动 Phone Agent...');
+    addLog('[系统] 正在连接后端服务...');
 
-    // 模拟模式：执行模拟步骤
-    if (simulateMode) {
-      addLog('[系统] 正在通过 VLM 视觉模型驱动 Phone Agent...');
-      addLog('[系统] 【模拟模式】开始模拟执行...');
-      
-      const stepsToExecute = Math.min(maxSteps, simulateSteps.length);
-      
-      for (let i = 0; i < stepsToExecute; i++) {
-        await new Promise(resolve => setTimeout(resolve, 1500)); // 模拟每步延迟
-        const step = simulateSteps[i];
-        addLog(`[步骤 ${i + 1}/${stepsToExecute}] ${step.action}`);
-        addLog(`[结果] ${step.result}`);
-        
-        if (step.action === '任务完成') {
-          break;
-        }
-      }
-      
-      addLog('[系统] 任务执行完成！');
-      addLog('[系统] 【模拟模式】已成功模拟VLM视觉模型驱动的Phone Agent执行流程');
-      setExecutionPhase('completed');
-      return;
-    }
-
-    // 真实模式：调用后端API
     try {
       // 使用 phone_agent 的 agent 能力
       const taskId = await executeDirect({
@@ -313,8 +326,18 @@ export function AgentPage() {
         setExecutionPhase('failed');
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || error.message || String(error);
+      console.error('[AgentPage] Task execution error:', error);
+      console.error('[AgentPage] Error response:', error.response);
+      console.error('[AgentPage] Error config:', error.config);
+      
+      const errorMessage = error.response?.data?.detail || error.response?.data || error.message || String(error);
       addLog(`[错误] 任务启动失败: ${errorMessage}`);
+      
+      if (error.response) {
+        addLog(`[错误] HTTP状态码: ${error.response.status}`);
+        addLog(`[错误] 响应数据: ${JSON.stringify(error.response.data)}`);
+      }
+      
       if (error.response?.status === 404) {
         addLog('[提示] 后端服务未找到，请确认后端服务已启动');
         addLog('[提示] 启动命令: cd backend && python run.py');
@@ -327,73 +350,13 @@ export function AgentPage() {
         addLog('[提示] 默认端口: http://localhost:8005');
       } else if (error.code === 'ENETUNREACH') {
         addLog('[提示] 网络不可达，请检查网络连接');
+      } else if (error.code === 'ERR_NETWORK') {
+        addLog('[提示] 网络错误，请检查网络连接');
+      } else if (error.message?.includes('timeout')) {
+        addLog('[提示] 请求超时，请检查网络连接或后端服务响应时间');
       }
       setExecutionPhase('failed');
     }
-  };
-
-  const pollTaskStatus = async (taskId: string) => {
-    const pollInterval = 2000;
-    const maxPolls = 900;
-    let pollCount = 0;
-    let lastLogCount = 0;
-
-    const poll = async () => {
-      try {
-        const [task, logsResponse] = await Promise.all([
-          taskApi.getTask(taskId),
-          taskApi.getTaskLogs(taskId, 50),
-        ]);
-        
-        const taskData = (task as any).task || task;
-        
-        const logs = (logsResponse as any).logs || [];
-        const newLogs = logs.slice(lastLogCount);
-        newLogs.forEach((log: any) => {
-          const timestamp = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
-          const level = log.level || 'INFO';
-          const message = log.message || '';
-          
-          if (level === 'ERROR') {
-            addLog(`[${timestamp}] [错误] ${message}`);
-          } else {
-            addLog(`[${timestamp}] ${message}`);
-          }
-        });
-        lastLogCount = logs.length;
-
-        if (taskData.status === 'completed') {
-          addLog('[系统] 任务执行完成！');
-          addLog('[系统] 正在生成脚本...');
-          generateScriptFromTask(taskId);
-          return;
-        } else if (taskData.status === 'failed') {
-          addLog('[错误] 任务执行失败');
-          if (taskData.error_message) {
-            addLog(`[错误] ${taskData.error_message}`);
-          }
-          setExecutionPhase('failed');
-          return;
-        } else if (taskData.status === 'executing' || taskData.status === 'running') {
-          if (newLogs.length === 0) {
-            addLog('[系统] 智能体正在执行中...');
-          }
-        }
-
-        pollCount++;
-        if (pollCount < maxPolls) {
-          setTimeout(poll, pollInterval);
-        } else {
-          addLog('[错误] 任务执行超时');
-          setExecutionPhase('failed');
-        }
-      } catch (error) {
-        addLog(`[错误] 获取任务状态失败: ${error}`);
-        setExecutionPhase('failed');
-      }
-    };
-
-    setTimeout(poll, pollInterval);
   };
 
   const generateScriptFromTask = async (taskId: string) => {
@@ -408,8 +371,11 @@ export function AgentPage() {
         addLog('[系统] 无执行历史，生成空脚本');
       }
 
+      // 从任务数据中获取任务描述，因为 taskDescription 状态已被清空
+      const taskDescriptionFromData = taskData.description || taskData.name || 'Unknown task';
+      
       const scriptLines = [
-        `# Auto-generated script for: ${taskDescription}`,
+        `# Auto-generated script for: ${taskDescriptionFromData}`,
         `# Platform: ${selectedPlatforms[0]}`,
         `# Generated at: ${new Date().toISOString()}`,
         '',
@@ -499,9 +465,13 @@ export function AgentPage() {
         await scriptApi.updateScript(scriptId, { content: scriptContent });
         addLog('[系统] 脚本更新成功');
       } else {
+        // 使用脚本内容的前50个字符作为名称（移除注释和特殊字符）
+        const cleanScript = scriptContent.replace(/#.*$/gm, '').trim();
+        const scriptName = cleanScript.substring(0, 50) || 'Auto-generated script';
+        
         const response = await scriptApi.createScript({
-          name: taskDescription.substring(0, 50) + '...',
-          description: taskDescription,
+          name: scriptName.length > 50 ? scriptName.substring(0, 50) + '...' : scriptName,
+          description: 'Auto-generated from Phone Agent execution',
           platform: selectedPlatforms[0],
           content: scriptContent,
         }) as unknown as { script_id: string };
@@ -684,111 +654,77 @@ export function AgentPage() {
                 </div>
               </div>
             ) : (
-              logs.map((log, index) => {
-                const isError = log.includes('[错误]');
-                const isSystem = log.includes('[系统]');
-                
-                return (
-                  <div key={index} className={`flex gap-2.5 ${isSystem ? 'justify-end' : 'justify-start'}`}>
-                    {isSystem ? (
-                      <div className="max-w-[80%]">
-                        <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-lg rounded-br-none px-3 py-2">
-                          <p className="text-[#64748b] text-xs whitespace-pre-wrap">{log}</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="w-7 h-7 bg-[#165DFF] rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Bot className="w-3.5 h-3.5 text-white" />
-                        </div>
-                        <div className="max-w-[80%]">
-                          <div className={`rounded-lg rounded-bl-none px-3 py-2 border ${isError ? 'bg-red-50 border-red-200' : 'bg-[#f8fafc] border-[#e2e8f0]'}`}>
-                            <p className={`text-xs whitespace-pre-wrap ${isError ? 'text-[#ef4444]' : 'text-[#64748b]'}`}>
-                              {log}
-                            </p>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })
+              logs.map((log: LogEntry) => (
+                <LogCard key={log.id} log={log} />
+              ))
             )}
           </div>
         </div>
 
         {/* 底部输入区域 */}
         <div className="p-4 border-t border-[#e2e8f0] bg-white">
-          <div className="max-w-3xl mx-auto">
-            <div className="flex items-end gap-2.5">
-              <div className="flex-1 space-y-2">
-                {/* 实时日志标签 */}
-                <div className="flex items-center gap-3">
-                  <span className="text-[#64748b] text-xs font-medium">实时日志</span>
-                  {/* 模拟模式开关 */}
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[#64748b] text-xs">{simulateMode ? '模拟模式' : '真实模式'}</span>
-                    <button
-                      onClick={() => setSimulateMode(!simulateMode)}
-                      className={`relative w-10 h-5.5 rounded-full transition-colors duration-200 ${
-                        simulateMode ? 'bg-[#165DFF]' : 'bg-[#cbd5e1]'
-                      }`}
-                    >
-                      <div
-                        className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow-md transition-transform duration-200 ${
-                          simulateMode ? 'left-5' : 'left-0.5'
-                        }`}
-                      />
-                    </button>
-                  </div>
-                  {/* 最大步骤限制 */}
-                  <div className="flex items-center gap-1.5 ml-auto">
-                    <span className="text-[#64748b] text-xs">最大步骤</span>
-                    <input
-                      type="number"
-                      value={maxSteps}
-                      onChange={(e) => setMaxSteps(Math.max(1, parseInt(e.target.value) || 1))}
-                      min={1}
-                      max={100}
-                      className="w-16 px-2 py-1 bg-[#f8fafc] border border-[#e2e8f0] rounded-md text-[#0f172a] text-xs text-center focus:outline-none focus:border-[#165DFF] focus:ring-1 focus:ring-[#165DFF] transition-all"
-                    />
-                  </div>
-                </div>
-                {/* 输入框 */}
-                <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-lg p-3 focus-within:border-[#165DFF] focus-within:ring-1 focus-within:ring-[#165DFF] transition-all">
-                  <textarea
-                    value={taskDescription}
-                    onChange={(e) => setTaskDescription(e.target.value)}
-                    placeholder="输入自然语言指令，AI Agent 将自动执行..."
-                    className="w-full bg-transparent text-[#0f172a] text-sm resize-none focus:outline-none placeholder-[#94a3b8]"
-                    rows={3}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleExecute();
-                      }
-                    }}
+          <div className="max-w-4xl mx-auto space-y-3">
+            {/* 任务描述标签 */}
+            <div className="text-[#64748b] text-xs font-medium">任务描述</div>
+            
+            {/* 输入区域：输入框 + 右侧控制区 */}
+            <div className="flex items-stretch gap-3">
+              {/* 输入框 */}
+              <div className="flex-1 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg p-3 focus-within:border-[#165DFF] focus-within:ring-1 focus-within:ring-[#165DFF] transition-all">
+                <textarea
+                  value={taskDescription}
+                  onChange={(e) => setTaskDescription(e.target.value)}
+                  placeholder="输入自然语言指令，AI Agent 将自动执行..."
+                  className="w-full bg-transparent text-[#0f172a] text-sm resize-none focus:outline-none placeholder-[#94a3b8]"
+                  rows={3}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleExecute();
+                    }
+                  }}
+                />
+              </div>
+              
+              {/* 右侧控制区：最大步骤 + 发送按钮（上下排列） */}
+              <div className="flex flex-col gap-2 w-auto">
+                {/* 最大步骤 */}
+                <div className="flex flex-col items-center">
+                  <span className="text-[#64748b] text-xs mb-1">最大步骤</span>
+                  <input
+                    type="number"
+                    value={maxSteps}
+                    onChange={(e) => setMaxSteps(Math.max(1, parseInt(e.target.value) || 1))}
+                    min={1}
+                    max={100}
+                    className="w-14 px-2 py-1 bg-white border border-[#e2e8f0] rounded-md text-[#0f172a] text-xs text-center focus:outline-none focus:border-[#165DFF] focus:ring-1 focus:ring-[#165DFF] transition-all"
                   />
                 </div>
+                
+                {/* 发送按钮 */}
+                <button
+                  onClick={handleExecute}
+                  disabled={!taskDescription.trim() || executionPhase === 'executing'}
+                  className={`flex-1 min-h-[40px] px-4 py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-1.5 transition-all duration-200 shadow-sm ${
+                    executionPhase === 'executing'
+                      ? 'bg-gradient-to-r from-[#165DFF] to-[#2563eb] text-white'
+                      : 'bg-gradient-to-r from-[#165DFF] to-[#2563eb] hover:from-[#0f4cdb] hover:to-[#1d4ed8] disabled:opacity-40 disabled:cursor-not-allowed text-white'
+                  }`}
+                >
+                  {executionPhase === 'executing' ? (
+                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Play className="w-3.5 h-3.5" />
+                  )}
+                  {executionPhase === 'executing' ? '执行中' : '发送'}
+                </button>
               </div>
-              <button
-                onClick={handleExecute}
-                disabled={!taskDescription.trim() || executionPhase === 'executing'}
-                className={`px-5 py-3 rounded-lg font-medium flex items-center gap-2 transition-all duration-200 ${
-                  executionPhase === 'executing'
-                    ? 'bg-[#165DFF] text-white'
-                    : 'bg-[#165DFF] hover:bg-[#0f4cdb] disabled:opacity-50 text-white'
-                }`}
-              >
-                {executionPhase === 'executing' ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <Play className="w-4 h-4" />
-                )}
-                {executionPhase === 'executing' ? '执行中' : '发送'}
-              </button>
             </div>
-            <p className="text-[#94a3b8] text-xs mt-2 text-right">按 Enter 发送，Shift+Enter 换行</p>
+            
+            {/* 快捷键提示 */}
+            <div className="flex items-center justify-end">
+              <p className="text-[#94a3b8] text-xs">按 Enter 发送，Shift+Enter 换行</p>
+            </div>
           </div>
         </div>
       </div>
