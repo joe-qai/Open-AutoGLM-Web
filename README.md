@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 <img src="resources/logo.svg" width="150">
 
@@ -56,10 +56,13 @@
 
 - **实时投屏** — Scrcpy H.264 视频流，WebCodecs 解码
 - **WebSocket 推送** — 任务执行进度实时推送
+- **SSE 日志流** — 后端日志实时广播到前端
 - **无线调试** — ADB/HDC TCP/IP 远程连接
 - **人工接管** — 登录/验证码场景支持人工干预
 - **APP 包映射** — 预置 150+ 应用包名（Android / HarmonyOS / iOS）
 - **审计日志** — 所有操作记录至 SQLite
+- **任务完成检测** — 智能识别任务完成状态，自动结束任务
+- **KillApp 动作** — 支持强制停止应用进程
 
 ---
 
@@ -153,7 +156,8 @@ python main.py "完成以下任务：打开抖音并浏览"
 │   │   │   ├── model_configs.py # 模型配置
 │   │   │   ├── settings.py     # 系统设置
 │   │   │   ├── logs.py         # 审计日志
-│   │   │   └── websocket.py    # WebSocket 实时推送
+│   │   │   ├── websocket.py    # WebSocket 实时推送
+│   │   │   └── log_stream.py   # SSE 日志流
 │   │   ├── core/
 │   │   │   ├── agent/          # AgentEngine + 子代理
 │   │   │   ├── adapters/       # Android/HarmonyOS/iOS 适配器
@@ -169,6 +173,7 @@ python main.py "完成以下任务：打开抖音并浏览"
 │   │   ├── App.tsx             # 路由入口
 │   │   ├── pages/              # 9 个功能页面
 │   │   ├── components/         # ScrcpyPlayer / LogCard / Layout
+│   │   ├── hooks/              # 自定义 Hooks (useLogStream)
 │   │   ├── stores/             # Zustand 状态管理（7 个 store）
 │   │   └── services/           # Axios API 客户端
 │   └── package.json
@@ -192,6 +197,7 @@ python main.py "完成以下任务：打开抖音并浏览"
 | 系统设置 | `GET/PUT /api/v1/settings` | 获取、更新、重置 |
 | 审计日志 | `GET /api/v1/logs` | 操作日志查询 |
 | 实时推送 | `WS /ws/{client_id}` | 任务进度 WebSocket |
+| SSE 日志流 | `GET /api/v1/logs/stream` | 后端日志实时广播 |
 
 完整文档：http://localhost:8005/docs
 
