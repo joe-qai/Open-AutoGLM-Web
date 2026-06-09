@@ -480,6 +480,18 @@ th {{ background: #1e293b; color: #94a3b8; }}
             (task_id, time.strftime("%Y-%m-%dT%H:%M:%S"), level, message)
         )
         await conn.commit()
+        
+        # Broadcast to SSE clients
+        try:
+            from app.api.v1.log_stream import broadcast_log
+            broadcast_log(
+                level=level,
+                category="task",
+                message=message,
+                task_id=task_id,
+            )
+        except ImportError:
+            pass
 
     async def get_task_logs(self, task_id: str, limit: int = 100) -> List[Dict]:
         conn = await db.get_connection()
@@ -605,7 +617,6 @@ th {{ background: #1e293b; color: #94a3b8; }}
             
             execution_history = []
             step_count = 0
-            log_queue = []
             
             async def async_step_callback(step_info):
                 nonlocal step_count
@@ -616,46 +627,88 @@ th {{ background: #1e293b; color: #94a3b8; }}
                 message = step_info.get("message", "")
                 success = step_info.get("success", True)
                 full_response = step_info.get("full_response", "")
-                
-                # For think event, don't increment step count
-                if event_type != "think":
+                screenshot_base64 = step_info.get("screenshot_base64", "")
+
+                # Handle think events - send to WebSocket for real-time display
+                if event_type == "think":
+                    if save_task:
+                        await self._log(task_id, "INFO", f"[Step {step_count + 1}] 思考: {thinking[:200]}")
+                    
+                    # Send thinking to frontend via WebSocket using manager
+                    ws_data = {
+                        "type": "log",
+                        "step": step_count + 1,
+                        "event": "think",
+                        "thinking": thinking,
+                        "proposed_action": action,
+                        "full_response": full_response,
+                        "screenshot_base64": screenshot_base64,
+                    }
+                    try:
+                        await ws_manager.send_task_update(task_id, ws_data)
+                    except Exception as ws_e:
+                        if save_task:
+                            await self._log(task_id, "DEBUG", f"WebSocket send failed: {ws_e}")
+                    return
+
+                # Increment step count only on action/observe events
+                if event_type in ("act", "observe"):
                     step_count += 1
-                
-                # Queue for async processing
+
+                # Real-time logging (no queuing for streaming output)
                 if save_task:
-                    if event_type == "think":
-                        log_queue.append((task_id, "INFO", f"[Step {step_count}] 思考: {thinking}"))
-                        log_queue.append((task_id, "INFO", f"[Step {step_count}] 完整思考过程: {full_response}"))
+                    await self._log(task_id, "INFO", f"[Step {step_count}] {action}: {message or '执行中'}")
+
+                # Enhanced duplicate detection:
+                # 1. Detect repeated failed actions (same action failed in previous step)
+                # 2. Detect recent successful action repeats (within last 3 steps)
+                dedup_hint = ""
+                if execution_history:
+                    # Check for consecutive failed actions
+                    if not success:
+                        last = execution_history[-1]
+                        if last["action"] == action and last["success"] is False:
+                            dedup_hint = (
+                                f" [注意: '{action}' 在上一步失败且屏幕未变化。"
+                                "请勿重复相同操作。尝试不同策略、不同元素，或使用返回/主页恢复。]"
+                            )
                     else:
-                        log_queue.append((task_id, "INFO", f"[Step {step_count}] {action}: {message or '执行中'}"))
-                
-                # Send real-time WebSocket update
+                        # Check for recent successful action repeats (prevents redundant operations)
+                        recent_actions = [h["action"] for h in execution_history[-3:]]
+                        if action in recent_actions and action not in ["Back", "Wait"]:
+                            action_count = recent_actions.count(action)
+                            if action_count >= 2:
+                                dedup_hint = (
+                                    f" [注意: '{action}' 在最近几步已执行过 {action_count} 次。"
+                                    "避免重复操作，考虑其他步骤。]"
+                                )
+
+                # Send real-time WebSocket update (action events only)
                 ws_data = {
                     "task_id": task_id,
                     "event": event_type,
                     "step": step_count,
                     "action": action,
-                    "result": message,
+                    "result": message + dedup_hint if dedup_hint else message,
                     "success": success,
                     "thought": thinking,
                     "full_response": full_response,
+                    "screenshot_base64": screenshot_base64,
                 }
                 try:
                     await ws_manager.send_task_update(task_id, ws_data)
                 except Exception as ws_e:
                     if save_task:
                         await self._log(task_id, "WARNING", f"Failed to send WebSocket update: {ws_e}")
-                
-                # Only add to execution history for action events
-                if event_type != "think":
-                    execution_history.append({
-                        "step": step_count,
-                        "action": action,
-                        "thinking": thinking,
-                        "message": message,
-                        "success": success,
-                    })
-            
+
+                # Add to execution history for LLM context
+                execution_history.append({
+                    "step": step_count,
+                    "action": action,
+                    "thinking": thinking,
+                    "message": message,
+                    "success": success,
+                })
             # Get the current event loop for thread-safe callback
             loop = asyncio.get_running_loop()
             
@@ -678,10 +731,6 @@ th {{ background: #1e293b; color: #94a3b8; }}
             # Execute task using PhoneAgent's run method in a separate thread
             # to avoid blocking the event loop (which would stop video streaming)
             result_message = await asyncio.to_thread(phone_agent.run, task_description)
-            
-            # Process queued async operations after synchronous run completes
-            for log_args in log_queue:
-                await self._log(*log_args)
             
             # Send completion message
             completion_data = {

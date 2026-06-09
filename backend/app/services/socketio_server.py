@@ -125,12 +125,9 @@ async def _stream_packets(sid: str, streamer: ScrcpyStreamer) -> None:
             payload = _packet_to_payload(packet)
             await sio.emit("video-data", payload, to=sid)
             packet_count += 1
-            if packet_count % 30 == 0:
-                logger.debug(f"Sent {packet_count} video packets to sid: {sid}")
-            if packet.type == "configuration":
-                logger.debug(f"Sent configuration packet (size: {len(packet.data)})")
-            elif packet.type == "data" and packet.keyframe:
-                logger.debug(f"Sent keyframe packet (size: {len(packet.data)})")
+            # Only log every 300 packets (about every 10 seconds at 30fps) to reduce log spam
+            if packet_count % 300 == 0:
+                logger.info(f"Video streaming progress for sid: {sid}, packets sent: {packet_count}")
     except asyncio.CancelledError:
         logger.info(f"Video streaming cancelled for sid: {sid}")
         raise
@@ -143,7 +140,7 @@ async def _stream_packets(sid: str, streamer: ScrcpyStreamer) -> None:
                 "Failed to emit Socket.IO stream error to %s: %s", sid, emit_exc
             )
     finally:
-        logger.info(f"Stopping video streaming for sid: {sid}")
+        logger.info(f"Stopping video streaming for sid: {sid}, total packets: {packet_count}")
         await _stop_stream_for_sid(sid)
 
 

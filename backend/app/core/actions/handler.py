@@ -101,6 +101,7 @@ class ActionHandler:
             "Swipe": self._handle_swipe,
             "Back": self._handle_back,
             "Home": self._handle_home,
+            "KillApp": self._handle_kill_app,
             "Double Tap": self._handle_double_tap,
             "Long Press": self._handle_long_press,
             "Wait": self._handle_wait,
@@ -170,8 +171,13 @@ class ActionHandler:
 
         x, y = self._convert_relative_to_absolute(element, width, height)
 
-        # Check for sensitive operation
-        if "message" in action:
+        # Check for sensitive operation - only confirm for truly sensitive actions
+        # The 'message' field is just a description, not an indicator of sensitivity
+        sensitive_actions = ["delete", "remove", "uninstall", "clear", "format", "logout", "exit"]
+        action_description = action.get("message", "").lower()
+        is_sensitive = any(keyword in action_description for keyword in sensitive_actions)
+        
+        if is_sensitive and "message" in action:
             if not self.confirmation_callback(action["message"]):
                 return ActionResult(
                     success=False,
@@ -230,6 +236,43 @@ class ActionHandler:
         """Handle home button action."""
         self.device.press_key("HOME")
         return ActionResult(True, False)
+
+    def _handle_kill_app(self, action: dict, width: int, height: int) -> ActionResult:
+        """Handle kill app action - force stops the specified application."""
+        package_name = action.get("app")
+        
+        if not package_name:
+            # Try to get current app if no package name specified
+            current_app = self.device.get_current_app()
+            if current_app:
+                package_name = current_app
+            else:
+                return ActionResult(False, False, "No app specified to kill and cannot detect current app")
+        
+        # Resolve app name to package if needed
+        resolved = self._resolve_app_name(package_name)
+        if resolved:
+            package_name = resolved
+        
+        # Check for sensitive operation confirmation
+        if hasattr(self, 'confirmation_callback') and self.confirmation_callback:
+            if not self.confirmation_callback(f"确定要强制停止应用: {package_name}?"):
+                return ActionResult(
+                    success=False,
+                    should_finish=True,
+                    message="User cancelled kill app operation",
+                )
+        
+        if hasattr(self.device, 'force_stop_app'):
+            success = self.device.force_stop_app(package_name)
+            if success:
+                return ActionResult(True, False, f"Successfully killed app: {package_name}")
+            else:
+                return ActionResult(False, False, f"Failed to kill app: {package_name}")
+        else:
+            # Fallback to home if force_stop_app is not supported
+            self.device.press_key("HOME")
+            return ActionResult(True, False, "Force stop not supported, using Home as fallback")
 
     def _handle_double_tap(self, action: dict, width: int, height: int) -> ActionResult:
         """Handle double tap action."""
@@ -358,14 +401,120 @@ def parse_action(response: str) -> dict[str, Any]:
     """
     try:
         response = response.strip()
-        
+
         # --- Extract action from various formats ---
-        
+
         # First, try to extract content between <action>...</action> tags
         action_match = re.search(r'<action>(.*?)</action>', response, re.DOTALL)
         if action_match:
             response = action_match.group(1).strip()
-        
+            
+            # Handle various malformed formats inside <action> tags:
+            # Format 1: Tap, element=[x,y]
+            # Format 2: Tap", element=[x,y]) (with trailing quote and paren)
+            # Format 3: Tap",element=[x,y]
+            # Clean up any trailing garbage characters
+            response = re.sub(r'^(\w+)"\s*,', r'\1,', response)  # Remove leading quote after action name
+            response = re.sub(r'\)$', '', response)  # Remove trailing parenthesis
+            
+            # Handle simple format inside <action> tags: Tap, element=[x,y]
+            simple_action_match = re.match(r'^\s*(\w+)\s*,\s*element\s*=\s*\[([^\]]+)\]', response)
+            if simple_action_match:
+                action_name = simple_action_match.group(1)
+                coords = [int(x.strip()) for x in simple_action_match.group(2).split(',')]
+                action_dict = {"_metadata": "do", "action": action_name, "element": coords}
+                # Also extract message if present
+                msg_match = re.search(r',\s*message\s*=\s*"([^"]+)"', response)
+                if msg_match:
+                    action_dict["message"] = msg_match.group(1)
+                return action_dict
+
+        # Handle malformed XML-like format: <action name="Tap", element=[x,y], ...>
+        # Some VLMs output this incorrect format
+        malformed_xml_match = re.search(r'<(action|do)\s+name\s*=\s*"([^"]+)"([^>]*)>', response)
+        if malformed_xml_match:
+            # Extract the action name and parameters
+            action_name = malformed_xml_match.group(2)
+            params_str = malformed_xml_match.group(3)
+            # Parse parameters like: element=[499, 213], message="xxx"
+            action_dict = {"_metadata": "do", "action": action_name}
+            # Extract element parameter
+            element_match = re.search(r'element\s*=\s*\[([^\]]+)\]', params_str)
+            if element_match:
+                coords = [int(x.strip()) for x in element_match.group(1).split(',')]
+                action_dict["element"] = coords
+            # Extract app parameter
+            app_match = re.search(r'app\s*=\s*"([^"]+)"', params_str)
+            if app_match:
+                action_dict["app"] = app_match.group(1)
+            # Extract text parameter
+            text_match = re.search(r'text\s*=\s*"([^"]+)"', params_str)
+            if text_match:
+                action_dict["text"] = text_match.group(1)
+            # Extract duration parameter
+            duration_match = re.search(r'duration\s*=\s*"([^"]+)"', params_str)
+            if duration_match:
+                action_dict["duration"] = duration_match.group(1)
+            # Extract message parameter
+            msg_match = re.search(r'message\s*=\s*"([^"]+)"', params_str)
+            if msg_match:
+                action_dict["message"] = msg_match.group(1)
+            
+            # Also check for parameters after the closing >
+            # Handle format: <action name="Wait">duration="3 seconds"
+            after_tag = response[malformed_xml_match.end():]
+            if after_tag and not after_tag.strip().startswith('</'):
+                # Try to extract parameters from the content after the tag
+                duration_match = re.search(r'duration\s*=\s*"([^"]+)"', after_tag)
+                if duration_match and 'duration' not in action_dict:
+                    action_dict["duration"] = duration_match.group(1)
+                element_match = re.search(r'element\s*=\s*\[([^\]]+)\]', after_tag)
+                if element_match and 'element' not in action_dict:
+                    coords = [int(x.strip()) for x in element_match.group(1).split(',')]
+                    action_dict["element"] = coords
+                app_match = re.search(r'app\s*=\s*"([^"]+)"', after_tag)
+                if app_match and 'app' not in action_dict:
+                    action_dict["app"] = app_match.group(1)
+                text_match = re.search(r'text\s*=\s*"([^"]+)"', after_tag)
+                if text_match and 'text' not in action_dict:
+                    action_dict["text"] = text_match.group(1)
+                msg_match = re.search(r'message\s*=\s*"([^"]+)"', after_tag)
+                if msg_match and 'message' not in action_dict:
+                    action_dict["message"] = msg_match.group(1)
+            
+            return action_dict
+
+        # Handle another malformed format: <action="Tap", element=[x,y], ...>
+        malformed_xml_match2 = re.search(r'<(action|do)\s*=\s*"([^"]+)"([^>]*)>', response)
+        if malformed_xml_match2:
+            # Extract the action name and parameters
+            action_name = malformed_xml_match2.group(2)
+            params_str = malformed_xml_match2.group(3)
+            # Parse parameters like: element=[499, 213], message="xxx"
+            action_dict = {"_metadata": "do", "action": action_name}
+            # Extract element parameter
+            element_match = re.search(r'element\s*=\s*\[([^\]]+)\]', params_str)
+            if element_match:
+                coords = [int(x.strip()) for x in element_match.group(1).split(',')]
+                action_dict["element"] = coords
+            # Extract app parameter
+            app_match = re.search(r'app\s*=\s*"([^"]+)"', params_str)
+            if app_match:
+                action_dict["app"] = app_match.group(1)
+            # Extract text parameter
+            text_match = re.search(r'text\s*=\s*"([^"]+)"', params_str)
+            if text_match:
+                action_dict["text"] = text_match.group(1)
+            # Extract duration parameter
+            duration_match = re.search(r'duration\s*=\s*"([^"]+)"', params_str)
+            if duration_match:
+                action_dict["duration"] = duration_match.group(1)
+            # Extract message parameter
+            msg_match = re.search(r'message\s*=\s*"([^"]+)"', params_str)
+            if msg_match:
+                action_dict["message"] = msg_match.group(1)
+            return action_dict
+
         # If no XML tags found, try to extract do() or finish() function call
         if not (response.startswith("{") or response.startswith("do(") or response.startswith("finish(")):
             # Look for do(...) pattern
@@ -382,17 +531,24 @@ def parse_action(response: str) -> dict[str, Any]:
                     json_match = re.search(r'(\{[\s\S]*\})', response)
                     if json_match:
                         response = json_match.group(1)
-        
+
         # Clean up any remaining XML tags or trailing garbage
         response = re.sub(r'</?action>', '', response)
         response = re.sub(r'</?answer>', '', response)
         response = re.sub(r'<thinking>.*?</thinking>', '', response, flags=re.DOTALL)
         response = re.sub(r'<answer>.*?</answer>', '', response, flags=re.DOTALL)
-        
+
         # Remove backticks that wrap the action but keep content inside
         response = re.sub(r'^`\s*', '', response)  # Remove leading backtick
         response = re.sub(r'\s*`$', '', response)  # Remove trailing backtick
         
+        # Also remove any remaining backticks that might be in the middle of the action
+        # This handles cases like: do(action="Home")` text...
+        response = re.sub(r'`\s*[^`]*$', '', response)  # Remove backtick followed by trailing text
+        
+        # If still has backticks, remove them all
+        response = response.replace('`', '')
+
         # Replace problematic characters that break AST parsing
         response = response.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
         response = re.sub(r'\s+', ' ', response).strip()
@@ -448,12 +604,67 @@ def parse_action(response: str) -> dict[str, Any]:
                 "_metadata": "do",
                 "action": "Wait",
             }
-        elif response.strip() in ["Swipe", "Back", "Home", "Lock", "Unlock", "VolumeUp", "VolumeDown", "Power"]:
+        elif response.strip().startswith("Wait,"):
+            # Handle Wait action with duration: Wait, duration="3 seconds"
+            try:
+                duration_match = re.search(r'duration\s*=\s*"([^"]+)"', response)
+                action = {
+                    "_metadata": "do",
+                    "action": "Wait",
+                }
+                if duration_match:
+                    action["duration"] = duration_match.group(1)
+                return action
+            except Exception:
+                pass
+        elif response.strip() == "Tap":
+            # Handle simple Tap action without coordinates
+            # Note: As a vision model, you SHOULD provide element coordinates!
+            # This case is handled by the agent to request rethinking
+            action = {
+                "_metadata": "do",
+                "action": "Tap",
+            }
+        elif response.strip() in ["Swipe", "Back", "Home", "Lock", "Unlock", "VolumeUp", "VolumeDown", "Power", "KillApp"]:
             # Handle simple action commands without arguments
             action = {
                 "_metadata": "do",
                 "action": response.strip(),
             }
+        # Handle malformed actions - missing 'do(' prefix
+        elif response.startswith('"') or (response.count('"') >= 2 and 'element=' in response):
+            # Try to reconstruct the do() call
+            try:
+                # Look for action name in quotes
+                action_match = re.search(r'"([^"]+)"', response)
+                if action_match:
+                    action_name = action_match.group(1)
+                    
+                    # Build a complete do() call
+                    full_action = f'do(action="{action_name}"'
+                    
+                    # Add remaining content
+                    after_action = response[action_match.end():]
+                    if after_action:
+                        full_action += after_action
+                    
+                    # Make sure it ends with )
+                    if not full_action.endswith(')'):
+                        full_action += ')'
+                    
+                    # Now parse the reconstructed action
+                    tree = ast.parse(full_action, mode="eval")
+                    if isinstance(tree.body, ast.Call):
+                        call = tree.body
+                        action = {"_metadata": "do"}
+                        for keyword in call.keywords:
+                            key = keyword.arg
+                            value = ast.literal_eval(keyword.value)
+                            action[key] = value
+                        return action
+            except Exception:
+                pass
+            raise ValueError(f"Failed to parse malformed action: {response}")
         else:
             raise ValueError(f"Failed to parse action: {response}")
         return action

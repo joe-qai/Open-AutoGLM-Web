@@ -96,6 +96,18 @@ class ADBDevice(BaseDevice):
         """Press home button."""
         adb_home(self.device_id)
 
+    def force_stop_app(self, package_name: str) -> bool:
+        """Force stop an application by package name."""
+        cmd = ["adb"]
+        if self.device_id:
+            cmd.extend(["-s", self.device_id])
+        cmd.extend(["shell", "am", "force-stop", package_name])
+        try:
+            result = subprocess.run(cmd, capture_output=True, timeout=10)
+            return result.returncode == 0
+        except Exception:
+            return False
+
     def is_connected(self) -> bool:
         """Check if device is connected."""
         return self._connection.is_connected()

@@ -24,6 +24,7 @@ import {
 } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import ScrcpyPlayer from '../../components/ScrcpyPlayer/ScrcpyPlayer';
 import { LogCard, LogEntry } from '../../components/LogCard/LogCard';
+import { useLogStream } from '../../hooks/useLogStream';
 
 // WebSocket 配置
 const WS_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8005').replace('http', 'ws');
@@ -97,7 +98,47 @@ export function AgentPage() {
   
   // WebSocket 状态
   const wsRef = useRef<WebSocket | null>(null);
+  const [wsConnected, setWsConnected] = useState(false);
   const currentTaskIdRef = useRef<string | null>(null);
+  // Buffer pending think messages, merge with matching act events
+  const thinkBufferRef = useRef<Record<number, { thought: string; proposedAction: string; screenshot?: string }>>({});
+
+  // SSE 日志流订阅
+  const { updateParams: updateLogStreamParams } = useLogStream({
+    onMessage: (message) => {
+      if (message.type === 'connected') {
+        console.log('[SSE] Log stream connected');
+      } else if (message.type === 'keepalive') {
+        // 心跳消息，无需处理
+      } else {
+        // 将 SSE 日志添加到日志列表
+        const logLevel = message.level.toLowerCase();
+        const logType: LogEntry['type'] = 
+          logLevel === 'error' ? 'error' :
+          logLevel === 'warning' ? 'warning' :
+          logLevel === 'info' ? 'action' :
+          'system';
+        
+        addStructuredLog({
+          step: 0,
+          type: logType,
+          action: message.category?.toUpperCase(),
+          result: message.message,
+        });
+      }
+    },
+    onConnect: () => {
+      console.log('[SSE] Connected to log stream');
+    },
+    onDisconnect: () => {
+      console.log('[SSE] Disconnected from log stream');
+    },
+    onError: (error) => {
+      console.error('[SSE] Log stream error:', error);
+    },
+    // 订阅所有任务相关日志（task 类别）
+    category: 'task',
+  });
 
   // 初始化 WebSocket 连接
   useEffect(() => {
@@ -106,6 +147,17 @@ export function AgentPage() {
     
     socket.onopen = () => {
       console.log('WebSocket connected');
+      setWsConnected(true);
+    };
+    
+    socket.onclose = () => {
+      console.log('WebSocket disconnected');
+      setWsConnected(false);
+    };
+    
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setWsConnected(false);
     };
     
     socket.onmessage = (event) => {
@@ -114,71 +166,109 @@ export function AgentPage() {
         console.log('[WebSocket] Received message:', message);
         
         // 处理 WebSocket 消息
-        if (message.type === 'agent_step' && message.task_id === currentTaskIdRef.current) {
-          const data = message.data;
-          const step = data.step || 0;
-          const eventType = data.event || '';
+        if (message.type === 'agent_step') {
+          // Debug logging
+          console.log('[WebSocket] agent_step received:', {
+            'message.task_id': message.task_id,
+            'currentTaskIdRef.current': currentTaskIdRef.current,
+            'data.event': message.data?.event,
+            'data.thinking': message.data?.thinking?.substring(0, 50)
+          });
           
-          // 处理不同阶段的消息
-          if (eventType === 'observe') {
-            addStructuredLog({ step, type: 'system', result: '正在观察屏幕...' });
-          } else if (eventType === 'think') {
-            const thought = data.thought || '';
-            const proposedAction = data.proposed_action || '';
-            const fullResponse = data.full_response || '';
+          if (message.task_id === currentTaskIdRef.current) {
+            const data = message.data;
+            const step = data.step || 0;
+            const eventType = data.event || '';
             
-            // 清理思考过程中的HTML标签
-            const cleanThinking = (fullResponse || thought)
-              .replace(/<thinking>|<\/thinking>|<action>|<\/action>|<answer>|<\/answer>/g, '')
-              .replace(/<json_think>|<\/json_think>|<json_answer>|<\/json_answer>/g, '')
-              .trim();
-            
-            addStructuredLog({ 
-              step, 
-              type: 'think', 
-              action: proposedAction,
-              thinking: cleanThinking 
-            });
-          } else if (eventType === 'act') {
-            const action = data.action || '';
-            const result = data.result || '';
-            const success = data.success;
-            
-            if (action === 'finish') {
-              addStructuredLog({ step: 0, type: 'success', result: result || '任务完成' });
+            // 处理不同阶段的消息
+            if (eventType === 'observe') {
+              addStructuredLog({ step, type: 'system', result: '正在观察屏幕...' });
+            } else if (eventType === 'think') {
+              // Display thinking immediately for real-time feedback
+              const thought = data.thought || '';
+              const proposedAction = data.proposed_action || '';
+              const fullResponse = data.full_response || '';
+              const screenshot = data.screenshot_base64 || '';
+              const cleanThinking = (fullResponse || thought)
+                .replace(/<thinking>|<\/thinking>|<action>|<\/action>|<answer>|<\/answer>/g, '')
+                .replace(/<json_think>|<\/json_think>|<json_answer>|<\/json_answer>/g, '')
+                .trim();
+              
+              console.log('[WebSocket] Processing think event:', {
+                step,
+                thinkingLength: cleanThinking.length,
+                hasScreenshot: !!screenshot
+              });
+              
+              // Store in buffer for potential merge with act event
+              thinkBufferRef.current[step] = { thought: cleanThinking, proposedAction, screenshot };
+              
+              // Also display immediately as a think-only log entry
+              addStructuredLog({
+                step,
+                type: 'think' as const,
+                thinking: cleanThinking,
+                thinkingAction: proposedAction,
+                screenshot,
+              });
+            } else if (eventType === 'act') {
+              const action = data.action || '';
+              const result = data.result || '';
+              const success = data.success;
+              const screenshot = data.screenshot_base64 || '';
+              
+              if (action === 'finish') {
+                addStructuredLog({ step: 0, type: 'success', result: result || '任务完成' });
+                setExecutionPhase('completed');
+                currentTaskIdRef.current = null;
+              } else {
+                // Merge with buffered think if available
+                const buffer = thinkBufferRef.current[step];
+                if (buffer) {
+                  delete thinkBufferRef.current[step];
+                  addStructuredLog({ 
+                    step, 
+                    type: success ? 'action' : 'warning', 
+                    action, 
+                    result,
+                    thinking: buffer.thought,
+                    thinkingAction: buffer.proposedAction,
+                    screenshot,
+                  });
+                } else {
+                  addStructuredLog({ 
+                    step, 
+                    type: success ? 'action' : 'warning', 
+                    action, 
+                    result,
+                    screenshot,
+                  });
+                }
+              }
+            } else if (eventType === 'reflect') {
+              const reflection = data.reflection || '';
+              const historySummary = data.history_summary || '';
+              if (reflection) {
+                console.log('[WebSocket] Reflection:', reflection);
+              }
+              if (historySummary) {
+                addStructuredLog({ step: 0, type: 'system', result: historySummary });
+              }
+            } else if (eventType === 'completed') {
+              addStructuredLog({ step: 0, type: 'success', result: `任务执行完成！共执行 ${step} 步` });
               setExecutionPhase('completed');
               currentTaskIdRef.current = null;
+            } else if (eventType === 'error' || eventType === 'failed') {
+              addStructuredLog({ step: 0, type: 'error', result: data.result || '执行失败' });
+              setExecutionPhase('failed');
+              currentTaskIdRef.current = null;
             } else {
-              addStructuredLog({ 
-                step, 
-                type: success ? 'action' : 'warning', 
-                action, 
-                result 
-              });
-            }
-          } else if (eventType === 'reflect') {
-            const reflection = data.reflection || '';
-            const historySummary = data.history_summary || '';
-            if (reflection) {
-              console.log('[WebSocket] Reflection:', reflection);
-            }
-            if (historySummary) {
-              addStructuredLog({ step: 0, type: 'system', result: historySummary });
-            }
-          } else if (eventType === 'completed') {
-            addStructuredLog({ step: 0, type: 'success', result: `任务执行完成！共执行 ${step} 步` });
-            setExecutionPhase('completed');
-            currentTaskIdRef.current = null;
-          } else if (eventType === 'error' || eventType === 'failed') {
-            addStructuredLog({ step: 0, type: 'error', result: data.result || '执行失败' });
-            setExecutionPhase('failed');
-            currentTaskIdRef.current = null;
-          } else {
-            // 通用日志显示
-            const action = data.action || data.proposed_action || '';
-            const result = data.result || '';
-            if (action || result) {
-              addStructuredLog({ step, type: 'system', action, result });
+              // 通用日志显示
+              const action = data.action || data.proposed_action || '';
+              const result = data.result || '';
+              if (action || result) {
+                addStructuredLog({ step, type: 'system', action, result });
+              }
             }
           }
         } else if (message.type === 'subscribed') {
@@ -203,6 +293,54 @@ export function AgentPage() {
       socket.close();
     };
   }, []);
+
+  // 自动重连 WebSocket
+  useEffect(() => {
+    // 当 WebSocket 断开且有任务在执行时，自动重连
+    if (!wsConnected && currentTaskIdRef.current && executionPhase === 'executing') {
+      const reconnectTimeout = setTimeout(() => {
+        if (!wsConnected || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+          // 强制重新创建 WebSocket 连接
+          const clientId = `agent_${Date.now()}`;
+          const newSocket = new WebSocket(`${WS_URL}/ws/${clientId}`);
+          
+          newSocket.onopen = () => {
+            console.log('WebSocket reconnected');
+            setWsConnected(true);
+            // 重新订阅任务
+            if (currentTaskIdRef.current) {
+              newSocket.send(JSON.stringify({
+                type: 'subscribe',
+                task_id: currentTaskIdRef.current,
+              }));
+              addLog('[系统] WebSocket重新连接成功');
+            }
+          };
+          
+          newSocket.onclose = () => {
+            setWsConnected(false);
+          };
+          
+          newSocket.onerror = () => {
+            setWsConnected(false);
+          };
+          
+          newSocket.onmessage = (event) => {
+            try {
+              const message = JSON.parse(event.data);
+              // 处理消息...
+            } catch (e) {
+              console.error('Failed to parse WebSocket message:', e);
+            }
+          };
+          
+          wsRef.current = newSocket;
+        }
+      }, 1000); // 1秒后重连
+      
+      return () => clearTimeout(reconnectTimeout);
+    }
+  }, [wsConnected, executionPhase]);
 
   useEffect(() => {
     fetchDevices();
@@ -280,6 +418,20 @@ export function AgentPage() {
     addLog('[系统] 正在通过 VLM 视觉模型驱动 Phone Agent...');
     addLog('[系统] 正在连接后端服务...');
 
+    // 等待 WebSocket 连接建立（最多等待5秒）
+    if (!wsConnected || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+      addLog('[系统] 等待 WebSocket 连接...');
+      const waitStart = Date.now();
+      while ((!wsConnected || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) && Date.now() - waitStart < 5000) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      if (wsConnected && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        addLog('[系统] WebSocket 连接已建立');
+      } else {
+        addLog('[警告] WebSocket 连接超时，但将继续执行任务');
+      }
+    }
+
     try {
       // 使用 phone_agent 的 agent 能力
       const taskId = await executeDirect({
@@ -305,7 +457,7 @@ export function AgentPage() {
             task_id: taskId,
           }));
         } else {
-          addLog('[警告] WebSocket连接未建立，可能无法接收实时日志');
+          addLog('[警告] WebSocket连接不可用，实时日志将无法接收');
         }
 
         // 设置超时检测
@@ -730,12 +882,12 @@ export function AgentPage() {
       </div>
 
       {/* 右侧：设备实时预览 */}
-      <div className="w-80 flex flex-col bg-white border border-[#e2e8f0] rounded-lg">
+      <div className="flex-1 flex flex-col bg-white border border-[#e2e8f0] rounded-lg min-w-[300px] max-w-[400px]">
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e8f0]">
           <div className="flex items-center gap-2.5">
             {selectedDevice ? (
               <>
-                <div className="w-7 h-7 bg-[#22c55e] rounded-lg flex items-center justify-center">
+                <div className="w-7 h-7 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center shadow-md shadow-emerald-500/20">
                   <Smartphone className="w-3.5 h-3.5 text-white" />
                 </div>
                 <div>
@@ -750,33 +902,60 @@ export function AgentPage() {
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 bg-[#22c55e] rounded-full" />
-            <span className="text-[#22c55e] text-xs font-medium">在线</span>
+            <div className="w-2 h-2 bg-emerald-500 rounded-full shadow-lg shadow-emerald-500/50 animate-pulse" />
+            <span className="text-emerald-600 text-xs font-medium">在线</span>
           </div>
         </div>
 
-        <div className="flex-1 p-3">
+        <div className="flex-1 p-1.5">
           {selectedDevice ? (
-            <div className="relative bg-[#0f172a] rounded-[1.5rem] shadow-lg aspect-[9/16] overflow-hidden border-3 border-slate-700">
-              <ScrcpyPlayer
-                deviceId={selectedDevice}
-                enableControl={true}
-                onTapSuccess={() => console.log('Tap success')}
-                onTapError={(error) => console.error('Tap error:', error)}
-                onSwipeSuccess={() => console.log('Swipe success')}
-                onSwipeError={(error) => console.error('Swipe error:', error)}
-              />
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5 bg-[#0f172a] rounded-b-xl z-20" />
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-1 bg-slate-600 rounded-full z-20" />
+            <div className="relative h-full bg-gradient-to-b from-slate-900 to-slate-950 rounded-xl shadow-lg shadow-black/30 overflow-hidden border border-slate-700">
+              {/* 顶部圆角遮罩 */}
+              <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-slate-950 to-transparent z-10" />
+              
+              {/* 顶部刘海区域 */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5 bg-slate-950 rounded-b-[0.75rem] z-20 flex items-center justify-center">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-6 h-3 bg-slate-800 rounded-full" />
+                  <div className="w-1.5 h-1.5 bg-slate-700 rounded-full" />
+                </div>
+              </div>
+              
+              {/* 视频播放区域 - 平铺填充 */}
+              <div className="absolute inset-0 pt-3 pb-5">
+                <ScrcpyPlayer
+                  deviceId={selectedDevice}
+                  enableControl={true}
+                  onTapSuccess={() => console.log('Tap success')}
+                  onTapError={(error) => console.error('Tap error:', error)}
+                  onSwipeSuccess={() => console.log('Swipe success')}
+                  onSwipeError={(error) => console.error('Swipe error:', error)}
+                />
+              </div>
+              
+              {/* 底部圆角遮罩 */}
+              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-950 to-transparent z-10" />
+              
+              {/* 底部指示条 - 窄边框设计 */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-slate-600 to-transparent rounded-full z-20" />
+              
+              {/* 光效装饰 */}
+              <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-30">
+                <div className="absolute top-1.5 left-1.5 w-12 h-12 bg-white/4 rounded-full blur-lg" />
+                <div className="absolute top-1.5 right-1.5 w-10 h-10 bg-white/2 rounded-full blur-md" />
+              </div>
+              
+              {/* 窄边框高光 */}
+              <div className="absolute inset-0 border border-white/4 rounded-xl pointer-events-none z-40" />
             </div>
           ) : (
-            <div className="h-full bg-[#f8fafc] rounded-lg flex items-center justify-center border border-[#e2e8f0]">
+            <div className="h-full bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl flex items-center justify-center border border-slate-200 shadow-sm">
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <Smartphone className="w-6 h-6 text-[#165DFF]" />
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md">
+                  <Smartphone className="w-8 h-8 text-blue-500" />
                 </div>
-                <p className="text-[#64748b] text-xs">选择设备以查看预览</p>
-                <p className="text-[#94a3b8] text-xs mt-1">自动连接 USB 设备</p>
+                <p className="text-slate-600 text-sm font-medium">选择设备以查看预览</p>
+                <p className="text-slate-400 text-xs mt-1">自动连接 USB 设备</p>
               </div>
             </div>
           )}

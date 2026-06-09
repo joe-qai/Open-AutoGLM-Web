@@ -20,7 +20,9 @@ export interface LogEntry {
   type: 'system' | 'think' | 'action' | 'success' | 'error' | 'warning';
   action?: string;
   thinking?: string;
+  thinkingAction?: string;
   result?: string;
+  screenshot?: string;  // base64 截图
   timestamp: Date;
 }
 
@@ -145,7 +147,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       console.log('[AgentStore] executeDirect called with:', data);
       const response = await taskApi.executeNaturalLanguageTask(data);
       console.log('[AgentStore] API response:', response);
-      const taskId = response?.data?.task_id;
+      const taskId = response?.task_id;
       console.log('[AgentStore] taskId:', taskId);
       set({ isExecuting: false, currentTaskId: taskId });
       return taskId || null;

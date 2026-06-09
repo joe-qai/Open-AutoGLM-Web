@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from app.api.v1 import tasks, devices, reports, websocket, scripts, apks, projects, settings as settings_router, logs, model_configs, control
+from app.api.v1 import tasks, devices, reports, websocket, scripts, apks, projects, settings as settings_router, logs, model_configs, control, log_stream
 from app.api.v1.middleware import AuditLogMiddleware
 from app.core.agent.engine import AgentEngine
 from app.config import settings
@@ -89,6 +89,7 @@ app.include_router(projects.router, prefix="/api/v1/projects", tags=["projects"]
 app.include_router(settings_router.router, prefix="/api/v1/settings", tags=["settings"])
 app.include_router(model_configs.router, prefix="/api/v1/model_configs", tags=["model_configs"])
 app.include_router(logs.router, prefix="/api/v1/logs", tags=["logs"])
+app.include_router(log_stream.router, prefix="/api/v1/logs", tags=["logs"])
 app.include_router(websocket.router, prefix="/ws", tags=["websocket"])
 app.include_router(control.router, prefix="/api/v1/control", tags=["control"])
 

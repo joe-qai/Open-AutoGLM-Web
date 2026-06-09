@@ -31,7 +31,7 @@ class LogService:
         error: Optional[str] = None,
     ) -> str:
         """Create a new log entry via the audit log service."""
-        return self.audit.log(
+        result = self.audit.log(
             level=level,
             category=category,
             action=action,
@@ -48,6 +48,26 @@ class LogService:
             duration_ms=duration_ms,
             error=error,
         )
+        
+        # Broadcast to SSE clients if available
+        try:
+            from app.api.v1.log_stream import broadcast_log
+            broadcast_log(
+                level=level,
+                category=category,
+                message=f"{action}: {target_name or target_id or detail.get('message', '') if detail else ''}",
+                task_id=task_id,
+                device_id=device_id,
+                script_id=script_id,
+                action=action,
+                operator=operator,
+                error=error,
+            )
+        except ImportError:
+            # log_stream module not available (circular import during startup)
+            pass
+        
+        return result
 
     @staticmethod
     def _map_to_entry(log_dict: dict) -> LogEntry:

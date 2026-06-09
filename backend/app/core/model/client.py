@@ -15,6 +15,12 @@ except ImportError:
 
 from app.core.config.i18n import get_message
 
+
+class ContentModerationError(Exception):
+    """Raised when the VLM model rejects an image due to content moderation."""
+    pass
+
+
 # Marker strings for JSON format (used in both streaming and parsing)
 # Using standard XML-style tags that all cloud models recognize and follow reliably
 JSON_ANSWER_OPEN = "<json_answer>"
@@ -71,12 +77,14 @@ class ModelClient:
             )
         else:
             # Configure OpenAI client with proper timeout and SSL settings
+            # Increased timeouts for VLM models which may take longer to process images
             from httpx import Timeout
-            timeout = Timeout(connect=30.0, read=120.0, write=60.0, pool=5.0)
+            timeout = Timeout(connect=60.0, read=300.0, write=120.0, pool=10.0)
             self.client = OpenAI(
                 base_url=self.config.base_url, 
                 api_key=self.config.api_key,
                 timeout=timeout,
+                max_retries=2,  # Add retry for transient errors
             )
 
     def request(self, messages: list[dict[str, Any]]) -> ModelResponse:
@@ -250,16 +258,25 @@ class ModelClient:
         time_to_first_token = None
         time_to_thinking_end = None
 
-        stream = self.client.chat.completions.create(
-            messages=messages,
-            model=self.config.model_name,
-            max_tokens=self.config.max_tokens,
-            temperature=self.config.temperature,
-            top_p=self.config.top_p,
-            frequency_penalty=self.config.frequency_penalty,
-            extra_body=self.config.extra_body,
-            stream=True,
-        )
+        try:
+            stream = self.client.chat.completions.create(
+                messages=messages,
+                model=self.config.model_name,
+                max_tokens=self.config.max_tokens,
+                temperature=self.config.temperature,
+                top_p=self.config.top_p,
+                frequency_penalty=self.config.frequency_penalty,
+                extra_body=self.config.extra_body,
+                stream=True,
+            )
+        except Exception as e:
+            error_msg = str(e)
+            # Check for content moderation error
+            if "DataInspectionFailed" in error_msg or "inappropriate content" in error_msg.lower():
+                # Try to extract the reason
+                reason = "截图内容可能被内容审核过滤"
+                raise ContentModerationError(reason) from e
+            raise
 
         raw_content = ""
         buffer = ""  # Buffer to hold content that might be part of a marker

@@ -167,8 +167,8 @@ export function ScrcpyPlayer({
     canvas.style.left = '0';
     canvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     canvas.style.transformOrigin = 'top left';
-    canvas.style.borderRadius = '24px';
-    canvas.style.background = 'black';
+    canvas.style.borderRadius = '0';
+    canvas.style.background = 'transparent';
   }, [screenInfo]);
 
   useEffect(() => {
@@ -215,9 +215,9 @@ export function ScrcpyPlayer({
       element.style.top = '50%';
       element.style.left = '50%';
       element.style.transform = 'translate(-50%, -50%)';
-      element.style.borderRadius = '24px';
+      element.style.borderRadius = '0';
       element.style.pointerEvents = 'none';
-      element.style.background = 'black';
+      element.style.background = 'transparent';
       element.style.overflow = 'hidden';
 
       if (videoContainerRef.current && !element.parentElement) {
@@ -806,13 +806,12 @@ export function ScrcpyPlayer({
 
   return (
     <div
-      className={`relative w-full h-full flex items-center justify-center overflow-hidden rounded-[24px] ${className || ''}`}
-      style={{ borderRadius: '24px' }}
+      className={`relative w-full h-full flex items-center justify-center overflow-hidden ${className || ''}`}
     >
       <div
         ref={videoContainerRef}
-        className="relative w-full h-full flex items-center justify-center bg-black"
-        style={{ borderRadius: '24px', overflow: 'hidden' }}
+        className="relative w-full h-full flex items-center justify-center"
+        style={{ background: 'transparent', overflow: 'hidden' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -820,7 +819,7 @@ export function ScrcpyPlayer({
         onWheel={handleWheel}
       >
         {status !== 'connected' && (
-          <div className="absolute inset-0 flex items-center justify-center text-slate-400">
+          <div className="absolute inset-0 flex items-center justify-center text-slate-400 bg-black/50 backdrop-blur-sm">
             {status === 'connecting' && 'Connecting...'}
             {status === 'error' && (errorMessage || 'Connection error')}
             {status === 'disconnected' && 'Disconnected'}
